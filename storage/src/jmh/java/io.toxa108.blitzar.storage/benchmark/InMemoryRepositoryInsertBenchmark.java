@@ -1,4 +1,4 @@
-package benchmark;
+package io.toxa108.blitzar.storage.benchmark;
 
 import io.toxa108.blitzar.storage.Repository;
 import io.toxa108.blitzar.storage.impl.InMemoryHashMapRepository;
