@@ -46,10 +46,10 @@ public class InMemoryBTreeRepository<K extends Comparable<K>, V> implements Repo
         return add(rootLeaf, key, value);
     }
 
-    V add(List<BTreeNode<K, V>> rootLeaf, K key, V value) {
-        if (rootLeaf.isEmpty()) {
+    V add(List<BTreeNode<K, V>> leaf, K key, V value) {
+        if (leaf.isEmpty()) {
             BTreeNode<K, V> newNode = new BTreeNode<>(key, value);
-            rootLeaf.add(newNode);
+            leaf.add(newNode);
             size++;
             return newNode.value;
         }
@@ -58,15 +58,38 @@ public class InMemoryBTreeRepository<K extends Comparable<K>, V> implements Repo
          * The tree has only one leaf
          */
         if (size < M - 1) {
-            V v = insertInLeaf(rootLeaf, new BTreeNode<>(key, value));
+            V v = insertInLeaf(leaf, new BTreeNode<>(key, value));
             size++;
             return v;
         }
         /*
          * Split the root leaf to leafs
          */
+        else if (size == M) {
+            List<BTreeNode<K, V>> topLeaf = split(leaf);
+            BTreeNode<K, V> newNode = new BTreeNode<>(key, value);
+            if (newNode.key.compareTo(topLeaf.get(0).getKey()) > 0) {
+                insertInLeaf(topLeaf.get(0).getRightChilds(), newNode);
+            } else {
+                insertInLeaf(topLeaf.get(0).getLeftChilds(), newNode);
+            }
+            this.size++;
+            this.rootLeaf = topLeaf;
+            return newNode.value;
+        }
+        /*
+         * We need go deeper
+         */
         else {
-            return null;
+            if (leaf.size() == M) {
+                split(leaf);
+            }
+            for(BTreeNode<K, V> node: leaf) {
+                if (node.key.compareTo(key) < 0) {
+                    continue;
+                }
+                if ()
+            }
         }
     }
 
