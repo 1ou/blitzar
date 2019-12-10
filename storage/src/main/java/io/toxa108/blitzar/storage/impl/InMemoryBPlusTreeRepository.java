@@ -4,59 +4,70 @@ import io.toxa108.blitzar.storage.Repository;
 import io.toxa108.blitzar.storage.entity.Result;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
-public class InMemoryBPlusTreeRepository<K extends Comparable<K>, V>
+public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
         implements Repository<K, V> {
 
     public static class BTreeNode<K, V> {
         BTreeNode(int q) {
             this.keys = new ArrayList<>(q);
-            this.childs = new ArrayList<>(q + 1);
+            this.p = new ArrayList<>(q + 1);
             this.leaf = true;
             this.q = 0;
+            this.pNext = null;
         }
 
         BTreeNode(K key, V value, int q) {
             this.value = value;
             this.keys = new ArrayList<>(q);
-            this.childs = new ArrayList<>(q + 1);
+            this.p = new ArrayList<>(q + 1);
             this.leaf = true;
             this.q = 1;
+            this.pNext = null;
         }
 
         List<K> keys;
-        List<InMemoryBPlusTreeRepository.BTreeNode<K, V>> childs;
+        List<InMemoryBPlusTreeRepository.BTreeNode<K, V>> p;
         V value;
         boolean leaf;
         int q;
+        BTreeNode<K, V> pNext;
+
+        boolean isEmpty() {
+            return keys.isEmpty();
+        }
     }
 
     private final Stack<BTreeNode<K, V>> stack = new Stack<>();
     private BTreeNode<K, V> rootNode;
-    private final int q;
+    private final int p;
+    private final int pLeaf;
 
-    public InMemoryBPlusTreeRepository(int q) {
-        this.q = q;
+    public InMemoryBPlusTreeRepository(int p, int pLeaf) {
+        this.p = p;
+        this.pLeaf = pLeaf;
+        this.rootNode = new BTreeNode<>(p);
     }
 
     @Override
     public V add(K key, V value) {
         BTreeNode<K, V> n = rootNode;
         /*
-        Search the properly node for insert and add parents to the stack
+            Search the properly node for insert and add parents to the stack
          */
         while (!n.leaf) {
             stack.push(n);
             int q = n.q;
             if (n.keys.get(0).compareTo(key) < 0) {
-                n = n.childs.get(0);
+                n = n.p.get(0);
             } else if (n.keys.get(q - 1).compareTo(key) > 0) {
-                n = n.childs.get(q);
+                n = n.p.get(q);
             } else {
                 int fn = search(n.keys, key);
-                n = n.childs.get(fn);
+                n = n.p.get(fn);
             }
         }
         int properlyPosition = findProperlyPosition(n.keys, key);
@@ -66,21 +77,53 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<K>, V>
         if (properlyPosition == -1) {
             throw new IllegalArgumentException();
         } else {
-            BTreeNode<K, V> newNode = new BTreeNode<>(q);
+            BTreeNode<K, V> newNode = new BTreeNode<>(p);
             /*
                 If node is not full, insert new node
              */
-            if (n.q < this.q) {
+            if (n.q < this.p - 1) {
                 n.keys.add(properlyPosition, key);
-                n.childs.add(properlyPosition, newNode);
+                n.p.add(properlyPosition, new BTreeNode<>(p));
+                n.q++;
             }
             /*
                 Split node before insert
              */
             else {
+                BTreeNode<K, V> tmp = new BTreeNode<>(this.p + 1);
+                tmp.keys.addAll(List.copyOf(n.keys));
+                tmp.p.addAll(List.copyOf(n.p));
 
+                tmp.keys.add(properlyPosition, key);
+                tmp.p.add(properlyPosition, new BTreeNode<>(this.p));
+
+                tmp.pNext = n.pNext;
+                int j = (pLeaf + 1) >>> 1;
+
+                n.keys = new ArrayList<>();
+                n.p = new ArrayList<>();
+                n.keys.addAll(List.copyOf(tmp.keys.subList(0, j + 1)));
+                n.p.addAll(List.copyOf(tmp.p.subList(0, j + 1)));
+                n.pNext = newNode;
+                n.q = j + 1;
+
+                newNode.keys.addAll(List.copyOf(tmp.keys.subList(j + 1, tmp.keys.size())));
+                newNode.p.addAll(List.copyOf(tmp.p.subList(j + 1, tmp.p.size())));
+                newNode.q = tmp.p.size() - (j + 1);
+
+                boolean finished = false;
+                if (stack.isEmpty()) {
+                    rootNode = new BTreeNode<>(this.p);
+                    rootNode.keys.add(tmp.keys.get(j));
+                    rootNode.p.addAll(Arrays.asList(n, newNode));
+                    rootNode.leaf = false;
+                    finished = true;
+                } else {
+
+                }
             }
         }
+        return null;
     }
 
     int search(List<K> keys, K key) {
@@ -95,7 +138,6 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<K>, V>
             } else {
                 throw new IllegalArgumentException();
             }
-            m = (r + l) / 2;
         }
         return l;
     }
@@ -112,9 +154,12 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<K>, V>
             } else {
                 return -1;
             }
-            m = (r + l) >>> 1;
         }
         return l;
+    }
+
+    public BTreeNode<K, V> root() {
+        return this.rootNode;
     }
 
     @Override
