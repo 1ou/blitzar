@@ -57,7 +57,7 @@ public class InMemoryBTreeRepository<K extends Comparable<K>, V> implements Repo
         /*
          * The tree has only one leaf
          */
-        if (size < M - 1) {
+        if (size < M) {
             V v = insertInLeaf(leaf, new BTreeNode<>(key, value));
             size++;
             return v;
@@ -82,20 +82,24 @@ public class InMemoryBTreeRepository<K extends Comparable<K>, V> implements Repo
          */
         else {
             if (leaf.size() == M) {
-                split(leaf);
+                // split
+                // add newLeaf to parent leaf... but i have no pointer to parent leaf.
+                List<BTreeNode<K, V>> newLeaf = split(leaf);
+                return add(newLeaf, key, value);
             }
-            for(BTreeNode<K, V> node: leaf) {
-                if (node.key.compareTo(key) < 0) {
-                    continue;
-                }
-                if ()
+            List<BTreeNode<K, V>> nextLeaf = traverse(leaf, key);
+            if (nextLeaf.size() == 0) {
+                // insert
+                V v = insertInLeaf(leaf, new BTreeNode<>(key, value));
+                this.size++;
+                return v;
+            } else {
+                return add(nextLeaf, key, value);
             }
         }
     }
 
     /**
-     * The complexity equals O(n), but we can use binary search here. Think later - how.
-     *
      * @param leaf    leaf
      * @param newNode new node
      * @return inserting value
@@ -117,6 +121,27 @@ public class InMemoryBTreeRepository<K extends Comparable<K>, V> implements Repo
         }
         leaf.add(l, newNode);
         return newNode.value;
+    }
+
+    List<BTreeNode<K, V>> traverse(List<BTreeNode<K, V>> leaf, K key) {
+        int l = 0, r = leaf.size(), m;
+        while (l < r) {
+            m = (l + r) >>> 1;
+            int c = leaf.get(m).key.compareTo(key);
+            if (c > 0) {
+                r = m;
+            } else if (c < 0) {
+                l = m + 1;
+            } else {
+                throw new IllegalArgumentException();
+            }
+            m = (r + l) / 2;
+        }
+        if (l == leaf.size()) {
+            return leaf.get(l - 1).getRightChilds();
+        } else {
+            return leaf.get(l).getLeftChilds();
+        }
     }
 
     /**
