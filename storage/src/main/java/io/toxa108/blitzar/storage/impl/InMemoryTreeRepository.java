@@ -5,6 +5,7 @@ import io.toxa108.blitzar.storage.entity.Result;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,11 @@ public class InMemoryTreeRepository<K, V> implements Repository<K, V> {
                 .stream()
                 .map(e -> new Result<>(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<V> findByKey(K key) {
+        return Optional.ofNullable(treeMap.get(key));
     }
 
     @Override

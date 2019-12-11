@@ -3,10 +3,7 @@ package io.toxa108.blitzar.storage.impl;
 import io.toxa108.blitzar.storage.Repository;
 import io.toxa108.blitzar.storage.entity.Result;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
@@ -200,6 +197,31 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
     @Override
     public List<Result<K, V>> all() {
         return null;
+    }
+
+    @Override
+    public Optional<V> findByKey(K key) {
+        BTreeNode<K, V> n = rootNode;
+        /*
+            Search the properly node for insert and add parents to the stack
+         */
+        while (!n.leaf) {
+            int q = n.q;
+            if (key.compareTo(n.keys.get(0)) < 0) {
+                n = n.p.get(0);
+            } else if (key.compareTo(n.keys.get(q - 1)) > 0) {
+                n = n.p.get(q);
+            } else {
+                int fn = search(n.keys, key);
+                n = n.p.get(fn);
+            }
+        }
+        try {
+            int properlyPosition = search(n.keys, key);
+            return Optional.of(n.p.get(properlyPosition).value);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

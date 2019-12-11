@@ -6,6 +6,7 @@ import io.toxa108.blitzar.storage.entity.Result;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +28,11 @@ public class InMemoryHashMapRepository<K, V> implements Repository<K, V> {
                 .stream()
                 .map(e -> new Result<>(e.getKey(), e.getValue()))
                 .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public Optional<V> findByKey(K key) {
+        return Optional.ofNullable(map.get(key));
     }
 
     @Override
