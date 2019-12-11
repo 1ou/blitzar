@@ -28,4 +28,9 @@ public class InMemoryHashMapRepository<K, V> implements Repository<K, V> {
                 .map(e -> new Result<>(e.getKey(), e.getValue()))
                 .collect(Collectors.toUnmodifiableList());
     }
+
+    @Override
+    public void removeAll() {
+        map.clear();
+    }
 }

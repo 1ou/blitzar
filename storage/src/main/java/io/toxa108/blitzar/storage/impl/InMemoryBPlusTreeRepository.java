@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
         implements Repository<K, V> {
@@ -67,7 +68,9 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
             If record with such key already exists
          */
         if (properlyPosition == -1) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "key: " + String.valueOf(key) + " was inserted into node [" +
+                    n.keys.stream().map(K::toString).collect(Collectors.joining(", ")) + "]");
         } else {
             BTreeNode<K, V> newNode = new BTreeNode<>(p);
             /*
@@ -197,5 +200,10 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
     @Override
     public List<Result<K, V>> all() {
         return null;
+    }
+
+    @Override
+    public void removeAll() {
+        this.rootNode = new BTreeNode<>(this.p);
     }
 }

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class InMemoryBPlusTreeRepositoryTest {
 
@@ -58,7 +60,7 @@ public class InMemoryBPlusTreeRepositoryTest {
     }
 
     @Test
-    public void insert_in_empty_tree_two_levels_when_success() {
+    public void insert_in_empty_tree_3_levels_when_success() {
         InMemoryBPlusTreeRepository<Integer, Integer> inMemoryBPlusTreeRepository =
                 new InMemoryBPlusTreeRepository<>(3, 2);
 
@@ -70,6 +72,25 @@ public class InMemoryBPlusTreeRepositoryTest {
         inMemoryBPlusTreeRepository.add(12, 100);
         inMemoryBPlusTreeRepository.add(9, 100);
         inMemoryBPlusTreeRepository.add(6, 100);
+        Collections.sort(keys);
+
+        for (int i = 0; i < keys.size(); ++i) {
+            Assert.assertEquals(keys.get(i), inMemoryBPlusTreeRepository.root().keys.get(i));
+        }
+    }
+
+    @Test
+    public void insert_in_empty_tree_ascending_sequence_when_success() {
+        InMemoryBPlusTreeRepository<Integer, Integer> inMemoryBPlusTreeRepository =
+                new InMemoryBPlusTreeRepository<>(3, 2);
+
+        List<Integer> keys = IntStream.range(0, 500).boxed()
+                .collect(Collectors.toList());
+
+        for (Integer key : keys) {
+            inMemoryBPlusTreeRepository.add(key, 100);
+        }
+
         Collections.sort(keys);
 
         for (int i = 0; i < keys.size(); ++i) {

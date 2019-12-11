@@ -30,4 +30,9 @@ public class InMemoryTreeRepository<K, V> implements Repository<K, V> {
                 .map(e -> new Result<>(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void removeAll() {
+        treeMap.clear();
+    }
 }

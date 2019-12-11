@@ -169,4 +169,9 @@ public class InMemoryBTreeRepository<K extends Comparable<K>, V> implements Repo
     public List<Result<K, V>> all() {
         return null;
     }
+
+    @Override
+    public void removeAll() {
+
+    }
 }
