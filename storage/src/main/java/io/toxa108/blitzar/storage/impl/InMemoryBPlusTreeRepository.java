@@ -20,14 +20,6 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
             this.pNext = null;
         }
 
-        BTreeNode(K key, V value, int q) {
-            this.value = value;
-            this.keys = new ArrayList<>(q);
-            this.p = new ArrayList<>(q + 1);
-            this.leaf = true;
-            this.q = 1;
-            this.pNext = null;
-        }
 
         List<K> keys;
         List<InMemoryBPlusTreeRepository.BTreeNode<K, V>> p;
@@ -41,7 +33,6 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
         }
     }
 
-    private final Stack<BTreeNode<K, V>> stack = new Stack<>();
     private BTreeNode<K, V> rootNode;
     private final int p;
     private final int pLeaf;
@@ -55,15 +46,16 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
     @Override
     public V add(K key, V value) {
         BTreeNode<K, V> n = rootNode;
+        Stack<BTreeNode<K, V>> stack = new Stack<>();
         /*
             Search the properly node for insert and add parents to the stack
          */
         while (!n.leaf) {
             stack.push(n);
             int q = n.q;
-            if (n.keys.get(0).compareTo(key) < 0) {
+            if (key.compareTo(n.keys.get(0)) < 0) {
                 n = n.p.get(0);
-            } else if (n.keys.get(q - 1).compareTo(key) > 0) {
+            } else if (key.compareTo(n.keys.get(q - 1)) > 0) {
                 n = n.p.get(q);
             } else {
                 int fn = search(n.keys, key);
@@ -97,7 +89,7 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
                 tmp.keys.add(properlyPosition, key);
                 tmp.p.add(properlyPosition, new BTreeNode<>(this.p));
 
-                tmp.pNext = n.pNext;
+                newNode.pNext = n.pNext;
                 int j = (pLeaf + 1) >>> 1;
 
                 n.keys = new ArrayList<>();
@@ -110,16 +102,56 @@ public class InMemoryBPlusTreeRepository<K extends Comparable<? super K>, V>
                 newNode.keys.addAll(List.copyOf(tmp.keys.subList(j + 1, tmp.keys.size())));
                 newNode.p.addAll(List.copyOf(tmp.p.subList(j + 1, tmp.p.size())));
                 newNode.q = tmp.p.size() - (j + 1);
+                key = tmp.keys.get(j);
 
                 boolean finished = false;
-                if (stack.isEmpty()) {
-                    rootNode = new BTreeNode<>(this.p);
-                    rootNode.keys.add(tmp.keys.get(j));
-                    rootNode.p.addAll(Arrays.asList(n, newNode));
-                    rootNode.leaf = false;
-                    finished = true;
-                } else {
+                while (!finished) {
+                    if (stack.isEmpty()) {
+                        rootNode = new BTreeNode<>(this.p);
+                        rootNode.keys.add(key);
+                        rootNode.p.addAll(Arrays.asList(n, newNode));
+                        rootNode.leaf = false;
+                        rootNode.q = 1;
+                        finished = true;
+                    } else {
+                        n = stack.pop();
+                    /*
+                        If internal node n is not full
+                        parent node is not full - no split
+                     */
+                        if (n.keys.size() < this.p - 1) {
+                            properlyPosition = findProperlyPosition(n.keys, key);
+                            n.keys.add(properlyPosition, key);
+                            n.p.add(properlyPosition + 1, newNode);
+                            n.q++;
+                            finished = true;
+                        } else {
+                            tmp = new BTreeNode<>(this.p + 1);
+                            tmp.keys.addAll(List.copyOf(n.keys));
+                            tmp.p.addAll(List.copyOf(n.p));
 
+                            properlyPosition = findProperlyPosition(n.keys, key);
+                            tmp.keys.add(properlyPosition, key);
+                            tmp.p.add(properlyPosition + 1, newNode);
+
+                            newNode = new BTreeNode<>(this.p);
+                            j = (this.p + 1) >>> 1;
+
+                            n.keys = new ArrayList<>();
+                            n.p = new ArrayList<>();
+                            n.keys.addAll(List.copyOf(tmp.keys.subList(0, j - 1)));
+                            n.p.addAll(List.copyOf(tmp.p.subList(0, j)));
+                            n.q = j - 1;
+                            n.leaf = false;
+
+                            newNode.keys.addAll(List.copyOf(tmp.keys.subList(j, tmp.keys.size())));
+                            newNode.p.addAll(List.copyOf(tmp.p.subList(j, tmp.p.size())));
+                            newNode.q = tmp.p.size() - (j + 1);
+                            newNode.leaf = false;
+
+                            key = tmp.keys.get(j - 1);
+                        }
+                    }
                 }
             }
         }

@@ -62,14 +62,19 @@ public class InMemoryBPlusTreeRepositoryTest {
         InMemoryBPlusTreeRepository<Integer, Integer> inMemoryBPlusTreeRepository =
                 new InMemoryBPlusTreeRepository<>(3, 2);
 
-        List<Integer> keys = Arrays.asList(5, 8, 1, 7);
+        List<Integer> keys = Arrays.asList(5, 8, 1, 7, 3);
         for (Integer key : keys) {
             inMemoryBPlusTreeRepository.add(key, 100);
         }
+
+        inMemoryBPlusTreeRepository.add(12, 100);
+        inMemoryBPlusTreeRepository.add(9, 100);
+        inMemoryBPlusTreeRepository.add(6, 100);
         Collections.sort(keys);
 
         for (int i = 0; i < keys.size(); ++i) {
             Assert.assertEquals(keys.get(i), inMemoryBPlusTreeRepository.root().keys.get(i));
         }
     }
+
 }
