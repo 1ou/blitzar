@@ -22,6 +22,10 @@ public class DatabaseImpl implements Database {
     }
 
     public DatabaseImpl(String name) {
+        if (name == null) {
+            throw new NullPointerException("The table name is not specified");
+        }
+
         if (!name.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect database name");
         }
@@ -50,7 +54,7 @@ public class DatabaseImpl implements Database {
     @Override
     public ResultQuery initializeDatabase() {
         File newDirectory = new File(new File(System.getProperty("java.io.tmpdir")), name);
-        if (newDirectory.mkdir()) {
+        if (newDirectory.mkdir() || newDirectory.exists()) {
             return new EmptySuccessResultQuery();
         } else {
             return new ErrorResultQuery();

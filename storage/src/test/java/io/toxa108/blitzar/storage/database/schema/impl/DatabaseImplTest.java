@@ -17,6 +17,11 @@ public class DatabaseImplTest {
         assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void create_db_when_error_name_not_specified() {
+        final Database database = new DatabaseImpl(null);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void create_db_when_error_in_name() {
         final Database database = new DatabaseImpl("test_db");

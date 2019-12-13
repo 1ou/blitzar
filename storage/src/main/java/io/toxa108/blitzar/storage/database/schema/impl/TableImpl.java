@@ -8,8 +8,17 @@ import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 public class TableImpl implements Table {
     private final String name;
     private Scheme scheme;
+    private final String nameRegex = "[a-zA-Z]+";
 
     public TableImpl(String name) {
+        if (name == null) {
+            throw new NullPointerException("The table name is not specified");
+        }
+
+        if (!name.matches(nameRegex)) {
+            throw new IllegalArgumentException("Incorrect table name");
+        }
+
         this.name = name;
     }
 
