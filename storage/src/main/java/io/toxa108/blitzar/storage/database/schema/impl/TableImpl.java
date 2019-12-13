@@ -1,12 +1,18 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.database.schema.Record;
+import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 
 public class TableImpl implements Table {
-    private final Record record;
+    private Scheme scheme;
 
-    public TableImpl(Record record) {
-        this.record = record;
+    @Override
+    public void initializeScheme(Scheme scheme) {
+        this.scheme = scheme;
+    }
+
+    @Override
+    public String name() {
+        return null;
     }
 }

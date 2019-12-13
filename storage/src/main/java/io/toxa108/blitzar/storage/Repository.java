@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage;
 
-import io.toxa108.blitzar.storage.entity.Result;
+import io.toxa108.blitzar.storage.inmemory.entity.Result;
 
 import java.util.List;
 import java.util.Optional;

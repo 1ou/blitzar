@@ -2,9 +2,6 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Field;
 
-/**
- * @author toxa
- */
 public class FieldImpl implements Field {
     private final String name;
     private final FieldType fieldType;

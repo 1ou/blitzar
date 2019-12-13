@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /**
- * @author toxa
  * Disk writer shouldn'n know about all high level logic. It works only with bytes and files.
  */
 public class DiskWriterIoImpl implements DiskWriter {

@@ -9,9 +9,6 @@ import io.toxa108.blitzar.storage.database.manager.DatabaseManagerImpl;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
-/**
- * @author toxa
- */
 public class StorageApplication {
 
     public static void main(String[] args) {
@@ -19,8 +16,7 @@ public class StorageApplication {
 
         final DatabaseContext databaseContext = new DatabaseContextImpl();
 
-        final DatabaseManager databaseManager = new DatabaseManagerImpl(databaseContext);
+        final DatabaseManager databaseManager = new DatabaseManagerImpl(databaseContext, dataDefinitionQueryResolver);
         final QueryProcessor queryProcessor = new QueryProcessorImpl();
-
     }
 }

@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.entity;
+package io.toxa108.blitzar.storage.inmemory.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

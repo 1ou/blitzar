@@ -1,9 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-/**
- * @author toxa
- */
-
 public enum FieldType {
     /**
      * 1 byte
