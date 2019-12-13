@@ -11,11 +11,11 @@ import java.io.RandomAccessFile;
  * @author toxa
  * Disk writer shouldn'n know about all high level logic. It works only with bytes and files.
  */
-public class DiskWriterImpl implements DiskWriter {
+public class DiskWriterIoImpl implements DiskWriter {
     private final RandomAccessFile randomAccessFile;
     private final FileOutputStream fileOutputStream;
 
-    public DiskWriterImpl(RandomAccessFile randomAccessFile) throws IOException {
+    public DiskWriterIoImpl(RandomAccessFile randomAccessFile) throws IOException {
         this.randomAccessFile = randomAccessFile;
         this.fileOutputStream = new FileOutputStream(randomAccessFile.getFD());
     }
