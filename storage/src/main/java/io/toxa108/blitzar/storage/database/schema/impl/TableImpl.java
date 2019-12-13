@@ -3,7 +3,7 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.query.ResultQuery;
-import io.toxa108.blitzar.storage.query.impl.EmptyResultQuery;
+import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 
 public class TableImpl implements Table {
     private final String name;
@@ -16,7 +16,7 @@ public class TableImpl implements Table {
     @Override
     public ResultQuery initializeScheme(Scheme scheme) {
         this.scheme = scheme;
-        return new EmptyResultQuery();
+        return new EmptySuccessResultQuery();
     }
 
     @Override

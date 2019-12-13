@@ -21,22 +21,23 @@ public class DatabaseManagerImpl implements DatabaseManager {
 
     @Override
     public ResultQuery resolveDataDefinitionQuery(DataDefinitionQuery query) throws QueryProcessException {
-        query.setQueryContext(createQueryContext(query));
         switch (query.type()) {
             case CREATE_DATABASE:
+                query.setQueryContext(createDatabaseScopeQueryContext(query));
                 return dataDefinitionQueryResolver.createDatabase(query);
             case CREATE_INDEX:
                 return dataDefinitionQueryResolver.createIndex(query);
             case CREATE_TABLE:
+                query.setQueryContext(createTableScopeQueryContext(query));
                 return dataDefinitionQueryResolver.createTable(query);
             case DROP_DATABASE:
                 return dataDefinitionQueryResolver.dropDatabase(query);
             default:
-                return new EmptyResultQuery();
+                return new EmptySuccessResultQuery();
         }
     }
 
-    private QueryContext createQueryContext(AbstractQuery query) {
+    private QueryContext createTableScopeQueryContext(AbstractQuery query) {
         Optional<Database> database = databaseContext.findByName(query.databaseName());
         if (database.isEmpty()) {
             database = Optional.of(databaseContext.createDatabase(query.databaseName()));
@@ -45,6 +46,14 @@ public class DatabaseManagerImpl implements DatabaseManager {
         if (table.isEmpty()) {
             table = Optional.of(database.get().createTable(query.tableName()));
         }
-        return new QueryContextImpl(database.get(), table.get());
+        return new TableScopeQueryContextImpl(database.get(), table.get());
+    }
+
+    private QueryContext createDatabaseScopeQueryContext(AbstractQuery query) {
+        Optional<Database> database = databaseContext.findByName(query.databaseName());
+        if (database.isEmpty()) {
+            database = Optional.of(databaseContext.createDatabase(query.databaseName()));
+        }
+        return new DatabaseScopeQueryContextImpl(database.get());
     }
 }

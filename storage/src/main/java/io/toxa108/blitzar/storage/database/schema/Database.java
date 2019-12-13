@@ -1,5 +1,7 @@
 package io.toxa108.blitzar.storage.database.schema;
 
+import io.toxa108.blitzar.storage.query.ResultQuery;
+
 import java.util.Optional;
 
 public interface Database {
@@ -22,4 +24,10 @@ public interface Database {
      * @return table
      */
     Table createTable(String name);
+
+    /**
+     * Initialize database
+     * @return result query
+     */
+    ResultQuery initializeDatabase();
 }
