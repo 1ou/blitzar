@@ -1,7 +1,7 @@
-package io.toxa108.blitzar.storage.schema.impl;
+package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.schema.Field;
-import io.toxa108.blitzar.storage.schema.Key;
+import io.toxa108.blitzar.storage.database.schema.Field;
+import io.toxa108.blitzar.storage.database.schema.Key;
 
 /**
  * @author toxa

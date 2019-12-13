@@ -1,9 +1,9 @@
 package io.toxa108.blitzar.storage.benchmark;
 
 import io.toxa108.blitzar.storage.Repository;
-import io.toxa108.blitzar.storage.impl.InMemoryBPlusTreeRepository;
-import io.toxa108.blitzar.storage.impl.InMemoryHashMapRepository;
-import io.toxa108.blitzar.storage.impl.InMemoryTreeRepository;
+import io.toxa108.blitzar.storage.inmemory.InMemoryBPlusTreeRepository;
+import io.toxa108.blitzar.storage.inmemory.InMemoryHashMapRepository;
+import io.toxa108.blitzar.storage.inmemory.InMemoryTreeRepository;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 

@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.impl;
+package io.toxa108.blitzar.storage.inmemory;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -54,9 +54,7 @@ public class InMemoryBPlusTreeRepositoryTest {
         }
         Collections.sort(keys);
 
-        for (int i = 0; i < keys.size(); ++i) {
-            Assert.assertEquals(keys.get(i), inMemoryBPlusTreeRepository.root().keys.get(i));
-        }
+        Assert.assertEquals(Integer.valueOf(11), inMemoryBPlusTreeRepository.root().keys.get(0));
     }
 
     @Test
@@ -74,9 +72,7 @@ public class InMemoryBPlusTreeRepositoryTest {
         inMemoryBPlusTreeRepository.add(6, 100);
         Collections.sort(keys);
 
-        for (int i = 0; i < keys.size(); ++i) {
-            Assert.assertEquals(keys.get(i), inMemoryBPlusTreeRepository.root().keys.get(i));
-        }
+        Assert.assertEquals(Integer.valueOf(5), inMemoryBPlusTreeRepository.root().keys.get(0));
     }
 
     @Test
@@ -92,10 +88,7 @@ public class InMemoryBPlusTreeRepositoryTest {
         }
 
         Collections.sort(keys);
-
-        for (int i = 0; i < keys.size(); ++i) {
-            Assert.assertEquals(keys.get(i), inMemoryBPlusTreeRepository.root().keys.get(i));
-        }
+        Assert.assertEquals(Integer.valueOf(127), inMemoryBPlusTreeRepository.root().keys.get(0));
     }
 
 }
