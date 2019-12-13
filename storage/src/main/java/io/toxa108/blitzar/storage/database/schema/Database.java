@@ -18,7 +18,8 @@ public interface Database {
 
     /**
      * Create table in the database
+     * @param name table name
      * @return table
      */
-    Table createTable();
+    Table createTable(String name);
 }

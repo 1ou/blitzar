@@ -9,34 +9,32 @@ import java.util.List;
 public class DataDefinitionQueryResolverImpl implements DataDefinitionQueryResolver {
     @Override
     public ResultQuery createDatabase(DataDefinitionQuery query) {
-        return null;
+        return new EmptyResultQuery();
     }
 
     @Override
     public ResultQuery createTable(DataDefinitionQuery query) {
-        query.context().table().initializeScheme(
+        return query.context().table().initializeScheme(
                 new SchemeImpl(query.fields(), List.of()));
-
-        return null;
     }
 
     @Override
     public ResultQuery createIndex(DataDefinitionQuery query) {
-        return null;
+        return new EmptyResultQuery();
     }
 
     @Override
     public ResultQuery dropDatabase(DataDefinitionQuery query) {
-        return null;
+        return new EmptyResultQuery();
     }
 
     @Override
     public ResultQuery dropTable(DataDefinitionQuery query) {
-        return null;
+        return new EmptyResultQuery();
     }
 
     @Override
     public ResultQuery dropIndex(DataDefinitionQuery query) {
-        return null;
+        return new EmptyResultQuery();
     }
 }

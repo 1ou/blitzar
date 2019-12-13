@@ -6,10 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.QueryContext;
 import io.toxa108.blitzar.storage.query.ResultQuery;
-import io.toxa108.blitzar.storage.query.impl.AbstractQuery;
-import io.toxa108.blitzar.storage.query.impl.DataDefinitionQuery;
-import io.toxa108.blitzar.storage.query.impl.QueryContextImpl;
-import io.toxa108.blitzar.storage.query.impl.QueryProcessException;
+import io.toxa108.blitzar.storage.query.impl.*;
 
 import java.util.Optional;
 
@@ -29,18 +26,25 @@ public class DatabaseManagerImpl implements DatabaseManager {
             case CREATE_DATABASE:
                 return dataDefinitionQueryResolver.createDatabase(query);
             case CREATE_INDEX:
+                return dataDefinitionQueryResolver.createIndex(query);
+            case CREATE_TABLE:
+                return dataDefinitionQueryResolver.createTable(query);
             case DROP_DATABASE:
+                return dataDefinitionQueryResolver.dropDatabase(query);
             default:
-                return null;
+                return new EmptyResultQuery();
         }
     }
 
     private QueryContext createQueryContext(AbstractQuery query) {
-        Database database = databaseContext.findByName(query.database());
-        Optional<Table> table = database.findTableByName(query.table());
-        if (table.isEmpty()) {
-            table = Optional.of(database.createTable());
+        Optional<Database> database = databaseContext.findByName(query.databaseName());
+        if (database.isEmpty()) {
+            database = Optional.of(databaseContext.createDatabase(query.databaseName()));
         }
-        return new QueryContextImpl(database, table.get());
+        Optional<Table> table = database.get().findTableByName(query.tableName());
+        if (table.isEmpty()) {
+            table = Optional.of(database.get().createTable(query.tableName()));
+        }
+        return new QueryContextImpl(database.get(), table.get());
     }
 }

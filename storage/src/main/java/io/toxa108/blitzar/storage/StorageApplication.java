@@ -6,7 +6,9 @@ import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.DatabaseContextImpl;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManagerImpl;
+import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
+import io.toxa108.blitzar.storage.query.impl.DataDefinitionQueryResolverImpl;
 import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
 public class StorageApplication {
@@ -15,8 +17,11 @@ public class StorageApplication {
         final Server server = new ServerImpl(9005);
 
         final DatabaseContext databaseContext = new DatabaseContextImpl();
+        final DataDefinitionQueryResolver dataDefinitionQueryResolver =
+                new DataDefinitionQueryResolverImpl();
 
-        final DatabaseManager databaseManager = new DatabaseManagerImpl(databaseContext, dataDefinitionQueryResolver);
+        final DatabaseManager databaseManager = new DatabaseManagerImpl(
+                databaseContext, dataDefinitionQueryResolver);
         final QueryProcessor queryProcessor = new QueryProcessorImpl();
     }
 }

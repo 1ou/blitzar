@@ -4,23 +4,23 @@ import io.toxa108.blitzar.storage.query.Query;
 import io.toxa108.blitzar.storage.query.QueryContext;
 
 public class AbstractQuery implements Query {
-    private final String database;
-    private final String table;
+    private final String databaseName;
+    private final String tableName;
     private QueryContext queryContext;
 
-    public AbstractQuery(String database, String table) {
-        this.database = database;
-        this.table = table;
+    public AbstractQuery(String databaseName, String tableName) {
+        this.databaseName = databaseName;
+        this.tableName = tableName;
     }
 
     @Override
-    public String database() {
-        return database;
+    public String databaseName() {
+        return databaseName;
     }
 
     @Override
-    public String table() {
-        return table;
+    public String tableName() {
+        return tableName;
     }
 
     public QueryContext context() {

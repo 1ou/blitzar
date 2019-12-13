@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.query.impl;
 
 public class DataManipulationQuery extends AbstractQuery {
-    public DataManipulationQuery() {
-        super(database, table);
+    public DataManipulationQuery(String databaseName, String tableName) {
+        super(databaseName, tableName);
     }
 }

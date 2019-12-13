@@ -2,17 +2,25 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
+import io.toxa108.blitzar.storage.query.ResultQuery;
+import io.toxa108.blitzar.storage.query.impl.EmptyResultQuery;
 
 public class TableImpl implements Table {
+    private final String name;
     private Scheme scheme;
 
+    public TableImpl(String name) {
+        this.name = name;
+    }
+
     @Override
-    public void initializeScheme(Scheme scheme) {
+    public ResultQuery initializeScheme(Scheme scheme) {
         this.scheme = scheme;
+        return new EmptyResultQuery();
     }
 
     @Override
     public String name() {
-        return null;
+        return name;
     }
 }
