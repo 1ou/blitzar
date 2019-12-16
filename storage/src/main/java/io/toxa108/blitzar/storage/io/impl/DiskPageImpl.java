@@ -1,10 +1,10 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import io.toxa108.blitzar.storage.io.DiskBlock;
+import io.toxa108.blitzar.storage.io.DiskPage;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class DiskBlockImpl implements DiskBlock {
+public class DiskPageImpl implements DiskPage {
     private final int size;
 
     @Override

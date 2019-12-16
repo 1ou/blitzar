@@ -2,11 +2,8 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Table;
-import io.toxa108.blitzar.storage.query.ResultQuery;
-import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
-import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
+import io.toxa108.blitzar.storage.io.FileManager;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,24 +11,22 @@ import java.util.Optional;
 public class DatabaseImpl implements Database {
     private final List<Table> tables;
     private final String name;
-    private final String nameRegex = "[a-zA-Z]+";
+    private final FileManager fileManager;
 
-    public DatabaseImpl(String name, List<Table> tables) {
+    public DatabaseImpl(String name, List<Table> tables, FileManager fileManager) {
         this.tables = tables;
         this.name = name;
+        this.fileManager = fileManager;
     }
 
-    public DatabaseImpl(String name) {
+    public DatabaseImpl(String name, FileManager fileManager) {
         if (name == null) {
             throw new NullPointerException("The table name is not specified");
         }
 
-        if (!name.matches(nameRegex)) {
-            throw new IllegalArgumentException("Incorrect database name");
-        }
-
         this.name = name;
         this.tables = new ArrayList<>();
+        this.fileManager = fileManager;
     }
 
     @Override
@@ -48,16 +43,7 @@ public class DatabaseImpl implements Database {
 
     @Override
     public Table createTable(String name) {
-        return new TableImpl(name);
-    }
-
-    @Override
-    public ResultQuery initializeDatabase() {
-        File newDirectory = new File(new File(System.getProperty("java.io.tmpdir")), name);
-        if (newDirectory.mkdir() || newDirectory.exists()) {
-            return new EmptySuccessResultQuery();
-        } else {
-            return new ErrorResultQuery();
-        }
+        Table table = fileManager.initializeTable(this, name);
+        return table;
     }
 }

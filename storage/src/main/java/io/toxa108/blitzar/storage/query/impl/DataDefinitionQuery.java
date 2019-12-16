@@ -2,9 +2,17 @@ package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Field;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataDefinitionQuery extends AbstractQuery {
+    public DataDefinitionQuery(String database,
+                               Type type) {
+        super(database, "");
+        this.type = type;
+        this.fields = new ArrayList<>();
+    }
+
     public DataDefinitionQuery(String database,
                                String table,
                                List<Field> fields,

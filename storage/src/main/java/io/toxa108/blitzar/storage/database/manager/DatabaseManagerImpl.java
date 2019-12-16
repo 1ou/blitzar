@@ -14,7 +14,8 @@ public class DatabaseManagerImpl implements DatabaseManager {
     private final DatabaseContext databaseContext;
     private final DataDefinitionQueryResolver dataDefinitionQueryResolver;
 
-    public DatabaseManagerImpl(DatabaseContext databaseContext, DataDefinitionQueryResolver dataDefinitionQueryResolver) {
+    public DatabaseManagerImpl(DatabaseContext databaseContext,
+                               DataDefinitionQueryResolver dataDefinitionQueryResolver) {
         this.databaseContext = databaseContext;
         this.dataDefinitionQueryResolver = dataDefinitionQueryResolver;
     }
@@ -23,12 +24,10 @@ public class DatabaseManagerImpl implements DatabaseManager {
     public ResultQuery resolveDataDefinitionQuery(DataDefinitionQuery query) throws QueryProcessException {
         switch (query.type()) {
             case CREATE_DATABASE:
-                query.setQueryContext(createDatabaseScopeQueryContext(query));
                 return dataDefinitionQueryResolver.createDatabase(query);
             case CREATE_INDEX:
                 return dataDefinitionQueryResolver.createIndex(query);
             case CREATE_TABLE:
-                query.setQueryContext(createTableScopeQueryContext(query));
                 return dataDefinitionQueryResolver.createTable(query);
             case DROP_DATABASE:
                 return dataDefinitionQueryResolver.dropDatabase(query);

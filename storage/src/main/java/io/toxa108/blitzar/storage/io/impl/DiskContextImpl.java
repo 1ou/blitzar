@@ -1,17 +1,17 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import io.toxa108.blitzar.storage.io.DiskBlock;
 import io.toxa108.blitzar.storage.io.DiskContext;
+import io.toxa108.blitzar.storage.io.DiskPage;
 
 public class DiskContextImpl implements DiskContext {
-    private final DiskBlock diskBlock;
+    private final DiskPage diskPage;
 
-    public DiskContextImpl(DiskBlock diskBlock) {
-        this.diskBlock = diskBlock;
+    public DiskContextImpl(DiskPage diskPage) {
+        this.diskPage = diskPage;
     }
 
     @Override
     public int blockSize() {
-        return diskBlock.size();
+        return diskPage.size();
     }
 }
