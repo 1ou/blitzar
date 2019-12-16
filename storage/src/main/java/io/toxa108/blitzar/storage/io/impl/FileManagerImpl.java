@@ -13,19 +13,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class FileManagerImpl implements FileManager {
-    private final String baseFolder = "blitzar";
+    protected final String baseFolder;
     private final String nameRegex = "[a-zA-Z]+";
+    private final String tableExtension = "ddd";
 
-    public FileManagerImpl() {
-        File newDirectory = new File(new File(System.getProperty("java.io.tmpdir")), baseFolder);
-        if (!newDirectory.mkdir()) {
-            newDirectory.mkdir();
-        }
+    public FileManagerImpl(String baseFolder) {
+        this.baseFolder = baseFolder;
     }
 
     @Override
     public List<String> databases() {
-        File[] folders = new File(System.getProperty("java.io.tmpdir") + "/" + baseFolder).listFiles(File::isDirectory);
+        File[] folders = new File(baseFolder).listFiles(File::isDirectory);
         if (folders != null) {
             return Arrays.stream(folders)
                     .map(File::getName)
@@ -45,12 +43,8 @@ public class FileManagerImpl implements FileManager {
             throw new IllegalArgumentException("Incorrect database name");
         }
 
-        File newDirectory = new File(new File(System.getProperty("java.io.tmpdir") + "/" + baseFolder), name);
-        if (newDirectory.mkdir() || newDirectory.exists()) {
-            return new DatabaseImpl(name, this);
-        } else {
-            throw new IllegalArgumentException("Database can't be created");
-        }
+        File file = createDirectory(baseFolder, name);
+        return new DatabaseImpl(file.getName(), this);
     }
 
     @Override
@@ -63,15 +57,28 @@ public class FileManagerImpl implements FileManager {
             throw new IllegalArgumentException("Incorrect table name");
         }
 
-        File databaseDirectory = new File(new File(
-                System.getProperty("java.io.tmpdir") + "/" + baseFolder),
-                name + ".ddd"
-        );
+        File file = createFile(baseFolder + "/" + database.name(), name, this.tableExtension);
+        return new TableImpl(file.getName(), this);
+    }
 
-        if (databaseDirectory.exists()) {
-            return new TableImpl(name, this);
+    /**
+     * Create directory
+     * @param directory directoryName
+     * @return path
+     */
+    protected File createDirectory(String directory, String folderName) {
+        File newDirectory = new File(directory + "/" + folderName);
+        if (newDirectory.mkdir() || newDirectory.exists()) {
+            return newDirectory;
         } else {
-            throw new IllegalArgumentException("Table can't be created");
+            throw new IllegalStateException("Can't create file");
         }
+    }
+
+    protected File createFile(String directory, String fileName, String fileExtension) {
+        return new File(
+                new File(directory),
+                fileName + "." + fileExtension
+        );
     }
 }

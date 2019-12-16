@@ -17,10 +17,6 @@ public class TableImpl implements Table {
             throw new NullPointerException("The table name is not specified");
         }
 
-        if (!name.matches(nameRegex)) {
-            throw new IllegalArgumentException("Incorrect table name");
-        }
-
         this.fileManager = fileManager;
         this.name = name;
     }

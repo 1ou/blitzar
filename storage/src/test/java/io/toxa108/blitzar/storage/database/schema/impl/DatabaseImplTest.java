@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class DatabaseImplTest {
-    private final FileManager fileManager = new FileManagerImpl();
+    private final FileManager fileManager = new FileManagerImpl("tmp");
 
     @Test
     public void initialize_db_when_success() {

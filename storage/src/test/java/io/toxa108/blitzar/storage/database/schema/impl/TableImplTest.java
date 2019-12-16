@@ -2,13 +2,13 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
-import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
+import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
 public class TableImplTest {
-    FileManager fileManager = new FileManagerImpl();
+    FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
 
     @Test(expected = NullPointerException.class)
     public void create_table_when_error_name_not_specified() {

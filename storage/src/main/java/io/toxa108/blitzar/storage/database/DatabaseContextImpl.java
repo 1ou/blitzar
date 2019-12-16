@@ -38,4 +38,9 @@ public class DatabaseContextImpl implements DatabaseContext {
         databases.add(database);
         return database;
     }
+
+    @Override
+    public List<Database> databases() {
+        return databases;
+    }
 }

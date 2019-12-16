@@ -18,7 +18,7 @@ public class StorageApplication {
     public static void main(String[] args) {
         final Server server = new ServerImpl(9005);
 
-        final FileManager fileManager = new FileManagerImpl();
+        final FileManager fileManager = new FileManagerImpl("/tmp/blitzar");
         final DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);

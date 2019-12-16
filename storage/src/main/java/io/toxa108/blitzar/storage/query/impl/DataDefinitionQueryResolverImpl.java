@@ -2,11 +2,10 @@ package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.schema.Database;
-import io.toxa108.blitzar.storage.database.schema.impl.SchemeImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 
-import java.util.List;
+import java.util.Optional;
 
 public class DataDefinitionQueryResolverImpl implements DataDefinitionQueryResolver {
     private final DatabaseContext databaseContext;
@@ -19,13 +18,18 @@ public class DataDefinitionQueryResolverImpl implements DataDefinitionQueryResol
     public ResultQuery createDatabase(DataDefinitionQuery query) {
         Database database = databaseContext.createDatabase(query.databaseName());
         return new EmptySuccessResultQuery();
-//бутина 78 кв 74
     }
 
     @Override
     public ResultQuery createTable(DataDefinitionQuery query) {
-        return query.context().table().initializeScheme(
-                new SchemeImpl(query.fields(), List.of()));
+        Optional<Database> databaseOptional = databaseContext.findByName(query.databaseName());
+        if (databaseOptional.isEmpty()) {
+            return new ErrorResultQuery();
+        } else {
+            Database database = databaseOptional.get();
+            database.createTable(query.tableName());
+            return new EmptySuccessResultQuery();
+        }
     }
 
     @Override
