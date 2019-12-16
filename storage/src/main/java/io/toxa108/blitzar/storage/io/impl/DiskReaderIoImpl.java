@@ -2,7 +2,6 @@ package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.io.DiskReader;
 
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -22,7 +21,10 @@ public class DiskReaderIoImpl implements DiskReader {
     @Override
     public byte[] read(int pos, int len) throws IOException {
         randomAccessFile.seek(pos);
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-        return bufferedInputStream.readNBytes(len);
+        byte[] res = new byte[len];
+        randomAccessFile.read(res);
+        return res;
+//        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+//        return bufferedInputStream.readNBytes(len);
     }
 }

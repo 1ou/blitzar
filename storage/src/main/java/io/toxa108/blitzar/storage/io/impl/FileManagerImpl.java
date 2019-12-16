@@ -94,8 +94,10 @@ public class FileManagerImpl implements FileManager {
                 new File(baseFolder + "/" + databaseName, tableName),
                 "rw")
         ) {
-            DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
             final int m = 1024;
+            accessFile.setLength(m * diskPage.size() * 20);
+            DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
+            DiskReader diskReader = new DiskReaderIoImpl(accessFile);
 
             int posOfIndexes = diskPage.size() * (m - 2);
 

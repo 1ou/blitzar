@@ -2,7 +2,6 @@ package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.io.DiskWriter;
 
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -22,8 +21,8 @@ public class DiskWriterIoImpl implements DiskWriter {
     @Override
     public void write(int pos, byte[] bytes) throws IOException {
         randomAccessFile.seek(pos);
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-        bufferedOutputStream.write(bytes);
-
+        randomAccessFile.write(bytes);
+//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+//        bufferedOutputStream.write(bytes);
     }
 }
