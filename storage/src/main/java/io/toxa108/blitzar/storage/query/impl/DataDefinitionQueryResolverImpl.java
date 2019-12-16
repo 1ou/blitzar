@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.schema.Database;
+import io.toxa108.blitzar.storage.database.schema.impl.SchemeImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 
@@ -27,7 +28,7 @@ public class DataDefinitionQueryResolverImpl implements DataDefinitionQueryResol
             return new ErrorResultQuery();
         } else {
             Database database = databaseOptional.get();
-            database.createTable(query.tableName());
+            database.createTable(query.tableName(), new SchemeImpl(query.fields(), query.getIndices()));
             return new EmptySuccessResultQuery();
         }
     }

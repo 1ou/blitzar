@@ -1,25 +1,34 @@
 package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Field;
+import io.toxa108.blitzar.storage.database.schema.Index;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataDefinitionQuery extends AbstractQuery {
+
+    private final Type type;
+    private final List<Field> fields;
+    private final List<Index> indices;
+
     public DataDefinitionQuery(String database,
                                Type type) {
         super(database, "");
         this.type = type;
         this.fields = new ArrayList<>();
+        this.indices = new ArrayList<>();
     }
 
     public DataDefinitionQuery(String database,
                                String table,
                                List<Field> fields,
+                               List<Index> indices,
                                Type type) {
         super(database, table);
         this.type = type;
         this.fields = fields;
+        this.indices = indices;
     }
 
     /**
@@ -50,16 +59,19 @@ public class DataDefinitionQuery extends AbstractQuery {
          * Drop table
          */
         DROP_TABLE
-    };
-    private final Type type;
+    }
+
+    ;
 
     public Type type() {
         return type;
     }
 
-    private final List<Field> fields;
-
     public List<Field> fields() {
         return fields;
+    }
+
+    public List<Index> getIndices() {
+        return indices;
     }
 }

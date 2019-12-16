@@ -61,6 +61,28 @@ public class FileManagerImpl implements FileManager {
         return new TableImpl(file.getName(), this);
     }
 
+    @Override
+    public List<Table> loadTables(String databaseName) {
+        File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
+        if (files != null) {
+            return Arrays.stream(files)
+                    .map(it -> new TableImpl(it.getName(), this))
+                    .collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public void clear() {
+        File[] files = new File(baseFolder).listFiles();
+        if (files != null) {
+            for (File file : files) {
+                file.delete();
+            }
+        }
+    }
+
     /**
      * Create directory
      * @param directory directoryName

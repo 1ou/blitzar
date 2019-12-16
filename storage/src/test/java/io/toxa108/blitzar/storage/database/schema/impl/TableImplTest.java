@@ -10,16 +10,6 @@ import static org.junit.Assert.assertNotNull;
 public class TableImplTest {
     FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
 
-    @Test(expected = NullPointerException.class)
-    public void create_table_when_error_name_not_specified() {
-        final Table table = new TableImpl(null, fileManager);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void create_table_when_error_in_name() {
-        final Table table = new TableImpl("test_table", fileManager);
-    }
-
     @Test
     public void create_table_when_success() {
         final Table table = new TableImpl("table", fileManager);

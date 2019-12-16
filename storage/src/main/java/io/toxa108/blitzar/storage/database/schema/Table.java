@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema;
 
+import io.toxa108.blitzar.storage.database.schema.impl.State;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 
 public interface Table {
@@ -17,4 +18,11 @@ public interface Table {
      * @return name
      */
     String name();
+
+    /**
+     * Return state
+     *
+     * @return state
+     */
+    State state();
 }

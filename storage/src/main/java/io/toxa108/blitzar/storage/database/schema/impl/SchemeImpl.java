@@ -14,4 +14,14 @@ public class SchemeImpl implements Scheme {
         this.fields = fields;
         this.indices = indices;
     }
+
+    @Override
+    public List<Field> fields() {
+        return fields;
+    }
+
+    @Override
+    public List<Index> indices() {
+        return indices;
+    }
 }

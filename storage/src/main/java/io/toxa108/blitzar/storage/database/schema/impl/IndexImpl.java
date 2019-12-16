@@ -1,16 +1,25 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 
 import java.util.List;
 
 public class IndexImpl implements Index {
-    private final List<Field> fields;
-    private final IndexType indexType;
+    private final List<String> fields;
+    private final IndexType type;
 
-    public IndexImpl(List<Field> fields, IndexType indexType) {
+    public IndexImpl(List<String> fields, IndexType type) {
         this.fields = fields;
-        this.indexType = indexType;
+        this.type = type;
+    }
+
+    @Override
+    public IndexType type() {
+        return type;
+    }
+
+    @Override
+    public List<String> fields() {
+        return fields;
     }
 }

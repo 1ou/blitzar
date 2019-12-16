@@ -23,8 +23,7 @@ public class StorageApplication {
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);
 
-        final DatabaseManager databaseManager = new DatabaseManagerImpl(
-                databaseContext, dataDefinitionQueryResolver);
+        final DatabaseManager databaseManager = new DatabaseManagerImpl(dataDefinitionQueryResolver);
         final QueryProcessor queryProcessor = new QueryProcessorImpl();
     }
 }

@@ -5,11 +5,15 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 public class FieldImpl implements Field {
     private final String name;
     private final FieldType fieldType;
-    private Object value;
+    private final Nullable nullable;
+    private final Unique unique;
+    private byte[] value;
 
     public FieldImpl(String name, FieldType fieldType) {
         this.name = name;
         this.fieldType = fieldType;
+        this.nullable = Nullable.NOT_NULL;
+        this.unique = Unique.UNIQUE;
     }
 
     @Override
@@ -24,6 +28,16 @@ public class FieldImpl implements Field {
 
     @Override
     public byte[] value() {
-        return new byte[0];
+        return value;
+    }
+
+    @Override
+    public Nullable nullable() {
+        return nullable;
+    }
+
+    @Override
+    public Unique unique() {
+        return unique;
     }
 }

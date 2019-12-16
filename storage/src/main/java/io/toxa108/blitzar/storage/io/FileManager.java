@@ -26,4 +26,16 @@ public interface FileManager {
      * @return result query
      */
     Table initializeTable(Database database, String name);
+
+    /**
+     * Load tables from disk to main memory
+     * @param databaseName databaseName
+     * @return tables
+     */
+    List<Table> loadTables(String databaseName);
+
+    /**
+     * Clear
+     */
+    void clear();
 }

@@ -1,10 +1,10 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Database;
+import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,21 +12,20 @@ public class DatabaseImpl implements Database {
     private final List<Table> tables;
     private final String name;
     private final FileManager fileManager;
+    private final State state;
 
     public DatabaseImpl(String name, List<Table> tables, FileManager fileManager) {
         this.tables = tables;
         this.name = name;
         this.fileManager = fileManager;
+        this.state = State.EXISTS;
     }
 
     public DatabaseImpl(String name, FileManager fileManager) {
-        if (name == null) {
-            throw new NullPointerException("The table name is not specified");
-        }
-
         this.name = name;
-        this.tables = new ArrayList<>();
         this.fileManager = fileManager;
+        this.tables = fileManager.loadTables(name);
+        this.state = State.EXISTS;
     }
 
     @Override
@@ -42,8 +41,17 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public Table createTable(String name) {
+    public Table createTable(String name, Scheme scheme) {
+        if (this.state == State.REMOVED) {
+            throw new IllegalStateException("Database removed, can't create table.");
+        }
         Table table = fileManager.initializeTable(this, name);
+        table.initializeScheme(scheme);
         return table;
+    }
+
+    @Override
+    public State state() {
+        return state;
     }
 }

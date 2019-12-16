@@ -18,6 +18,9 @@ public enum FieldType {
      */
     VARCHAR(false);
 
+    /**
+     * TRUE if the size of one record can be different from another one
+     */
     private final boolean variable;
 
     private FieldType(boolean variable) {
