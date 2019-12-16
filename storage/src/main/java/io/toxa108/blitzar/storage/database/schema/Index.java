@@ -16,4 +16,10 @@ public interface Index {
      * @return fields
      */
     List<String> fields();
+
+    /**
+     * Transform index to byte array
+     * @return byte array of index data
+     */
+    byte[] toBytes();
 }

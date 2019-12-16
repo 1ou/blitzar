@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -23,9 +22,6 @@ public class TableImpl implements Table {
     @Override
     public ResultQuery initializeScheme(Scheme scheme) {
         this.scheme = scheme;
-        for (Field field : scheme.fields()) {
-
-        }
         return new EmptySuccessResultQuery();
     }
 

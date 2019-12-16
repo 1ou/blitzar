@@ -39,4 +39,10 @@ public interface Field {
      * @return unique state
      */
     Unique unique();
+
+    /**
+     * Transfer metadata info to bytes array
+     * @return array of metadata bytes
+     */
+    byte[] metadataToBytes();
 }

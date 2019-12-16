@@ -28,7 +28,7 @@ public class DataDefinitionQueryResolverImpl implements DataDefinitionQueryResol
             return new ErrorResultQuery();
         } else {
             Database database = databaseOptional.get();
-            database.createTable(query.tableName(), new SchemeImpl(query.fields(), query.getIndices()));
+            database.createTable(query.tableName(), new SchemeImpl(query.fields(), query.getIndexes()));
             return new EmptySuccessResultQuery();
         }
     }

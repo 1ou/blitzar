@@ -10,8 +10,8 @@ public interface Scheme {
     List<Field> fields();
 
     /**
-     * Return list of indices
-     * @return indices
+     * Return list of indexes
+     * @return indexes
      */
-    List<Index> indices();
+    List<Index> indexes();
 }

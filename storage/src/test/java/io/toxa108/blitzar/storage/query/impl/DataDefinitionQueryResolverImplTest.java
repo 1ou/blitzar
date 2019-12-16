@@ -99,6 +99,7 @@ public class DataDefinitionQueryResolverImplTest {
 
         ResultQuery resultQuery = dataDefinitionQueryResolver.createTable(dataDefinitionQueryCreateTable);
 
+        fileManager.loadTableScheme(databaseName, databaseContext.databases().get(0).tables().get(0).name());
         Assert.assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
     }
 }

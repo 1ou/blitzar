@@ -40,4 +40,9 @@ public class FieldImpl implements Field {
     public Unique unique() {
         return unique;
     }
+
+    @Override
+    public byte[] metadataToBytes() {
+        return new byte[0];
+    }
 }

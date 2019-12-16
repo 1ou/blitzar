@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.database.schema;
 
 import io.toxa108.blitzar.storage.database.schema.impl.State;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface Database {
@@ -23,11 +24,18 @@ public interface Database {
     /**
      * Create table in the database
      *
-     * @param name table name
+     * @param name   table name
      * @param scheme scheme
      * @return table
      */
     Table createTable(String name, Scheme scheme);
+
+    /**
+     * Tables
+     *
+     * @return list of tables in the database
+     */
+    List<Table> tables();
 
     /**
      * Return state

@@ -45,9 +45,16 @@ public class DatabaseImpl implements Database {
         if (this.state == State.REMOVED) {
             throw new IllegalStateException("Database removed, can't create table.");
         }
-        Table table = fileManager.initializeTable(this, name);
+        Table table = fileManager.initializeTable(this.name, name);
         table.initializeScheme(scheme);
+        this.fileManager.saveTableScheme(this.name, table.name(), scheme);
+        tables.add(table);
         return table;
+    }
+
+    @Override
+    public List<Table> tables() {
+        return tables;
     }
 
     @Override

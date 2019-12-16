@@ -24,5 +24,6 @@ public class DiskWriterIoImpl implements DiskWriter {
         randomAccessFile.seek(pos);
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
         bufferedOutputStream.write(bytes);
+
     }
 }

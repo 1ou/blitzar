@@ -27,8 +27,7 @@ public class TestFileManagerImpl extends FileManagerImpl {
         try {
             File file = Files.createTempFile(
                     Path.of(directory),
-                    fileName,
-                    fileExtension
+                    fileName, "." + fileExtension
             ).toFile();
             file.deleteOnExit();
             return file;

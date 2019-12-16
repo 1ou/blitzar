@@ -8,11 +8,11 @@ import java.util.List;
 
 public class SchemeImpl implements Scheme {
     private final List<Field> fields;
-    private final List<Index> indices;
+    private final List<Index> indexes;
 
-    public SchemeImpl(List<Field> fields, List<Index> indices) {
+    public SchemeImpl(List<Field> fields, List<Index> indexes) {
         this.fields = fields;
-        this.indices = indices;
+        this.indexes = indexes;
     }
 
     @Override
@@ -21,7 +21,7 @@ public class SchemeImpl implements Scheme {
     }
 
     @Override
-    public List<Index> indices() {
-        return indices;
+    public List<Index> indexes() {
+        return indexes;
     }
 }

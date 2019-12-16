@@ -22,4 +22,9 @@ public class IndexImpl implements Index {
     public List<String> fields() {
         return fields;
     }
+
+    @Override
+    public byte[] toBytes() {
+        return new byte[0];
+    }
 }

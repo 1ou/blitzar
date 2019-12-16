@@ -10,25 +10,25 @@ public class DataDefinitionQuery extends AbstractQuery {
 
     private final Type type;
     private final List<Field> fields;
-    private final List<Index> indices;
+    private final List<Index> indexes;
 
     public DataDefinitionQuery(String database,
                                Type type) {
         super(database, "");
         this.type = type;
         this.fields = new ArrayList<>();
-        this.indices = new ArrayList<>();
+        this.indexes = new ArrayList<>();
     }
 
     public DataDefinitionQuery(String database,
                                String table,
                                List<Field> fields,
-                               List<Index> indices,
+                               List<Index> indexes,
                                Type type) {
         super(database, table);
         this.type = type;
         this.fields = fields;
-        this.indices = indices;
+        this.indexes = indexes;
     }
 
     /**
@@ -71,7 +71,7 @@ public class DataDefinitionQuery extends AbstractQuery {
         return fields;
     }
 
-    public List<Index> getIndices() {
-        return indices;
+    public List<Index> getIndexes() {
+        return indexes;
     }
 }

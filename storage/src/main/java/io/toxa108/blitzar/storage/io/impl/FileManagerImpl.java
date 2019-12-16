@@ -1,12 +1,13 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import io.toxa108.blitzar.storage.database.schema.Database;
-import io.toxa108.blitzar.storage.database.schema.Table;
+import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.TableImpl;
-import io.toxa108.blitzar.storage.io.FileManager;
+import io.toxa108.blitzar.storage.io.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,9 +17,13 @@ public class FileManagerImpl implements FileManager {
     protected final String baseFolder;
     private final String nameRegex = "[a-zA-Z]+";
     private final String tableExtension = "ddd";
+    private final DiskPage diskPage;
+    private final BytesManipulator bytesManipulator;
 
     public FileManagerImpl(String baseFolder) {
         this.baseFolder = baseFolder;
+        this.diskPage = new DiskPageImpl();
+        this.bytesManipulator = new BytesManipulatorImpl();
     }
 
     @Override
@@ -48,17 +53,103 @@ public class FileManagerImpl implements FileManager {
     }
 
     @Override
-    public Table initializeTable(Database database, String name) {
-        if (name == null) {
+    public Table initializeTable(String databaseName, String tableName) {
+        if (tableName == null) {
             throw new NullPointerException("The table name is not specified");
         }
 
-        if (!name.matches(nameRegex)) {
+        if (!tableName.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect table name");
         }
 
-        File file = createFile(baseFolder + "/" + database.name(), name, this.tableExtension);
+        File file = createFile(baseFolder + "/" + databaseName, tableName, this.tableExtension);
         return new TableImpl(file.getName(), this);
+    }
+
+    /**
+     * Table stores in one file. The page_size by default equals 16 kilobytes.
+     * | **** |
+     * | Meta information of table = page_size
+     * | page_size * 1024 - 1024 = offset index data (bytes)
+     * | indexes data = | number of indexes 4 bytes | arr of indexes size = 4 * number of indexes bytes | data
+     * | page_size * 1024 - 2048 = offset fields data (bytes)
+     * | fields data = | number of fields 4 bytes | arr of fields size = 4 * number of fields bytes | data
+     * | **** |
+     * | Records data
+     * | B (block size) = page_zie * 1024
+     * | R (record size) - size of record in bytes
+     * | B >= R
+     * | bfr - blocking factor B / R (rounds down) - number of records in file
+     * | Unused space in block (bytes) = B - (bfr * R)
+     * | **** |
+     *
+     * @param databaseName database
+     * @param tableName    name
+     * @param scheme       table scheme
+     * @return table
+     */
+    @Override
+    public Table saveTableScheme(String databaseName, String tableName, Scheme scheme) {
+        try (RandomAccessFile accessFile = new RandomAccessFile(
+                new File(baseFolder + "/" + databaseName, tableName),
+                "rw")
+        ) {
+            DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
+            final int m = 1024;
+
+            int posOfIndexes = diskPage.size() * (m - 2);
+
+            diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
+            int tmpSeek = posOfIndexes + Integer.BYTES;
+            posOfIndexes += Integer.BYTES * scheme.indexes().size() + Integer.BYTES;
+
+            for (Index index : scheme.indexes()) {
+                byte[] bytes = index.toBytes();
+                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfIndexes - tmpSeek));
+                diskWriter.write(posOfIndexes, bytes);
+                posOfIndexes += bytes.length;
+                tmpSeek += Integer.BYTES;
+            }
+
+            int posOfFields = diskPage.size() * (m - 1);
+            diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
+            tmpSeek = posOfFields + Integer.BYTES;
+            posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
+
+            for (Field field : scheme.fields()) {
+                byte[] bytes = field.metadataToBytes();
+                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfFields - tmpSeek));
+                diskWriter.write(posOfFields, bytes);
+                posOfFields += bytes.length;
+                tmpSeek += Integer.BYTES;
+            }
+            return null;
+        } catch (IOException e) {
+            throw new IllegalStateException("Table can't be read from disk");
+        }
+    }
+
+    @Override
+    public Scheme loadTableScheme(String databaseName, String tableName) {
+        try (RandomAccessFile accessFile = new RandomAccessFile(
+                new File(baseFolder + "/" + databaseName, tableName),
+                "r")
+        ) {
+            DiskReader diskReader = new DiskReaderIoImpl(accessFile);
+            final int m = 1024;
+
+            int posOfIndexes = diskPage.size() * (m - 2);
+            int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
+            for (int i = 0; i < sizeOfIndexes; ++i) {
+                posOfIndexes += Integer.BYTES;
+                int seek = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
+            }
+
+            int posOfFields = diskPage.size() * (m - 1);
+            return null;
+        } catch (IOException e) {
+            throw new IllegalStateException("Table can't be read from disk");
+        }
     }
 
     @Override
@@ -85,6 +176,7 @@ public class FileManagerImpl implements FileManager {
 
     /**
      * Create directory
+     *
      * @param directory directoryName
      * @return path
      */
