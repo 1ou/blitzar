@@ -6,10 +6,13 @@ import io.toxa108.blitzar.storage.io.FileManager;
 
 import java.util.Objects;
 
+/**
+ * Table doesn't know anything about Database.
+ * But knows a lot about below layers (fields, indexes)
+ */
 public class TableImpl implements Table {
     private final String name;
     private final Scheme scheme;
-    private final String nameRegex = "[a-zA-Z]+";
     private final FileManager fileManager;
     private final State state;
 
@@ -20,7 +23,6 @@ public class TableImpl implements Table {
         this.scheme = scheme;
     }
 
-
     @Override
     public String name() {
         return name;
@@ -29,6 +31,11 @@ public class TableImpl implements Table {
     @Override
     public State state() {
         return state;
+    }
+
+    @Override
+    public Scheme scheme() {
+        return scheme;
     }
 
     @Override

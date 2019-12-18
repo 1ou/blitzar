@@ -32,7 +32,7 @@ public class FileManagerImplTest {
         );
 
         Table table = database.createTable("table", scheme);
-        Scheme loadedScheme = fileManager.loadTableScheme(database.name(), table.name());
-        Assert.assertEquals(scheme, loadedScheme);
+        Table loadedTable = fileManager.loadTable(database.name(), table.name());
+        Assert.assertEquals(scheme, loadedTable.scheme());
     }
 }

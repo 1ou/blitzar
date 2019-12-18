@@ -4,7 +4,6 @@ import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 
-import java.io.File;
 import java.util.List;
 
 public interface FileManager {
@@ -34,28 +33,21 @@ public interface FileManager {
     Table initializeTable(String databaseName, String tableName, Scheme scheme);
 
     /**
-     * Save table scheme
-     *
-     * @param file   file
-     * @param scheme table scheme
-     */
-    void saveTableScheme(File file, Scheme scheme);
-
-    /**
-     * Load table scheme
-     *
-     * @param file file
-     * @return scheme
-     */
-    Scheme loadTableScheme(File file);
-
-    /**
      * Load tables from disk to main memory
      *
      * @param databaseName databaseName
      * @return tables
      */
     List<Table> loadTables(String databaseName);
+
+    /**
+     * Load table from disk
+     *
+     * @param databaseName database name
+     * @param tableName    table name
+     * @return table
+     */
+    Table loadTable(String databaseName, String tableName);
 
     /**
      * Clear

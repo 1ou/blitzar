@@ -17,5 +17,10 @@ public interface Table {
      */
     State state();
 
-
+    /**
+     * Return scheme
+     *
+     * @return scheme
+     */
+    Scheme scheme();
 }

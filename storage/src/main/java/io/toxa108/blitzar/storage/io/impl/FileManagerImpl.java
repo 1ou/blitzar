@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class FileManagerImpl implements FileManager {
@@ -93,8 +94,7 @@ public class FileManagerImpl implements FileManager {
      * @param file   file
      * @param scheme table scheme
      */
-    @Override
-    public void saveTableScheme(File file, Scheme scheme) {
+    private void saveTableScheme(File file, Scheme scheme) {
         try (RandomAccessFile accessFile = new RandomAccessFile(file, "rw")
         ) {
             final int m = 1024;
@@ -133,8 +133,7 @@ public class FileManagerImpl implements FileManager {
         }
     }
 
-    @Override
-    public Scheme loadTableScheme(File file) {
+    private Scheme loadTableScheme(File file) {
         try (RandomAccessFile accessFile = new RandomAccessFile(file, "r")
         ) {
             DiskReader diskReader = new DiskReaderIoImpl(accessFile);
@@ -172,6 +171,22 @@ public class FileManagerImpl implements FileManager {
                     .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public Table loadTable(String databaseName, String tableName) {
+        File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
+        if (files != null) {
+            return Arrays.stream(files)
+                    .filter(it -> it.getName().equals(tableName))
+                    .map(it -> new TableImpl(it.getName(), this.loadTableScheme(it), this))
+                    .findAny()
+                    .orElseThrow(() -> new NoSuchElementException(
+                            String.format("Table %s isn't found on disk", tableName))
+                    );
+        } else {
+            throw new NoSuchElementException(String.format("Table %s isn't found on disk", tableName));
         }
     }
 
