@@ -1,10 +1,7 @@
 package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.database.schema.*;
-import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.IndexImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.SchemeImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.TableImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.*;
 
 import java.io.File;
@@ -156,6 +153,22 @@ public class FileManagerImpl implements FileManager {
 
             Set<Field> fields = new HashSet<>();
             int posOfFields = (diskPage.size() - 1) * m;
+            int startOfFields = posOfFields;
+
+            int sizeOfFields = bytesManipulator.bytesToInt(diskReader.read(posOfFields, Integer.BYTES));
+            for (int i = 0; i < sizeOfFields; ++i) {
+                posOfFields += Integer.BYTES;
+                int seekOfField = bytesManipulator.bytesToInt(
+                        diskReader.read(posOfFields, Integer.BYTES));
+
+                int fieldSize = bytesManipulator.bytesToInt(
+                        diskReader.read(startOfFields + seekOfField, Integer.BYTES));
+
+                byte[] bytes = diskReader.read(startOfFields + seekOfField, fieldSize + Integer.BYTES);
+                Field field = new FieldImpl(bytes);
+                fields.add(field);
+            }
+
             return new SchemeImpl(fields, indexes);
         } catch (IOException e) {
             throw new IllegalStateException("Table can't be read from disk");

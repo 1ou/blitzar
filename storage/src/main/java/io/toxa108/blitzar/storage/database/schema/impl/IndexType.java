@@ -1,5 +1,7 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import java.util.NoSuchElementException;
+
 public enum IndexType {
     /**
      * Primary index - always clustered
@@ -22,6 +24,11 @@ public enum IndexType {
     }
 
     public static IndexType fromId(short id) {
-        return PRIMARY;
+        for (IndexType e : values()) {
+            if (e.id == id) {
+                return e;
+            }
+        }
+        throw new NoSuchElementException("Such index type doesn't exist");
     }
 }

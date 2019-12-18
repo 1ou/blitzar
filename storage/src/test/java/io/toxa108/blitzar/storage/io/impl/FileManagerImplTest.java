@@ -26,7 +26,8 @@ public class FileManagerImplTest {
                 Set.of(new FieldImpl("id", FieldType.LONG),
                         new FieldImpl("name", FieldType.VARCHAR, 10)
                 ),
-                Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY),
+                Set.of(
+//                        new IndexImpl(Set.of("id"), IndexType.PRIMARY),
                         new IndexImpl(Set.of("id", "name"), IndexType.SECONDARY)
                 )
         );
