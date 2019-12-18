@@ -6,6 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class DatabaseImpl implements Database {
@@ -60,5 +61,22 @@ public class DatabaseImpl implements Database {
     @Override
     public State state() {
         return state;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DatabaseImpl database = (DatabaseImpl) o;
+        return Objects.equals(name, database.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

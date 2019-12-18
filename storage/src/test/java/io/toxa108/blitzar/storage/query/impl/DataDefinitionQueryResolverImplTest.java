@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,7 +39,8 @@ public class DataDefinitionQueryResolverImplTest {
 
         dataDefinitionQueryResolver.createDatabase(dataDefinitionQuery);
         assertEquals(1, fileManager.databases().size());
-        assertEquals(databaseContext.databases().get(0).name(), fileManager.databases().get(0));
+        assertEquals(databaseContext.databases().stream().findAny().orElseThrow().name(),
+                fileManager.databases().get(0));
     }
 
     @Test
@@ -57,12 +59,12 @@ public class DataDefinitionQueryResolverImplTest {
         dataDefinitionQueryResolver.createDatabase(dataDefinitionQuery);
 
         assertEquals(databaseContext.databases().size(), fileManager.databases().size());
-        databaseName = databaseContext.databases().get(0).name();
+        databaseName = databaseContext.databases().stream().findAny().orElseThrow().name();
 
         assertEquals(databaseName, fileManager.databases().get(0));
 
         DataDefinitionQuery dataDefinitionQueryCreateTable = new DataDefinitionQuery(
-                databaseName, tableName, List.of(), List.of(), DataDefinitionQuery.Type.CREATE_TABLE);
+                databaseName, tableName, Set.of(), Set.of(), DataDefinitionQuery.Type.CREATE_TABLE);
 
         ResultQuery resultQuery = dataDefinitionQueryResolver.createTable(dataDefinitionQueryCreateTable);
 
@@ -85,21 +87,27 @@ public class DataDefinitionQueryResolverImplTest {
         dataDefinitionQueryResolver.createDatabase(dataDefinitionQuery);
 
         assertEquals(databaseContext.databases().size(), fileManager.databases().size());
-        databaseName = databaseContext.databases().get(0).name();
+        databaseName = databaseContext.databases().stream().findAny().orElseThrow().name();
 
         assertEquals(databaseName, fileManager.databases().get(0));
 
         DataDefinitionQuery dataDefinitionQueryCreateTable = new DataDefinitionQuery(
                 databaseName,
                 tableName,
-                List.of(new FieldImpl("id", FieldType.LONG)),
-                List.of(new IndexImpl(List.of("id"), IndexType.PRIMARY)),
+                Set.of(new FieldImpl("id", FieldType.LONG)),
+                Set.of(new IndexImpl(List.of("id"), IndexType.PRIMARY)),
                 DataDefinitionQuery.Type.CREATE_TABLE
         );
 
         ResultQuery resultQuery = dataDefinitionQueryResolver.createTable(dataDefinitionQueryCreateTable);
 
-        fileManager.loadTableScheme(databaseName, databaseContext.databases().get(0).tables().get(0).name());
+        fileManager.loadTableScheme(databaseName, databaseContext.databases().stream().
+                findFirst()
+                .orElseThrow()
+                .tables()
+                .get(0)
+                .name()
+        );
         Assert.assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
     }
 }

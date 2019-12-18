@@ -4,7 +4,12 @@ public enum IndexType {
     /**
      * Primary index - always clustered
      */
-    PRIMARY((short) 1);
+    PRIMARY((short) 1),
+
+    /**
+     * Secondary index
+     */
+    SECONDARY((short) 2);
 
     private final short id;
 

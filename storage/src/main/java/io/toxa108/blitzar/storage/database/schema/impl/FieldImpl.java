@@ -7,13 +7,51 @@ public class FieldImpl implements Field {
     private final FieldType fieldType;
     private final Nullable nullable;
     private final Unique unique;
-    private byte[] value;
+    private final byte[] value;
+    private final int size;
 
     public FieldImpl(String name, FieldType fieldType) {
         this.name = name;
         this.fieldType = fieldType;
         this.nullable = Nullable.NOT_NULL;
         this.unique = Unique.UNIQUE;
+
+        switch (fieldType) {
+            case SHORT:
+                this.size = Short.BYTES;
+                break;
+            case INTEGER:
+                this.size = Integer.BYTES;
+                break;
+            case LONG:
+                this.size = Long.BYTES;
+                break;
+            default:
+                throw new IllegalStateException("Size of value isn't specified");
+        }
+        this.value = new byte[size];
+    }
+
+    public FieldImpl(String name, FieldType fieldType, int size) {
+        this.name = name;
+        this.fieldType = fieldType;
+        this.nullable = Nullable.NOT_NULL;
+        this.unique = Unique.UNIQUE;
+
+        switch (fieldType) {
+            case SHORT:
+                this.size = Short.BYTES;
+                break;
+            case INTEGER:
+                this.size = Integer.BYTES;
+                break;
+            case LONG:
+                this.size = Long.BYTES;
+                break;
+            default:
+                this.size = size;
+        }
+        this.value = new byte[size];
     }
 
     @Override

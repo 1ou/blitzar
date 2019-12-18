@@ -100,17 +100,17 @@ public class FileManagerImpl implements FileManager {
             DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
 
             int posOfIndexes = (diskPage.size() - 2) * m;
-
+            int startOfIndexes = posOfIndexes;
             diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
-            int tmpSeek = posOfIndexes + Integer.BYTES;
+            int tmpSeek = posOfIndexes;
             posOfIndexes += Integer.BYTES * scheme.indexes().size() + Integer.BYTES;
 
             for (Index index : scheme.indexes()) {
                 byte[] bytes = index.toBytes();
-                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfIndexes - tmpSeek));
+                tmpSeek += Integer.BYTES;
+                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfIndexes - startOfIndexes));
                 diskWriter.write(posOfIndexes, bytes);
                 posOfIndexes += bytes.length;
-                tmpSeek += Integer.BYTES;
             }
 
             int posOfFields = (diskPage.size() - 1) * m;

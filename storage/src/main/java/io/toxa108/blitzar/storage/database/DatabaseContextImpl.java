@@ -4,12 +4,12 @@ import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
 import io.toxa108.blitzar.storage.io.FileManager;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DatabaseContextImpl implements DatabaseContext {
-    private final List<Database> databases;
+    private final Set<Database> databases;
     private final FileManager fileManager;
 
     public DatabaseContextImpl(FileManager fileManager) {
@@ -18,7 +18,7 @@ public class DatabaseContextImpl implements DatabaseContext {
         this.databases = fileManager.databases()
                 .stream()
                 .map(it -> new DatabaseImpl(it, fileManager))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -40,7 +40,7 @@ public class DatabaseContextImpl implements DatabaseContext {
     }
 
     @Override
-    public List<Database> databases() {
+    public Set<Database> databases() {
         return databases;
     }
 }

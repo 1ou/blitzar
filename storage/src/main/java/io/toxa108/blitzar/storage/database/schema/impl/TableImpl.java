@@ -6,6 +6,8 @@ import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 
+import java.util.Objects;
+
 public class TableImpl implements Table {
     private final String name;
     private Scheme scheme;
@@ -33,5 +35,22 @@ public class TableImpl implements Table {
     @Override
     public State state() {
         return state;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TableImpl table = (TableImpl) o;
+        return Objects.equals(name, table.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

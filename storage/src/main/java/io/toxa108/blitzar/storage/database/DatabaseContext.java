@@ -2,8 +2,8 @@ package io.toxa108.blitzar.storage.database;
 
 import io.toxa108.blitzar.storage.database.schema.Database;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface DatabaseContext {
     /**
@@ -24,5 +24,5 @@ public interface DatabaseContext {
      * Return databases
      * @return databases
      */
-    List<Database> databases();
+    Set<Database> databases();
 }

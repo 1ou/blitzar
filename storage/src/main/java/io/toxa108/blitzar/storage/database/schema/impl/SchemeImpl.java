@@ -4,24 +4,28 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 
-import java.util.List;
+import java.util.Set;
 
 public class SchemeImpl implements Scheme {
-    private final List<Field> fields;
-    private final List<Index> indexes;
+    private final Set<Field> fields;
+    private final Set<Index> indexes;
 
-    public SchemeImpl(List<Field> fields, List<Index> indexes) {
+    public SchemeImpl(Set<Field> fields, Set<Index> indexes) {
+        if (indexes.stream().filter(it -> it.type() == IndexType.PRIMARY).count() > 1) {
+            throw new IllegalArgumentException("Table must include only one PRIMARY index");
+        }
+
         this.fields = fields;
         this.indexes = indexes;
     }
 
     @Override
-    public List<Field> fields() {
+    public Set<Field> fields() {
         return fields;
     }
 
     @Override
-    public List<Index> indexes() {
+    public Set<Index> indexes() {
         return indexes;
     }
 }
