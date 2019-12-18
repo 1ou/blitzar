@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.database.schema;
 
 import io.toxa108.blitzar.storage.database.schema.impl.IndexType;
 
-import java.util.List;
+import java.util.Set;
 
 public interface Index {
     /**
@@ -15,7 +15,7 @@ public interface Index {
      * Fields on which based index
      * @return fields
      */
-    List<String> fields();
+    Set<String> fields();
 
     /**
      * Transform index to byte array

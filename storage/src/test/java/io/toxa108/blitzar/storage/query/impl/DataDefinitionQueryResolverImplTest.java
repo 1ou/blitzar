@@ -14,7 +14,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -95,7 +94,7 @@ public class DataDefinitionQueryResolverImplTest {
                 databaseName,
                 tableName,
                 Set.of(new FieldImpl("id", FieldType.LONG)),
-                Set.of(new IndexImpl(List.of("id"), IndexType.PRIMARY)),
+                Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)),
                 DataDefinitionQuery.Type.CREATE_TABLE
         );
 

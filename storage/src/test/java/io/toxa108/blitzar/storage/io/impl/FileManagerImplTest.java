@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Set;
 
 public class FileManagerImplTest {
@@ -25,8 +24,11 @@ public class FileManagerImplTest {
         Database database = fileManager.initializeDatabase("test");
         Scheme scheme = new SchemeImpl(
                 Set.of(new FieldImpl("id", FieldType.LONG),
-                        new FieldImpl("name", FieldType.VARCHAR, 10)),
-                Set.of(new IndexImpl(List.of("id"), IndexType.PRIMARY))
+                        new FieldImpl("name", FieldType.VARCHAR, 10)
+                ),
+                Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY),
+                        new IndexImpl(Set.of("id", "name"), IndexType.SECONDARY)
+                )
         );
 
         Table table = database.createTable("table", scheme);

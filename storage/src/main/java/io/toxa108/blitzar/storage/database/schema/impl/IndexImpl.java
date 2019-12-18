@@ -4,12 +4,13 @@ import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class IndexImpl implements Index {
-    private final List<String> fields;
+    private final Set<String> fields;
     private final IndexType type;
     private final BytesManipulator bytesManipulator;
 
@@ -28,10 +29,10 @@ public class IndexImpl implements Index {
         System.arraycopy(bytes, 0, fieldsBytes, Integer.BYTES + Short.BYTES, size);
 
         fields = Stream.of(new String(fieldsBytes).split("%"))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
-    public IndexImpl(List<String> fields, IndexType type) {
+    public IndexImpl(Set<String> fields, IndexType type) {
         this.fields = fields;
         this.type = type;
         this.bytesManipulator = new BytesManipulatorImpl();
@@ -43,7 +44,7 @@ public class IndexImpl implements Index {
     }
 
     @Override
-    public List<String> fields() {
+    public Set<String> fields() {
         return fields;
     }
 
@@ -71,5 +72,22 @@ public class IndexImpl implements Index {
         System.arraycopy(typeBytes, 0, resultBytes, sizeBytes.length, typeBytes.length);
         System.arraycopy(fieldsBytes, 0, resultBytes, sizeBytes.length + typeBytes.length, fieldsBytes.length);
         return resultBytes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        IndexImpl index = (IndexImpl) o;
+        return Objects.equals(fields, index.fields);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fields);
     }
 }

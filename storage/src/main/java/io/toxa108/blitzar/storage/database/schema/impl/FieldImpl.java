@@ -2,6 +2,8 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Field;
 
+import java.util.Objects;
+
 public class FieldImpl implements Field {
     private final String name;
     private final FieldType fieldType;
@@ -82,5 +84,22 @@ public class FieldImpl implements Field {
     @Override
     public byte[] metadataToBytes() {
         return new byte[0];
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        FieldImpl field = (FieldImpl) o;
+        return Objects.equals(name, field.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

@@ -54,17 +54,23 @@ public class FileManagerImpl implements FileManager {
     }
 
     @Override
-    public Table initializeTable(String databaseName, String tableName) {
+    public Table initializeTable(String databaseName, String tableName, Scheme scheme) {
+        if (databaseName == null) {
+            throw new NullPointerException("The database name is not specified");
+        }
+        if (!databaseName.matches(nameRegex)) {
+            throw new IllegalArgumentException("Incorrect database name");
+        }
         if (tableName == null) {
             throw new NullPointerException("The table name is not specified");
         }
-
         if (!tableName.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect table name");
         }
 
         File file = createFile(baseFolder + "/" + databaseName, tableName, this.tableExtension);
-        return new TableImpl(file.getName(), this);
+        this.saveTableScheme(file, scheme);
+        return new TableImpl(file.getName(), scheme, this);
     }
 
     /**
@@ -84,16 +90,12 @@ public class FileManagerImpl implements FileManager {
      * | Unused space in block (bytes) = B - (bfr * R)
      * | **** |
      *
-     * @param databaseName database
-     * @param tableName    name
-     * @param scheme       table scheme
-     * @return table
+     * @param file   file
+     * @param scheme table scheme
      */
     @Override
-    public Table saveTableScheme(String databaseName, String tableName, Scheme scheme) {
-        try (RandomAccessFile accessFile = new RandomAccessFile(
-                new File(baseFolder + "/" + databaseName, tableName),
-                "rw")
+    public void saveTableScheme(File file, Scheme scheme) {
+        try (RandomAccessFile accessFile = new RandomAccessFile(file, "rw")
         ) {
             final int m = 1024;
             accessFile.setLength(m * diskPage.size() * 20);
@@ -114,28 +116,26 @@ public class FileManagerImpl implements FileManager {
             }
 
             int posOfFields = (diskPage.size() - 1) * m;
+            startOfIndexes = posOfFields;
             diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
-            tmpSeek = posOfFields + Integer.BYTES;
+            tmpSeek = posOfFields;
             posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
 
             for (Field field : scheme.fields()) {
                 byte[] bytes = field.metadataToBytes();
-                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfFields - tmpSeek));
+                tmpSeek += Integer.BYTES;
+                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfFields - startOfIndexes));
                 diskWriter.write(posOfFields, bytes);
                 posOfFields += bytes.length;
-                tmpSeek += Integer.BYTES;
             }
-            return null;
         } catch (IOException e) {
             throw new IllegalStateException("Table can't be read from disk");
         }
     }
 
     @Override
-    public Scheme loadTableScheme(String databaseName, String tableName) {
-        try (RandomAccessFile accessFile = new RandomAccessFile(
-                new File(baseFolder + "/" + databaseName, tableName),
-                "r")
+    public Scheme loadTableScheme(File file) {
+        try (RandomAccessFile accessFile = new RandomAccessFile(file, "r")
         ) {
             DiskReader diskReader = new DiskReaderIoImpl(accessFile);
             final int m = 1024;
@@ -168,7 +168,7 @@ public class FileManagerImpl implements FileManager {
         File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
         if (files != null) {
             return Arrays.stream(files)
-                    .map(it -> new TableImpl(it.getName(), this))
+                    .map(it -> new TableImpl(it.getName(), this.loadTableScheme(it), this))
                     .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
