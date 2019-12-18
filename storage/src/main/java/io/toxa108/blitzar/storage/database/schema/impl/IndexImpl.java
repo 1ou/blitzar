@@ -20,13 +20,14 @@ public class IndexImpl implements Index {
         byte[] sizeBytes = new byte[Integer.BYTES];
         byte[] indexTypeBytes = new byte[Short.BYTES];
         System.arraycopy(bytes, 0, sizeBytes, 0, Integer.BYTES);
-        System.arraycopy(bytes, 0, indexTypeBytes, Integer.BYTES, Short.BYTES);
+        System.arraycopy(bytes, Integer.BYTES, indexTypeBytes, 0, Short.BYTES);
 
         int size = bytesManipulator.bytesToInt(sizeBytes);
         type = IndexType.fromId(bytesManipulator.bytesToShort(indexTypeBytes));
 
-        byte[] fieldsBytes = new byte[size];
-        System.arraycopy(bytes, 0, fieldsBytes, Integer.BYTES + Short.BYTES, size);
+        int fieldsMetadataSize = size - Short.BYTES;
+        byte[] fieldsBytes = new byte[fieldsMetadataSize];
+        System.arraycopy(bytes, Integer.BYTES + Short.BYTES, fieldsBytes, 0, fieldsMetadataSize);
 
         fields = Stream.of(new String(fieldsBytes).split("%"))
                 .collect(Collectors.toSet());

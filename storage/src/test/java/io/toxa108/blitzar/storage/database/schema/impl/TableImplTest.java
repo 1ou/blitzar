@@ -5,6 +5,8 @@ import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
 import org.junit.Test;
 
+import java.util.Set;
+
 import static org.junit.Assert.assertNotNull;
 
 public class TableImplTest {
@@ -12,7 +14,7 @@ public class TableImplTest {
 
     @Test
     public void create_table_when_success() {
-        final Table table = new TableImpl("table", fileManager);
+        final Table table = new TableImpl("table", new SchemeImpl(Set.of(), Set.of()), fileManager);
         assertNotNull(table);
     }
 }

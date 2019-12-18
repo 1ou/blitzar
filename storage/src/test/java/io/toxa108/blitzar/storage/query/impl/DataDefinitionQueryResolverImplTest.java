@@ -100,7 +100,7 @@ public class DataDefinitionQueryResolverImplTest {
 
         ResultQuery resultQuery = dataDefinitionQueryResolver.createTable(dataDefinitionQueryCreateTable);
 
-        fileManager.loadTableScheme(databaseName, databaseContext.databases().stream().
+        fileManager.loadTable(databaseName, databaseContext.databases().stream().
                 findFirst()
                 .orElseThrow()
                 .tables()

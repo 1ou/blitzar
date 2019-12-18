@@ -3,24 +3,23 @@ package io.toxa108.blitzar.storage.io.impl;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.IndexImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.SchemeImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.TableImpl;
 import io.toxa108.blitzar.storage.io.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class FileManagerImpl implements FileManager {
     protected final String baseFolder;
-    private final String nameRegex = "[a-zA-Z]+";
+    private final String nameRegex = "^[a-zA-Z0-9_]*$";
     private final String tableExtension = "ddd";
     private final DiskPage diskPage;
     private final BytesManipulator bytesManipulator;
+    private final int m = 1024;
 
     public FileManagerImpl(String baseFolder) {
         this.baseFolder = baseFolder;
@@ -97,7 +96,6 @@ public class FileManagerImpl implements FileManager {
     private void saveTableScheme(File file, Scheme scheme) {
         try (RandomAccessFile accessFile = new RandomAccessFile(file, "rw")
         ) {
-            final int m = 1024;
             accessFile.setLength(m * diskPage.size() * 20);
             DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
 
@@ -137,26 +135,28 @@ public class FileManagerImpl implements FileManager {
         try (RandomAccessFile accessFile = new RandomAccessFile(file, "r")
         ) {
             DiskReader diskReader = new DiskReaderIoImpl(accessFile);
-            final int m = 1024;
+            Set<Index> indexes = new HashSet<>();
 
             int posOfIndexes = (diskPage.size() - 2) * m;
+            int startOfIndexes = posOfIndexes;
+
             int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
-            List<Index> indexes = new ArrayList<>();
             for (int i = 0; i < sizeOfIndexes; ++i) {
                 posOfIndexes += Integer.BYTES;
                 int seekOfIndex = bytesManipulator.bytesToInt(
                         diskReader.read(posOfIndexes, Integer.BYTES));
 
                 int indexSize = bytesManipulator.bytesToInt(
-                        diskReader.read(posOfIndexes + seekOfIndex, Integer.BYTES));
+                        diskReader.read(startOfIndexes + seekOfIndex, Integer.BYTES));
 
-                byte[] bytes = diskReader.read(posOfIndexes + seekOfIndex, indexSize);
+                byte[] bytes = diskReader.read(startOfIndexes + seekOfIndex, indexSize + Integer.BYTES);
                 Index index = new IndexImpl(bytes);
                 indexes.add(index);
             }
 
+            Set<Field> fields = new HashSet<>();
             int posOfFields = (diskPage.size() - 1) * m;
-            return null;
+            return new SchemeImpl(fields, indexes);
         } catch (IOException e) {
             throw new IllegalStateException("Table can't be read from disk");
         }
@@ -195,8 +195,22 @@ public class FileManagerImpl implements FileManager {
         File[] files = new File(baseFolder).listFiles();
         if (files != null) {
             for (File file : files) {
+                clear(file);
                 file.delete();
             }
+        }
+    }
+
+    private void clear(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File file1 : files) {
+                    clear(file1);
+                }
+            }
+        } else {
+            file.delete();
         }
     }
 
