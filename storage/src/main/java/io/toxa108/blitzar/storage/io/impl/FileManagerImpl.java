@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.IndexImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.TableImpl;
 import io.toxa108.blitzar.storage.io.*;
 
@@ -70,10 +71,10 @@ public class FileManagerImpl implements FileManager {
      * Table stores in one file. The page_size by default equals 16 kilobytes.
      * | **** |
      * | Meta information of table = page_size
-     * | page_size * 1024 - 1024 = offset index data (bytes)
-     * | indexes data = | number of indexes 4 bytes | arr of indexes size = 4 * number of indexes bytes | data
-     * | page_size * 1024 - 2048 = offset fields data (bytes)
-     * | fields data = | number of fields 4 bytes | arr of fields size = 4 * number of fields bytes | data
+     * | page_size * 1024 - 2048 = offset index data (bytes)
+     * | indexes data = | number of indexes 2 bytes | arr of indexes size = 2 * number of indexes bytes | data
+     * | page_size * 1024 - 1024 = offset fields data (bytes)
+     * | fields data = | number of fields 2 bytes | arr of fields size = 2 * number of fields bytes | data
      * | **** |
      * | Records data
      * | B (block size) = page_zie * 1024
@@ -97,9 +98,8 @@ public class FileManagerImpl implements FileManager {
             final int m = 1024;
             accessFile.setLength(m * diskPage.size() * 20);
             DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
-            DiskReader diskReader = new DiskReaderIoImpl(accessFile);
 
-            int posOfIndexes = diskPage.size() * (m - 2);
+            int posOfIndexes = (diskPage.size() - 2) * m;
 
             diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
             int tmpSeek = posOfIndexes + Integer.BYTES;
@@ -113,7 +113,7 @@ public class FileManagerImpl implements FileManager {
                 tmpSeek += Integer.BYTES;
             }
 
-            int posOfFields = diskPage.size() * (m - 1);
+            int posOfFields = (diskPage.size() - 1) * m;
             diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
             tmpSeek = posOfFields + Integer.BYTES;
             posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
@@ -140,14 +140,23 @@ public class FileManagerImpl implements FileManager {
             DiskReader diskReader = new DiskReaderIoImpl(accessFile);
             final int m = 1024;
 
-            int posOfIndexes = diskPage.size() * (m - 2);
+            int posOfIndexes = (diskPage.size() - 2) * m;
             int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
+            List<Index> indexes = new ArrayList<>();
             for (int i = 0; i < sizeOfIndexes; ++i) {
                 posOfIndexes += Integer.BYTES;
-                int seek = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
+                int seekOfIndex = bytesManipulator.bytesToInt(
+                        diskReader.read(posOfIndexes, Integer.BYTES));
+
+                int indexSize = bytesManipulator.bytesToInt(
+                        diskReader.read(posOfIndexes + seekOfIndex, Integer.BYTES));
+
+                byte[] bytes = diskReader.read(posOfIndexes + seekOfIndex, indexSize);
+                Index index = new IndexImpl(bytes);
+                indexes.add(index);
             }
 
-            int posOfFields = diskPage.size() * (m - 1);
+            int posOfFields = (diskPage.size() - 1) * m;
             return null;
         } catch (IOException e) {
             throw new IllegalStateException("Table can't be read from disk");

@@ -10,6 +10,22 @@ public interface BytesManipulator {
     byte[] intToBytes(int number);
 
     /**
+     * Translate short to bytes array
+     *
+     * @param number short number
+     * @return bytes array
+     */
+    byte[] shortToBytes(short number);
+
+    /**
+     * Translate bytes to short
+     *
+     * @param bytes bytes
+     * @return short number
+     */
+    short bytesToShort(byte[] bytes);
+
+    /**
      * Translate bytes to int
      *
      * @param bytes bytes

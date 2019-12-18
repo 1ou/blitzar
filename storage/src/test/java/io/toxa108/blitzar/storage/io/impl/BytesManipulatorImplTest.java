@@ -14,4 +14,15 @@ public class BytesManipulatorImplTest {
         int k = bytesManipulator.bytesToInt(bytes);
         assertEquals(i, k);
     }
+
+    @Test
+    public void short_to_bytes_and_back_when_success() {
+        BytesManipulator bytesManipulator = new BytesManipulatorImpl();
+        short i = (short) 104;
+        byte[] bytes = bytesManipulator.shortToBytes(i);
+        int k = bytesManipulator.bytesToShort(bytes);
+        assertEquals(i, k);
+    }
+
+
 }

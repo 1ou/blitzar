@@ -4,5 +4,19 @@ public enum IndexType {
     /**
      * Primary index - always clustered
      */
-    PRIMARY;
+    PRIMARY((short) 1);
+
+    private final short id;
+
+    private IndexType(short id) {
+        this.id = id;
+    }
+
+    public short id() {
+        return id;
+    }
+
+    public static IndexType fromId(short id) {
+        return PRIMARY;
+    }
 }
