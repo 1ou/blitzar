@@ -19,7 +19,7 @@ public class TestFileManagerImpl extends FileManagerImpl {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null; // todo
+        return null;
     }
 
     @Override
@@ -34,6 +34,6 @@ public class TestFileManagerImpl extends FileManagerImpl {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null; // todo
+        return null;
     }
 }

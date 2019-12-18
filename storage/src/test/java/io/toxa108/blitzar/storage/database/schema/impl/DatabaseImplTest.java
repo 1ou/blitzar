@@ -3,7 +3,7 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -12,8 +12,8 @@ import static org.junit.Assert.assertNotNull;
 public class DatabaseImplTest {
     private final FileManager fileManager = new FileManagerImpl("/tmp/blitzar");
 
-    @After
-    public void end() {
+    @Before
+    public void before() {
         fileManager.clear();
     }
 
@@ -30,7 +30,7 @@ public class DatabaseImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void create_db_when_error_in_name() {
-        final Database database  = fileManager.initializeDatabase("test_db");
+        final Database database  = fileManager.initializeDatabase("test_%db");
     }
 
     @Test
