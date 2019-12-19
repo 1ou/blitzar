@@ -5,6 +5,19 @@ import io.toxa108.blitzar.storage.io.BytesManipulator;
 public class BytesManipulatorImpl implements BytesManipulator {
 
     @Override
+    public byte[] longToBytes(long number) {
+        return new byte[]{
+                (byte) number,
+                (byte) (number >> 8),
+                (byte) (number >> 16),
+                (byte) (number >> 24),
+                (byte) (number >> 32),
+                (byte) (number >> 40),
+                (byte) (number >> 48),
+                (byte) (number >> 56)};
+    }
+
+    @Override
     public byte[] intToBytes(int number) {
         return new byte[]{
                 (byte) (number >>> 24),
@@ -31,5 +44,17 @@ public class BytesManipulatorImpl implements BytesManipulator {
                 (bytes[1] << 16) & 0x00ff0000 |
                 (bytes[2] << 8) & 0x0000ff00 |
                 (bytes[3] << 0) & 0x000000ff;
+    }
+
+    @Override
+    public long bytesToLong(byte[] bytes) {
+        return ((long) bytes[7] << 56)
+                | ((long) bytes[6] & 0xff) << 48
+                | ((long) bytes[5] & 0xff) << 40
+                | ((long) bytes[4] & 0xff) << 32
+                | ((long) bytes[3] & 0xff) << 24
+                | ((long) bytes[2] & 0xff) << 16
+                | ((long) bytes[1] & 0xff) << 8
+                | ((long) bytes[0] & 0xff);
     }
 }

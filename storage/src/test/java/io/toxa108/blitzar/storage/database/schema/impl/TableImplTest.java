@@ -24,7 +24,7 @@ public class TableImplTest {
         final Table table = new TableImpl(
                 "table",
                 new SchemeImpl(Set.of(), Set.of()),
-                new RowManagerImpl(null)
+                new RowManagerImpl(null, null, 0)
         );
         assertNotNull(table);
     }

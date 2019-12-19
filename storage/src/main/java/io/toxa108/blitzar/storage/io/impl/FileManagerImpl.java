@@ -1,5 +1,7 @@
 package io.toxa108.blitzar.storage.io.impl;
 
+import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
+import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
@@ -18,11 +20,13 @@ public class FileManagerImpl implements FileManager {
     private final DiskPage diskPage;
     private final BytesManipulator bytesManipulator;
     private final int m = 1024;
+    private final DatabaseConfiguration databaseConfiguration;
 
     public FileManagerImpl(String baseFolder) {
         this.baseFolder = baseFolder;
         this.diskPage = new DiskPageImpl();
         this.bytesManipulator = new BytesManipulatorImpl();
+        this.databaseConfiguration = new DatabaseConfigurationImpl(diskPage.size());
     }
 
     @Override
@@ -71,7 +75,7 @@ public class FileManagerImpl implements FileManager {
         return new TableImpl(
                 file.getName(),
                 scheme,
-                new RowManagerImpl(file)
+                new RowManagerImpl(file, scheme, databaseConfiguration.metadataSize() + 1)
         );
     }
 
@@ -96,7 +100,8 @@ public class FileManagerImpl implements FileManager {
      * @param scheme table scheme
      */
     private void saveTableScheme(File file, Scheme scheme) {
-        try (RandomAccessFile accessFile = new RandomAccessFile(file, "rw")) {
+        try {
+            RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
             accessFile.setLength(m * diskPage.size() * 20);
             DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
 
@@ -133,8 +138,8 @@ public class FileManagerImpl implements FileManager {
     }
 
     private Scheme loadTableScheme(File file) {
-        try (RandomAccessFile accessFile = new RandomAccessFile(file, "r")
-        ) {
+        try {
+            RandomAccessFile accessFile = new RandomAccessFile(file, "r");
             DiskReader diskReader = new DiskReaderIoImpl(accessFile);
             Set<Index> indexes = new HashSet<>();
 
@@ -184,10 +189,14 @@ public class FileManagerImpl implements FileManager {
         File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
         if (files != null) {
             return Arrays.stream(files)
-                    .map(it -> new TableImpl(
-                            it.getName(),
-                            this.loadTableScheme(it),
-                            new RowManagerImpl(it))
+                    .map(it -> {
+                                Scheme scheme = this.loadTableScheme(it);
+                                return new TableImpl(
+                                        it.getName(),
+                                        this.loadTableScheme(it),
+                                        new RowManagerImpl(it, scheme, databaseConfiguration.metadataSize() + 1)
+                                );
+                            }
                     )
                     .collect(Collectors.toList());
         } else {
@@ -201,10 +210,14 @@ public class FileManagerImpl implements FileManager {
         if (files != null) {
             return Arrays.stream(files)
                     .filter(it -> it.getName().equals(tableName))
-                    .map(it -> new TableImpl(
-                            it.getName(),
-                            this.loadTableScheme(it),
-                            new RowManagerImpl(it))
+                    .map(it -> {
+                                Scheme scheme = this.loadTableScheme(it);
+                                return new TableImpl(
+                                        it.getName(),
+                                        this.loadTableScheme(it),
+                                        new RowManagerImpl(it, scheme, databaseConfiguration.metadataSize() + 1)
+                                );
+                            }
                     )
                     .findAny()
                     .orElseThrow(() -> new NoSuchElementException(

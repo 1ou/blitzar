@@ -9,4 +9,11 @@ public interface Row {
      * @return set of fields
      */
     Set<Field> fields();
+
+    /**
+     * Return key
+     *
+     * @return key
+     */
+    Key key();
 }
