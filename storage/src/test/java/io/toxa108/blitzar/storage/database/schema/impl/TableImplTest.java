@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
@@ -20,7 +21,11 @@ public class TableImplTest {
 
     @Test
     public void create_table_when_success() {
-        final Table table = new TableImpl("table", new SchemeImpl(Set.of(), Set.of()), fileManager);
+        final Table table = new TableImpl(
+                "table",
+                new SchemeImpl(Set.of(), Set.of()),
+                new RowManagerImpl(null)
+        );
         assertNotNull(table);
     }
 }

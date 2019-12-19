@@ -23,4 +23,10 @@ public interface Table {
      * @return scheme
      */
     Scheme scheme();
+
+    /**
+     * Add row
+     * @param row row
+     */
+    void addRow(Row row);
 }

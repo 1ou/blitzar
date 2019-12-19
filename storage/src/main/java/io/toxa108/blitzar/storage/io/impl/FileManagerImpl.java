@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.io.impl;
 
+import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.*;
@@ -67,7 +68,11 @@ public class FileManagerImpl implements FileManager {
 
         File file = createFile(baseFolder + "/" + databaseName, tableName, this.tableExtension);
         this.saveTableScheme(file, scheme);
-        return new TableImpl(file.getName(), scheme, this);
+        return new TableImpl(
+                file.getName(),
+                scheme,
+                new RowManagerImpl(file)
+        );
     }
 
     /**
@@ -91,8 +96,7 @@ public class FileManagerImpl implements FileManager {
      * @param scheme table scheme
      */
     private void saveTableScheme(File file, Scheme scheme) {
-        try (RandomAccessFile accessFile = new RandomAccessFile(file, "rw")
-        ) {
+        try (RandomAccessFile accessFile = new RandomAccessFile(file, "rw")) {
             accessFile.setLength(m * diskPage.size() * 20);
             DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
 
@@ -180,7 +184,11 @@ public class FileManagerImpl implements FileManager {
         File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
         if (files != null) {
             return Arrays.stream(files)
-                    .map(it -> new TableImpl(it.getName(), this.loadTableScheme(it), this))
+                    .map(it -> new TableImpl(
+                            it.getName(),
+                            this.loadTableScheme(it),
+                            new RowManagerImpl(it))
+                    )
                     .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
@@ -193,7 +201,11 @@ public class FileManagerImpl implements FileManager {
         if (files != null) {
             return Arrays.stream(files)
                     .filter(it -> it.getName().equals(tableName))
-                    .map(it -> new TableImpl(it.getName(), this.loadTableScheme(it), this))
+                    .map(it -> new TableImpl(
+                            it.getName(),
+                            this.loadTableScheme(it),
+                            new RowManagerImpl(it))
+                    )
                     .findAny()
                     .orElseThrow(() -> new NoSuchElementException(
                             String.format("Table %s isn't found on disk", tableName))
