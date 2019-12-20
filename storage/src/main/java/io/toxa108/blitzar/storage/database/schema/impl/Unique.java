@@ -30,4 +30,8 @@ public enum Unique {
         }
         throw new NoSuchElementException("Such unique type doesn't exist");
     }
+
+    public int size() {
+        return Short.BYTES;
+    }
 }

@@ -12,55 +12,20 @@ public class FieldImpl implements Field {
     private final Nullable nullable;
     private final Unique unique;
     private final byte[] value;
-    private final int size;
+    private final int valueSize;
     private final BytesManipulator bytesManipulator = new BytesManipulatorImpl();
 
-    public FieldImpl(String name, FieldType fieldType) {
+    public FieldImpl(String name, FieldType fieldType, Nullable nullable, Unique unique, byte[] value) {
         this.name = name;
         this.fieldType = fieldType;
-        this.nullable = Nullable.NOT_NULL;
-        this.unique = Unique.UNIQUE;
-
-        switch (fieldType) {
-            case SHORT:
-                this.size = Short.BYTES;
-                break;
-            case INTEGER:
-                this.size = Integer.BYTES;
-                break;
-            case LONG:
-                this.size = Long.BYTES;
-                break;
-            default:
-                throw new IllegalStateException("Size of value isn't specified");
-        }
-        this.value = new byte[size];
-    }
-
-    public FieldImpl(String name, FieldType fieldType, int size) {
-        this.name = name;
-        this.fieldType = fieldType;
-        this.nullable = Nullable.NOT_NULL;
-        this.unique = Unique.UNIQUE;
-
-        switch (fieldType) {
-            case SHORT:
-                this.size = Short.BYTES;
-                break;
-            case INTEGER:
-                this.size = Integer.BYTES;
-                break;
-            case LONG:
-                this.size = Long.BYTES;
-                break;
-            default:
-                this.size = size;
-        }
-        this.value = new byte[size];
+        this.nullable = nullable;
+        this.unique = unique;
+        this.valueSize = value.length;
+        this.value = value;
     }
 
     public FieldImpl(byte[] bytes) {
-        this.size = 0;
+        this.valueSize = 0;
         value = new byte[0];
 
         byte[] sizeBytes = new byte[Integer.BYTES];
@@ -132,6 +97,16 @@ public class FieldImpl implements Field {
         System.arraycopy(fieldsBytes, 0, resultBytes,
                 sizeBytes.length + fieldTypeBytes.length + nullableBytes.length + uniqueBytes.length, fieldsBytes.length);
         return resultBytes;
+    }
+
+    @Override
+    public int diskSize() {
+        return valueSize;
+    }
+
+    @Override
+    public boolean isVariable() {
+        return fieldType.isVariable();
     }
 
     @Override

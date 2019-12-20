@@ -31,6 +31,47 @@ public class SchemeImpl implements Scheme {
     }
 
     @Override
+    public Index primaryIndex() {
+        return indexes().stream()
+                .filter(it -> it.type() == IndexType.PRIMARY)
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("Table has to contain ONE primary index"));
+    }
+
+    @Override
+    public int primaryIndexSize() {
+        return primaryIndex()
+                .fields()
+                .stream()
+                .map(it -> fields().stream()
+                        .filter(it2 -> it2.name().equals(it))
+                        .findAny()
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Table has to contain ONE primary index"))
+                        .diskSize()
+                )
+                .reduce(Integer::sum)
+                .orElse(0);
+    }
+
+    @Override
+    public boolean isVariable() {
+        Set<String> indexFields = primaryIndex().fields();
+
+        return this.fields().stream()
+                .filter(it -> indexFields.contains(it.name()))
+                .anyMatch(Field::isVariable);
+    }
+
+    @Override
+    public int recordSize() {
+        return this.fields.stream()
+                .map(Field::diskSize)
+                .reduce(Integer::sum)
+                .orElse(0);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

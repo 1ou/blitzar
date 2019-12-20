@@ -30,4 +30,8 @@ public enum Nullable {
         }
         throw new NoSuchElementException("Such nullable type doesn't exist");
     }
+
+    public int size() {
+        return Short.BYTES;
+    }
 }

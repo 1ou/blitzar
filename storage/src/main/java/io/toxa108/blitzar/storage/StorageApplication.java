@@ -2,6 +2,8 @@ package io.toxa108.blitzar.storage;
 
 import io.toxa108.blitzar.storage.connection.Server;
 import io.toxa108.blitzar.storage.connection.impl.ServerImpl;
+import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
+import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.DatabaseContextImpl;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
@@ -18,7 +20,8 @@ public class StorageApplication {
     public static void main(String[] args) {
         final Server server = new ServerImpl(9005);
 
-        final FileManager fileManager = new FileManagerImpl("/tmp/blitzar");
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
+        final FileManager fileManager = new FileManagerImpl("/tmp/blitzar", databaseConfiguration);
         final DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);

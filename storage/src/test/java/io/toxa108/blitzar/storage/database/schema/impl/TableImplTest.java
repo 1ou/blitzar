@@ -1,5 +1,7 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
+import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -12,7 +14,8 @@ import java.util.Set;
 import static org.junit.Assert.assertNotNull;
 
 public class TableImplTest {
-    FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
+    DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
+    FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
 
     @Before
     public void before() {
@@ -24,7 +27,7 @@ public class TableImplTest {
         final Table table = new TableImpl(
                 "table",
                 new SchemeImpl(Set.of(), Set.of()),
-                new RowManagerImpl(null, null, 0)
+                new RowManagerImpl(null, null, null)
         );
         assertNotNull(table);
     }

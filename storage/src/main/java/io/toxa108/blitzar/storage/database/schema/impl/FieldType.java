@@ -47,4 +47,8 @@ public enum FieldType {
         }
         throw new NoSuchElementException("Such field type doesn't exist");
     }
+
+    public int size() {
+        return Short.BYTES;
+    }
 }

@@ -1,11 +1,13 @@
 package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
-import io.toxa108.blitzar.storage.io.*;
+import io.toxa108.blitzar.storage.io.BytesManipulator;
+import io.toxa108.blitzar.storage.io.DiskReader;
+import io.toxa108.blitzar.storage.io.DiskWriter;
+import io.toxa108.blitzar.storage.io.FileManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,16 +19,14 @@ public class FileManagerImpl implements FileManager {
     protected final String baseFolder;
     private final String nameRegex = "^[a-zA-Z0-9_]*$";
     private final String tableExtension = "ddd";
-    private final DiskPage diskPage;
     private final BytesManipulator bytesManipulator;
     private final int m = 1024;
     private final DatabaseConfiguration databaseConfiguration;
 
-    public FileManagerImpl(String baseFolder) {
+    public FileManagerImpl(String baseFolder, DatabaseConfiguration databaseConfiguration) {
         this.baseFolder = baseFolder;
-        this.diskPage = new DiskPageImpl();
         this.bytesManipulator = new BytesManipulatorImpl();
-        this.databaseConfiguration = new DatabaseConfigurationImpl(diskPage.size());
+        this.databaseConfiguration = databaseConfiguration;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class FileManagerImpl implements FileManager {
         return new TableImpl(
                 file.getName(),
                 scheme,
-                new RowManagerImpl(file, scheme, databaseConfiguration.metadataSize() + 1)
+                new RowManagerImpl(file, scheme, databaseConfiguration)
         );
     }
 
@@ -102,10 +102,10 @@ public class FileManagerImpl implements FileManager {
     private void saveTableScheme(File file, Scheme scheme) {
         try {
             RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
-            accessFile.setLength(m * diskPage.size() * 20);
-            DiskWriter diskWriter = new DiskWriterIoImpl(accessFile);
+            accessFile.setLength(databaseConfiguration.diskPageSize() * 20);
+            DiskWriter diskWriter = new DiskWriterIoImpl(file);
 
-            int posOfIndexes = (diskPage.size() - 2) * m;
+            int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
             int startOfIndexes = posOfIndexes;
             diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
             int tmpSeek = posOfIndexes;
@@ -119,7 +119,7 @@ public class FileManagerImpl implements FileManager {
                 posOfIndexes += bytes.length;
             }
 
-            int posOfFields = (diskPage.size() - 1) * m;
+            int posOfFields = databaseConfiguration.diskPageSize() - m;
             startOfIndexes = posOfFields;
             diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
             tmpSeek = posOfFields;
@@ -139,11 +139,10 @@ public class FileManagerImpl implements FileManager {
 
     private Scheme loadTableScheme(File file) {
         try {
-            RandomAccessFile accessFile = new RandomAccessFile(file, "r");
-            DiskReader diskReader = new DiskReaderIoImpl(accessFile);
+            DiskReader diskReader = new DiskReaderIoImpl(file);
             Set<Index> indexes = new HashSet<>();
 
-            int posOfIndexes = (diskPage.size() - 2) * m;
+            int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
             int startOfIndexes = posOfIndexes;
 
             int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
@@ -161,7 +160,7 @@ public class FileManagerImpl implements FileManager {
             }
 
             Set<Field> fields = new HashSet<>();
-            int posOfFields = (diskPage.size() - 1) * m;
+            int posOfFields = databaseConfiguration.diskPageSize() - m;
             int startOfFields = posOfFields;
 
             int sizeOfFields = bytesManipulator.bytesToInt(diskReader.read(posOfFields, Integer.BYTES));
@@ -194,7 +193,7 @@ public class FileManagerImpl implements FileManager {
                                 return new TableImpl(
                                         it.getName(),
                                         this.loadTableScheme(it),
-                                        new RowManagerImpl(it, scheme, databaseConfiguration.metadataSize() + 1)
+                                        new RowManagerImpl(it, scheme, databaseConfiguration)
                                 );
                             }
                     )
@@ -215,7 +214,7 @@ public class FileManagerImpl implements FileManager {
                                 return new TableImpl(
                                         it.getName(),
                                         this.loadTableScheme(it),
-                                        new RowManagerImpl(it, scheme, databaseConfiguration.metadataSize() + 1)
+                                        new RowManagerImpl(it, scheme, databaseConfiguration)
                                 );
                             }
                     )

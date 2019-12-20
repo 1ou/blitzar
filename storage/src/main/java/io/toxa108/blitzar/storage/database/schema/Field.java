@@ -42,7 +42,21 @@ public interface Field {
 
     /**
      * Transfer metadata info to bytes array
+     *
      * @return array of metadata bytes
      */
     byte[] metadataToBytes();
+
+    /**
+     * Size to store on disk
+     *
+     * @return size to store on disk
+     */
+    int diskSize();
+
+    /**
+     * Does size of record change duu to entry
+     * @return variability
+     */
+    boolean isVariable();
 }

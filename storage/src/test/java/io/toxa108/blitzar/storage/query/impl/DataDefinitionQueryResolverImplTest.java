@@ -2,10 +2,7 @@ package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.DatabaseContextImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.FieldType;
-import io.toxa108.blitzar.storage.database.schema.impl.IndexImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.IndexType;
+import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
@@ -19,7 +16,6 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 public class DataDefinitionQueryResolverImplTest {
-
     @Before
     public void before() {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
@@ -93,7 +89,7 @@ public class DataDefinitionQueryResolverImplTest {
         DataDefinitionQuery dataDefinitionQueryCreateTable = new DataDefinitionQuery(
                 databaseName,
                 tableName,
-                Set.of(new FieldImpl("id", FieldType.LONG)),
+                Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[8])),
                 Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)),
                 DataDefinitionQuery.Type.CREATE_TABLE
         );
