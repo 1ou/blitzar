@@ -88,6 +88,15 @@ public class SchemeImpl implements Scheme {
     }
 
     @Override
+    public int dataSize() {
+        return this.fields.stream()
+                .filter(it -> !primaryIndex().fields().contains(it.name()))
+                .map(Field::diskSize)
+                .reduce(Integer::sum)
+                .orElse(0);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

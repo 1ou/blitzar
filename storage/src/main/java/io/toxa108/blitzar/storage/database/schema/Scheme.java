@@ -46,9 +46,15 @@ public interface Scheme {
     boolean isVariable();
 
     /**
-     * Record size
+     * Record size (all fields include primary index)
      *
      * @return record size
      */
     int recordSize();
+
+    /**
+     * Record size (exclude primary index)
+     * @return data size
+     */
+    int dataSize();
 }
