@@ -39,6 +39,22 @@ public class SchemeImpl implements Scheme {
     }
 
     @Override
+    public Field primaryIndexField() {
+        return primaryIndex()
+                .fields()
+                .stream()
+                .map(it -> fields().stream()
+                        .filter(it2 -> it2.name().equals(it))
+                        .findAny()
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Table has to contain ONE primary index"))
+                )
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Table has to contain ONE primary index"));
+    }
+
+    @Override
     public int primaryIndexSize() {
         return primaryIndex()
                 .fields()

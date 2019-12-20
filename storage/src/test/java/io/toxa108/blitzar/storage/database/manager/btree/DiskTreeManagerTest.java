@@ -8,6 +8,7 @@ import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -53,7 +54,6 @@ public class DiskTreeManagerTest {
                 )
         );
 
-
         File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
         DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
@@ -69,14 +69,16 @@ public class DiskTreeManagerTest {
         for (int i = 0; i < n; ++i) {
             keys[i] = new KeyImpl(new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL,
-                    Unique.UNIQUE, bytesManipulator.intToBytes(i + 1)));
+                    Unique.UNIQUE, bytesManipulator.longToBytes(i + 1)));
             p[i] = -1;
         }
         p[n] = -1;
 
         DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(keys, p, false, n, -1);
         diskTreeManager.saveNode(databaseConfiguration.metadataSize() + 1, treeNode);
+        DiskTreeManager.TreeNode treeNode1 =
+                diskTreeManager.loadNode(databaseConfiguration.metadataSize() + 1);
 
-        int y = 0;
+        Assert.assertEquals(treeNode, treeNode1);
     }
 }

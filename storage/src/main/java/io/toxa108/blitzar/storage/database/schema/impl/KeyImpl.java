@@ -5,6 +5,8 @@ import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
 
+import java.util.Objects;
+
 public class KeyImpl implements Key {
     private final Field field;
     private final BytesManipulator bytesManipulator = new BytesManipulatorImpl();
@@ -36,5 +38,22 @@ public class KeyImpl implements Key {
     @Override
     public Field field() {
         return field;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        KeyImpl key = (KeyImpl) o;
+        return Objects.equals(field, key.field);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(field);
     }
 }

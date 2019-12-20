@@ -2,9 +2,12 @@ package io.toxa108.blitzar.storage.database.manager.btree;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.TableDataManager;
+import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
+import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
@@ -14,6 +17,8 @@ import io.toxa108.blitzar.storage.io.impl.DiskWriterIoImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Threadsafe b-plus-tree on disk realization
@@ -40,6 +45,12 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     public static class TreeNode {
+        Key[] keys;
+        int[] p;
+        byte[] value;
+        boolean leaf;
+        int q;
+        int next;
 
         TreeNode(int q) {
             this.keys = new Key[q];
@@ -57,12 +68,31 @@ public class DiskTreeManager implements TableDataManager {
             this.next = next;
         }
 
-        Key[] keys;
-        int[] p;
-        byte[] value;
-        boolean leaf;
-        int q;
-        int next;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            TreeNode treeNode = (TreeNode) o;
+            return leaf == treeNode.leaf &&
+                    q == treeNode.q &&
+                    next == treeNode.next &&
+                    Arrays.equals(keys, treeNode.keys) &&
+                    Arrays.equals(p, treeNode.p) &&
+                    Arrays.equals(value, treeNode.value);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(leaf, q, next);
+            result = 31 * result + Arrays.hashCode(keys);
+            result = 31 * result + Arrays.hashCode(p);
+            result = 31 * result + Arrays.hashCode(value);
+            return result;
+        }
     }
 
     @Override
@@ -80,79 +110,125 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     TreeNode loadNode(final int pos) throws IOException {
+        Field primaryIndexField = scheme.primaryIndexField();
+
         byte[] bytes = diskReader.read(pos, databaseConfiguration.diskPageSize());
         boolean isLeaf = bytes[0] == 1;
         byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
         System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
         int amountOfEntries = bytesManipulator.bytesToInt(amountOfEntriesBytes);
 
-        int[] keys = new int[amountOfEntries];
-        int[] p = new int[amountOfEntries + 1];
+        if (!isLeaf) {
+            Key[] keys = new Key[amountOfEntries];
+            int[] p = new int[amountOfEntries + 1];
 
-        byte[] entrySeekBytes = new byte[Integer.BYTES];
-        int entrySeek;
-        byte[] indexSizeBytes = new byte[Integer.BYTES];
-        byte[] dataSizeBytes = new byte[Integer.BYTES];
-        int indexSize, dataSize;
+            byte[] entryPosBytes = new byte[Integer.BYTES];
+            byte[] tmpByteBuffer = new byte[Integer.BYTES];
+            int sizeOfCurrentIndex;
 
-        for (int i = 0; i < amountOfEntries; ++i) {
-            System.arraycopy(bytes, Byte.BYTES + Integer.BYTES + Integer.BYTES * i, entrySeekBytes, 0, Integer.BYTES);
-            entrySeek = bytesManipulator.bytesToInt(entrySeekBytes);
+            for (int i = 0; i < amountOfEntries; ++i) {
+                System.arraycopy(
+                        bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
-            System.arraycopy(bytes,
-                    entrySeek,
-                    indexSizeBytes,
-                    0,
-                    Integer.BYTES
-            );
-            indexSize = bytesManipulator.bytesToInt(indexSizeBytes);
-            byte[] indexValueBytes = new byte[indexSize];
+                int posOfIndex = bytesManipulator.bytesToInt(entryPosBytes) - pos;
+                System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
+                sizeOfCurrentIndex = bytesManipulator.bytesToInt(tmpByteBuffer);
 
-            if (isLeaf) {
-                System.arraycopy(bytes,
-                        entrySeek + Integer.BYTES + Integer.BYTES,
-                        indexValueBytes,
-                        0,
-                        indexSize
+                System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
+                p[i] = bytesManipulator.bytesToInt(tmpByteBuffer);
+                byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
+                System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
+                keys[i] = new KeyImpl(new FieldImpl(
+                        primaryIndexField.name(),
+                        primaryIndexField.type(),
+                        primaryIndexField.nullable(),
+                        primaryIndexField.unique(),
+                        currentIndexBytes)
                 );
 
+                if (i == amountOfEntries - 1) {
+                    System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2 + currentIndexBytes.length,
+                            tmpByteBuffer, 0, Integer.BYTES);
+
+                    p[i + 1] = bytesManipulator.bytesToInt(tmpByteBuffer);
+                }
+            }
+            return new TreeNode(
+                    keys,
+                    p,
+                    isLeaf,
+                    amountOfEntries,
+                    -1
+            );
+        } else {
+
+            int[] keys = new int[amountOfEntries];
+            int[] p = new int[amountOfEntries + 1];
+
+            byte[] entrySeekBytes = new byte[Integer.BYTES];
+            int entrySeek;
+            byte[] indexSizeBytes = new byte[Integer.BYTES];
+            byte[] dataSizeBytes = new byte[Integer.BYTES];
+            int indexSize, dataSize;
+
+            for (int i = 0; i < amountOfEntries; ++i) {
+                System.arraycopy(bytes, Byte.BYTES + Integer.BYTES + Integer.BYTES * i, entrySeekBytes, 0, Integer.BYTES);
+                entrySeek = bytesManipulator.bytesToInt(entrySeekBytes);
+
                 System.arraycopy(bytes,
-                        entrySeek + Integer.BYTES,
-                        dataSizeBytes,
+                        entrySeek,
+                        indexSizeBytes,
                         0,
                         Integer.BYTES
                 );
+                indexSize = bytesManipulator.bytesToInt(indexSizeBytes);
+                byte[] indexValueBytes = new byte[indexSize];
 
-                dataSize = bytesManipulator.bytesToInt(dataSizeBytes);
-                byte[] dataValueBytes = new byte[dataSize];
+                if (isLeaf) {
+                    System.arraycopy(bytes,
+                            entrySeek + Integer.BYTES + Integer.BYTES,
+                            indexValueBytes,
+                            0,
+                            indexSize
+                    );
 
-                System.arraycopy(bytes,
-                        entrySeek + indexSize + Integer.BYTES,
-                        dataValueBytes,
-                        0,
-                        dataSize
-                );
-            } else {
-                System.arraycopy(bytes,
-                        entrySeek + Integer.BYTES,
-                        indexValueBytes,
-                        0,
-                        indexSize
-                );
+                    System.arraycopy(bytes,
+                            entrySeek + Integer.BYTES,
+                            dataSizeBytes,
+                            0,
+                            Integer.BYTES
+                    );
+
+                    dataSize = bytesManipulator.bytesToInt(dataSizeBytes);
+                    byte[] dataValueBytes = new byte[dataSize];
+
+                    System.arraycopy(bytes,
+                            entrySeek + indexSize + Integer.BYTES,
+                            dataValueBytes,
+                            0,
+                            dataSize
+                    );
+                } else {
+                    System.arraycopy(bytes,
+                            entrySeek + Integer.BYTES,
+                            indexValueBytes,
+                            0,
+                            indexSize
+                    );
+                }
             }
+            return null;
         }
-        return null;
     }
 
     void saveNode(final int pos, final TreeNode node) throws IOException {
         if (!node.leaf) {
-            int estimatedSize = estimateSizeOfElementsInLeafNode(scheme);
+            int estimatedSize = estimateSizeOfElementsInNonLeafNode(scheme);
 
             int currPos = pos;
             diskWriter.write(currPos, new byte[]{0});
             currPos++;
             diskWriter.write(currPos, bytesManipulator.intToBytes(node.q));
-            int seek = 0;
             for (int i = 0; i < node.q; ++i) {
                 currPos += Integer.BYTES;
                 int posOfIndex = pos + reservedSpaceInNode()

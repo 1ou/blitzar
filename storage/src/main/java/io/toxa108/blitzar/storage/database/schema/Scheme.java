@@ -25,6 +25,13 @@ public interface Scheme {
     Index primaryIndex();
 
     /**
+     * Return Primary index field
+     *
+     * @return primary  field
+     */
+    Field primaryIndexField();
+
+    /**
      * Return size of primary index
      *
      * @return primary index size
@@ -33,12 +40,14 @@ public interface Scheme {
 
     /**
      * Is scheme variable
+     *
      * @return variability
      */
     boolean isVariable();
 
     /**
      * Record size
+     *
      * @return record size
      */
     int recordSize();
