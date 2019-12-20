@@ -167,7 +167,7 @@ public class DiskTreeManager implements TableDataManager {
                 if (i == node.q - 1) {
                     diskWriter.write(
                             posOfIndex + 2 * Integer.BYTES + indexValue.length,
-                            bytesManipulator.intToBytes(node.p[node.q + 1]));
+                            bytesManipulator.intToBytes(node.p[node.q]));
                 }
             }
         }

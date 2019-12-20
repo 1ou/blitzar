@@ -9,6 +9,9 @@ import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
@@ -23,11 +26,14 @@ public class TableImplTest {
     }
 
     @Test
-    public void create_table_when_success() {
+    public void create_table_when_success() throws IOException {
+        File file = Files.createTempFile("q1", "12").toFile();
+        file.deleteOnExit();
+
         final Table table = new TableImpl(
                 "table",
                 new SchemeImpl(Set.of(), Set.of()),
-                new RowManagerImpl(null, null, null)
+                new RowManagerImpl(file, null, null)
         );
         assertNotNull(table);
     }
