@@ -135,4 +135,72 @@ public class DiskTreeManagerTest {
 
         Assert.assertEquals(treeNode, treeNode1);
     }
+
+    @Test
+    public void add_row_when_success() throws IOException {
+        int nameLen = 100;
+        int catLen = 2;
+
+        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+
+
+        String name = "exampleeeeeee" + "%";
+        byte[] nameBytes = new byte[nameLen];
+        System.arraycopy(name.getBytes(), 0, nameBytes, 0, name.length());
+
+        Field fieldName = new FieldImpl(
+                "name",
+                FieldType.VARCHAR,
+                Nullable.NOT_NULL,
+                Unique.NOT_UNIQUE,
+                nameBytes
+        );
+        Field fieldCategory = new FieldImpl(
+                "category",
+                FieldType.SHORT,
+                Nullable.NOT_NULL,
+                Unique.NOT_UNIQUE,
+                bytesManipulator.shortToBytes((short) 99)
+        );
+
+        Scheme scheme = new SchemeImpl(
+                Set.of(fieldId, fieldName, fieldCategory),
+                Set.of(
+                        new IndexImpl(Set.of("id"), IndexType.PRIMARY)
+                )
+        );
+
+        File file = Files.createTempFile("q1", "12").toFile();
+        file.deleteOnExit();
+        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        DiskTreeManager diskTreeManager = new DiskTreeManager(
+                file,
+                databaseConfiguration,
+                scheme
+        );
+
+        Key key = new KeyImpl(fieldId);
+        Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
+
+        diskTreeManager.addRow(row);
+    }
+
+    @Test
+    public void insert_in_array_test() throws IOException {
+        File file = Files.createTempFile("q1", "12").toFile();
+        file.deleteOnExit();
+
+        Integer[] arr = new Integer[10];
+        DiskTreeManager diskTreeManager = new DiskTreeManager(
+                file,
+                new DatabaseConfigurationImpl(1),
+                new SchemeImpl(Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
+                        Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)))
+        );
+
+        for (int i = 0; i < 9; ++i) arr[i] = i;
+
+        diskTreeManager.insertInArray(arr, 66, 4);
+        Assert.assertArrayEquals(new Integer[] {0, 1, 2, 3, 66, 4, 5, 6, 7, 8}, arr);
+    }
 }

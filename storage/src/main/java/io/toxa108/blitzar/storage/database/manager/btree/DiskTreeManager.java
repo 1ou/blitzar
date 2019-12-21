@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * Threadsafe b-plus-tree on disk realization
@@ -29,6 +31,8 @@ public class DiskTreeManager implements TableDataManager {
     private final transient DatabaseConfiguration databaseConfiguration;
     private final transient BytesManipulator bytesManipulator;
     private final transient Scheme scheme;
+    private final transient int pNonLeaf;
+    private final transient int pLeaf;
 
     public DiskTreeManager(final File file,
                            final DatabaseConfiguration databaseConfiguration,
@@ -39,6 +43,8 @@ public class DiskTreeManager implements TableDataManager {
             this.databaseConfiguration = databaseConfiguration;
             this.bytesManipulator = new BytesManipulatorImpl();
             this.scheme = scheme;
+            this.pLeaf = estimateSizeOfElementsInLeafNode(scheme);
+            this.pNonLeaf = estimateSizeOfElementsInNonLeafNode(scheme);
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
@@ -115,18 +121,62 @@ public class DiskTreeManager implements TableDataManager {
 
     @Override
     public void addRow(final Row row) throws IOException {
+        TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
+        Stack<TreeNode> stack = new Stack<>();
 
-        byte[] bytes = diskReader.read(databaseConfiguration.metadataSize() + 1, Byte.BYTES);
+        while (!n.leaf) {
+            stack.push(n);
+            int q = n.q;
+            if (row.key().compareTo(n.keys[0]) < 0) {
+                n = loadNode(n.p[0]);
+            } else if (row.key().compareTo(n.keys[q - 1]) > 0) {
+                n = loadNode(n.p[q]);
+            } else {
+                int fn = search(n.keys, row.key());
+                n = loadNode(n.p[fn]);
+            }
+        }
+
+        int properlyPosition = findProperlyPosition(n.keys, row.key());
         /*
-            If b-tree is empty
-        */
-        if (bytes[0] == 0) {
-
+            If record with such key already exists
+         */
+        if (properlyPosition == -1) {
+            throw new IllegalArgumentException(
+                    "key: " + row.key().field().name() + " was inserted into node [" +
+                            Arrays.stream(n.keys).map(it -> it.field().name())
+                                    .collect(Collectors.joining(", ")) + "]");
         } else {
-
+            TreeNode newNode = new TreeNode(pNonLeaf);
+            /*
+                If leaf is not full, insert new entry in leaf
+             */
+            if (n.q < this.pNonLeaf - 1) {
+                insertInArray(n.keys, row.key(), properlyPosition);
+                n.p[properlyPosition] = -1;
+                n.q++;
+                n.values[properlyPosition] = row.fields()
+                        .stream()
+                        .map(Field::value)
+                        .reduce((a, b) -> {
+                            byte[] c = new byte[a.length + b.length];
+                            System.arraycopy(a, 0, c, 0, a.length);
+                            System.arraycopy(b, 0, c, a.length, b.length);
+                            return c;
+                        }).orElse(new byte[0]);
+            }
+            /*
+                Split node before insert
+             */
         }
     }
 
+    /**
+     * Load node from disk
+     * @param pos pos in file
+     * @return tree node
+     * @throws IOException in case issue with reading
+     */
     TreeNode loadNode(final int pos) throws IOException {
         Field primaryIndexField = scheme.primaryIndexField();
 
@@ -135,6 +185,10 @@ public class DiskTreeManager implements TableDataManager {
         byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
         System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
         int amountOfEntries = bytesManipulator.bytesToInt(amountOfEntriesBytes);
+
+        if (amountOfEntries == 0) {
+            return new TreeNode(new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
+        }
 
         Key[] keys = new Key[amountOfEntries];
 
@@ -286,6 +340,59 @@ public class DiskTreeManager implements TableDataManager {
         }
     }
 
+    <T> void insertInArray(T[] array, T value, int pos) {
+        for (int i = array.length - 2; i >= pos; --i) {
+            array[i + 1] = array[i];
+        }
+        array[pos] = value;
+    }
+
+    /**
+     * Binary search key in node
+     *
+     * @param keys keys
+     * @param key  key
+     * @return position of properly key
+     */
+    int search(Key[] keys, Key key) {
+        int l = 0, r = keys.length, m;
+        while (l < r) {
+            m = (l + r) >>> 1;
+            int c = keys[m].compareTo(key);
+            if (c > 0) {
+                r = m;
+            } else if (c < 0) {
+                l = m + 1;
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+        return l;
+    }
+
+    /**
+     * Find properly position in node
+     *
+     * @param keys keys
+     * @param key  key
+     * @return position for insert
+     */
+    int findProperlyPosition(Key[] keys, Key key) {
+        int l = 0, r = keys.length, m;
+        while (l < r) {
+            m = (l + r) >>> 1;
+            int c = keys[m].compareTo(key);
+            if (c > 0) {
+                r = m;
+            } else if (c < 0) {
+                l = m + 1;
+            } else {
+                return -1;
+            }
+        }
+        return l;
+    }
+
     /**
      * Works only for not variable rows
      * Return the amount of elements can be stored in the node
@@ -308,7 +415,7 @@ public class DiskTreeManager implements TableDataManager {
     int dataNonVariableRecordSize() {
         return scheme.dataSize() +
                 scheme.primaryIndexSize() +
-                + Integer.BYTES // size of index
+                +Integer.BYTES // size of index
                 + Integer.BYTES; // size of data
     }
 
