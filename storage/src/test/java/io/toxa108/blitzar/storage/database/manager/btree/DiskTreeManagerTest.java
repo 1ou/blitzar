@@ -143,7 +143,6 @@ public class DiskTreeManagerTest {
 
         Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
 
-
         String name = "exampleeeeeee" + "%";
         byte[] nameBytes = new byte[nameLen];
         System.arraycopy(name.getBytes(), 0, nameBytes, 0, name.length());

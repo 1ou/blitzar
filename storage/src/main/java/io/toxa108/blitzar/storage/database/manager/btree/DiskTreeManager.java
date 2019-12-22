@@ -76,14 +76,6 @@ public class DiskTreeManager implements TableDataManager {
         }
 
         TreeNode(Key[] keys, byte[][] values, boolean isLeaf, int q, int next) {
-            if (q != values.length) {
-                throw new IllegalArgumentException();
-            }
-
-            if (q != keys.length) {
-                throw new IllegalArgumentException();
-            }
-
             this.keys = keys;
             this.values = values;
             this.leaf = isLeaf;
@@ -132,12 +124,12 @@ public class DiskTreeManager implements TableDataManager {
             } else if (row.key().compareTo(n.keys[q - 1]) > 0) {
                 n = loadNode(n.p[q]);
             } else {
-                int fn = search(n.keys, row.key());
+                int fn = search(n.keys, n.q, row.key());
                 n = loadNode(n.p[fn]);
             }
         }
 
-        int properlyPosition = findProperlyPosition(n.keys, row.key());
+        int properlyPosition = findProperlyPosition(n.keys, n.q, row.key());
         /*
             If record with such key already exists
          */
@@ -147,32 +139,45 @@ public class DiskTreeManager implements TableDataManager {
                             Arrays.stream(n.keys).map(it -> it.field().name())
                                     .collect(Collectors.joining(", ")) + "]");
         } else {
-            TreeNode newNode = new TreeNode(pNonLeaf);
+            TreeNode newNode = new TreeNode(pLeaf);
             /*
                 If leaf is not full, insert new entry in leaf
              */
-            if (n.q < this.pNonLeaf - 1) {
+            if (n.q < this.pLeaf - 1) {
                 insertInArray(n.keys, row.key(), properlyPosition);
-                n.p[properlyPosition] = -1;
+//                insertInArray(n.p, -1, properlyPosition);
                 n.q++;
-                n.values[properlyPosition] = row.fields()
-                        .stream()
-                        .map(Field::value)
-                        .reduce((a, b) -> {
-                            byte[] c = new byte[a.length + b.length];
-                            System.arraycopy(a, 0, c, 0, a.length);
-                            System.arraycopy(b, 0, c, a.length, b.length);
-                            return c;
-                        }).orElse(new byte[0]);
+                insertInArray(
+                        n.values,
+                        row.fields()
+                                .stream()
+                                .map(Field::value)
+                                .reduce((a, b) -> {
+                                    byte[] c = new byte[a.length + b.length];
+                                    System.arraycopy(a, 0, c, 0, a.length);
+                                    System.arraycopy(b, 0, c, a.length, b.length);
+                                    return c;
+                                }).orElse(new byte[0]),
+                        properlyPosition
+                );
             }
             /*
                 Split node before insert
              */
+            else {
+                TreeNode tmp = new TreeNode(this.pLeaf + 1);
+                copyArray(n.keys, tmp.keys, n.q);
+                copyArray(n.p, tmp.p, n.q);
+                insertInArray(tmp.keys, row.key(), properlyPosition);
+//                insertInArray(tmp.p,);
+//                tmp.p.add(properlyPosition, new InMemoryBPlusTreeRepository.BTreeNode<>(this.p));
+            }
         }
     }
 
     /**
      * Load node from disk
+     *
      * @param pos pos in file
      * @return tree node
      * @throws IOException in case issue with reading
@@ -341,21 +346,49 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     <T> void insertInArray(T[] array, T value, int pos) {
-        for (int i = array.length - 2; i >= pos; --i) {
-            array[i + 1] = array[i];
+        if (array.length - 1 - pos >= 0) {
+            System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
         }
         array[pos] = value;
+    }
+
+    void insertInArray(int[] array, int value, int pos) {
+        if (array.length - 1 - pos >= 0) {
+            System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
+        }
+        array[pos] = value;
+    }
+
+    <T> void copyArray(T[] source, T[] destination, int len) {
+        if (source.length < len || destination.length < len) {
+            throw new IllegalArgumentException();
+        }
+
+        if (len >= 0) {
+            System.arraycopy(source, 0, destination, 0, len);
+        }
+    }
+
+    void copyArray(int[] source, int[] destination, int len) {
+        if (source.length < len || destination.length < len) {
+            throw new IllegalArgumentException();
+        }
+
+        if (len >= 0) {
+            System.arraycopy(source, 0, destination, 0, len);
+        }
     }
 
     /**
      * Binary search key in node
      *
-     * @param keys keys
-     * @param key  key
+     * @param keys       keys
+     * @param keysLength len of keys
+     * @param key        key
      * @return position of properly key
      */
-    int search(Key[] keys, Key key) {
-        int l = 0, r = keys.length, m;
+    int search(Key[] keys, int keysLength, Key key) {
+        int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
             int c = keys[m].compareTo(key);
@@ -373,12 +406,13 @@ public class DiskTreeManager implements TableDataManager {
     /**
      * Find properly position in node
      *
-     * @param keys keys
-     * @param key  key
+     * @param keys       keys
+     * @param keysLength len of keys
+     * @param key        key
      * @return position for insert
      */
-    int findProperlyPosition(Key[] keys, Key key) {
-        int l = 0, r = keys.length, m;
+    int findProperlyPosition(Key[] keys, int keysLength, Key key) {
+        int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
             int c = keys[m].compareTo(key);
