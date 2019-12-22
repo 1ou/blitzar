@@ -3,6 +3,7 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
+import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
@@ -30,10 +31,14 @@ public class TableImplTest {
         File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
 
+        Scheme scheme = new SchemeImpl(Set.of(
+                new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
+                Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)));
+
         final Table table = new TableImpl(
                 "table",
-                new SchemeImpl(Set.of(), Set.of()),
-                new RowManagerImpl(file, null, null)
+                scheme,
+                new RowManagerImpl(file, scheme, new DatabaseConfigurationImpl(1))
         );
         assertNotNull(table);
     }

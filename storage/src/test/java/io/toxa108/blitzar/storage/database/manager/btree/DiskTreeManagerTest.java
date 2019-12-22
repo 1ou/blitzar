@@ -75,10 +75,11 @@ public class DiskTreeManagerTest {
         }
         p[n] = -1;
 
-        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(keys, p, false, n, -1);
-        diskTreeManager.saveNode(databaseConfiguration.metadataSize() + 1, treeNode);
+        int pos = databaseConfiguration.metadataSize() + 1;
+        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, p, false, n, -1);
+        diskTreeManager.saveNode(pos, treeNode);
         DiskTreeManager.TreeNode treeNode1 =
-                diskTreeManager.loadNode(databaseConfiguration.metadataSize() + 1);
+                diskTreeManager.loadNode(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
@@ -128,10 +129,11 @@ public class DiskTreeManagerTest {
             bytes[i] = valueBytes;
         }
 
-        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(keys, bytes, true, n, -1);
-        diskTreeManager.saveNode(databaseConfiguration.metadataSize() + 1, treeNode);
+        int pos = databaseConfiguration.metadataSize() + 1;
+        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, bytes, true, n, -1);
+        diskTreeManager.saveNode(pos, treeNode);
         DiskTreeManager.TreeNode treeNode1 =
-                diskTreeManager.loadNode(databaseConfiguration.metadataSize() + 1);
+                diskTreeManager.loadNode(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
@@ -201,5 +203,25 @@ public class DiskTreeManagerTest {
 
         diskTreeManager.insertInArray(arr, 66, 4);
         Assert.assertArrayEquals(new Integer[] {0, 1, 2, 3, 66, 4, 5, 6, 7, 8}, arr);
+    }
+
+    @Test
+    public void copy_array_test() throws IOException {
+        File file = Files.createTempFile("q1", "12").toFile();
+        file.deleteOnExit();
+
+        Integer[] arr = new Integer[10];
+        DiskTreeManager diskTreeManager = new DiskTreeManager(
+                file,
+                new DatabaseConfigurationImpl(1),
+                new SchemeImpl(Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
+                        Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)))
+        );
+
+        for (int i = 0; i < 10; ++i) arr[i] = i;
+
+        Integer[] res = new Integer[4];
+        diskTreeManager.copyArray(arr, res, 4, 4);
+        Assert.assertArrayEquals(new Integer[] {4, 5, 6, 7}, res);
     }
 }

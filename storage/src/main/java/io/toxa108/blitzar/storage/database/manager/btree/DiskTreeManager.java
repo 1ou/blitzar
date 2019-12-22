@@ -33,6 +33,7 @@ public class DiskTreeManager implements TableDataManager {
     private final transient Scheme scheme;
     private final transient int pNonLeaf;
     private final transient int pLeaf;
+    private int lastDataPos;
 
     public DiskTreeManager(final File file,
                            final DatabaseConfiguration databaseConfiguration,
@@ -45,9 +46,18 @@ public class DiskTreeManager implements TableDataManager {
             this.scheme = scheme;
             this.pLeaf = estimateSizeOfElementsInLeafNode(scheme);
             this.pNonLeaf = estimateSizeOfElementsInNonLeafNode(scheme);
+            initMetadata();
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
+    }
+
+    private void initMetadata() throws IOException {
+        lastDataPos = bytesManipulator.bytesToInt(diskReader.read(0, Integer.BYTES));
+    }
+
+    private void updateMetadata() throws IOException {
+        diskWriter.write(0, bytesManipulator.intToBytes(lastDataPos));
     }
 
     public static class TreeNode {
@@ -56,32 +66,36 @@ public class DiskTreeManager implements TableDataManager {
         byte[][] values;
         boolean leaf;
         int q;
-        int next;
+        int nextPos;
+        int pos;
 
         TreeNode(int q) {
             this.keys = new Key[q];
             this.p = new int[q + 1];
             this.leaf = true;
             this.q = 0;
-            this.next = -1;
+            this.nextPos = -1;
+            this.pos = -1;
         }
 
-        TreeNode(Key[] keys, int[] p, boolean isLeaf, int q, int next) {
+        TreeNode(int pos, Key[] keys, int[] p, boolean isLeaf, int q, int nextPos) {
             this.keys = keys;
             this.p = p;
             this.leaf = isLeaf;
             this.q = q;
-            this.next = next;
+            this.nextPos = nextPos;
             this.values = new byte[0][0];
+            this.pos = pos;
         }
 
-        TreeNode(Key[] keys, byte[][] values, boolean isLeaf, int q, int next) {
+        TreeNode(int pos, Key[] keys, byte[][] values, boolean isLeaf, int q, int nextPos) {
             this.keys = keys;
             this.values = values;
             this.leaf = isLeaf;
             this.q = q;
-            this.next = next;
+            this.nextPos = nextPos;
             this.p = new int[0];
+            this.pos = pos;
         }
 
         @Override
@@ -94,8 +108,9 @@ public class DiskTreeManager implements TableDataManager {
             }
             TreeNode treeNode = (TreeNode) o;
             return leaf == treeNode.leaf &&
+                    pos == treeNode.pos &&
                     q == treeNode.q &&
-                    next == treeNode.next &&
+                    nextPos == treeNode.nextPos &&
                     Arrays.equals(keys, treeNode.keys) &&
                     Arrays.equals(p, treeNode.p) &&
                     Arrays.deepEquals(values, treeNode.values);
@@ -103,7 +118,7 @@ public class DiskTreeManager implements TableDataManager {
 
         @Override
         public int hashCode() {
-            int result = Objects.hash(leaf, q, next);
+            int result = Objects.hash(leaf, q, nextPos);
             result = 31 * result + Arrays.hashCode(keys);
             result = 31 * result + Arrays.hashCode(p);
             result = 31 * result + Arrays.hashCode(values);
@@ -114,28 +129,30 @@ public class DiskTreeManager implements TableDataManager {
     @Override
     public void addRow(final Row row) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
+        Key key = row.key();
+
         Stack<TreeNode> stack = new Stack<>();
 
         while (!n.leaf) {
             stack.push(n);
             int q = n.q;
-            if (row.key().compareTo(n.keys[0]) < 0) {
+            if (key.compareTo(n.keys[0]) < 0) {
                 n = loadNode(n.p[0]);
-            } else if (row.key().compareTo(n.keys[q - 1]) > 0) {
+            } else if (key.compareTo(n.keys[q - 1]) > 0) {
                 n = loadNode(n.p[q]);
             } else {
-                int fn = search(n.keys, n.q, row.key());
+                int fn = search(n.keys, n.q, key);
                 n = loadNode(n.p[fn]);
             }
         }
 
-        int properlyPosition = findProperlyPosition(n.keys, n.q, row.key());
+        int properlyPosition = findProperlyPosition(n.keys, n.q, key);
         /*
             If record with such key already exists
          */
         if (properlyPosition == -1) {
             throw new IllegalArgumentException(
-                    "key: " + row.key().field().name() + " was inserted into node [" +
+                    "key: " + key.field().name() + " was inserted into node [" +
                             Arrays.stream(n.keys).map(it -> it.field().name())
                                     .collect(Collectors.joining(", ")) + "]");
         } else {
@@ -144,8 +161,8 @@ public class DiskTreeManager implements TableDataManager {
                 If leaf is not full, insert new entry in leaf
              */
             if (n.q < this.pLeaf - 1) {
-                insertInArray(n.keys, row.key(), properlyPosition);
-//                insertInArray(n.p, -1, properlyPosition);
+                insertInArray(n.keys, key, properlyPosition);
+//                insertInArray(n.p, -1, properlyPosition); it is leaf there is no array of p
                 n.q++;
                 insertInArray(
                         n.values,
@@ -160,6 +177,7 @@ public class DiskTreeManager implements TableDataManager {
                                 }).orElse(new byte[0]),
                         properlyPosition
                 );
+                saveNode(n.pos, n);
             }
             /*
                 Split node before insert
@@ -168,9 +186,38 @@ public class DiskTreeManager implements TableDataManager {
                 TreeNode tmp = new TreeNode(this.pLeaf + 1);
                 copyArray(n.keys, tmp.keys, n.q);
                 copyArray(n.p, tmp.p, n.q);
-                insertInArray(tmp.keys, row.key(), properlyPosition);
-//                insertInArray(tmp.p,);
-//                tmp.p.add(properlyPosition, new InMemoryBPlusTreeRepository.BTreeNode<>(this.p));
+                insertInArray(tmp.keys, key, properlyPosition);
+                insertInArray(tmp.p, lastDataPos, properlyPosition);
+
+                newNode.nextPos = n.nextPos;
+                int j = (pLeaf + 1) >>> 1;
+
+                n.keys = new Key[pLeaf];
+                n.p = new int[pLeaf + 1];
+                copyArray(tmp.keys, n.keys, j + 1);
+                copyArray(tmp.p, n.p, j + 1);
+                n.nextPos = lastDataPos;
+                n.q = j + 1;
+
+                copyArray(tmp.keys, newNode.keys, j + 1, tmp.q);
+                copyArray(tmp.p, newNode.p, j + 1, tmp.q + 1);
+                newNode.q = (tmp.q + 1) - (j + 1);
+                key = tmp.keys[j];
+
+                boolean finished = false;
+                while (!finished) {
+                    if (stack.isEmpty()) {
+                        TreeNode rootNode = new TreeNode(pLeaf);
+                        rootNode.keys[0] = key;
+                        rootNode.p[0] = n.pos;
+                        rootNode.p[1] = newNode.pos;
+                        rootNode.leaf = false;
+                        rootNode.q = 1;
+                        finished = true;
+                    } else {
+
+                    }
+                }
             }
         }
     }
@@ -192,7 +239,7 @@ public class DiskTreeManager implements TableDataManager {
         int amountOfEntries = bytesManipulator.bytesToInt(amountOfEntriesBytes);
 
         if (amountOfEntries == 0) {
-            return new TreeNode(new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
+            return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
         }
 
         Key[] keys = new Key[amountOfEntries];
@@ -225,13 +272,18 @@ public class DiskTreeManager implements TableDataManager {
                 );
 
                 if (i == amountOfEntries - 1) {
-                    System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2 + currentIndexBytes.length,
-                            tmpByteBuffer, 0, Integer.BYTES);
-
+                    int pNextPos = posOfIndex + Integer.BYTES * 2 + currentIndexBytes.length;
+                    System.arraycopy(bytes, pNextPos, tmpByteBuffer, 0, Integer.BYTES);
                     p[i + 1] = bytesManipulator.bytesToInt(tmpByteBuffer);
+
+                    if (pNextPos + Integer.BYTES > lastDataPos) {
+                        lastDataPos = pNextPos + Integer.BYTES;
+                        updateMetadata();
+                    }
                 }
             }
             return new TreeNode(
+                    pos,
                     keys,
                     p,
                     false,
@@ -273,12 +325,18 @@ public class DiskTreeManager implements TableDataManager {
                 values[i] = currentDataBytes;
 
                 if (i == amountOfEntries - 1) {
-                    System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex + sizeOfCurrentData,
-                            tmpByteBuffer, 0, Integer.BYTES);
+                    int nextLeafPos = posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex + sizeOfCurrentData;
+                    System.arraycopy(bytes, nextLeafPos, tmpByteBuffer, 0, Integer.BYTES);
                     next = bytesManipulator.bytesToInt(tmpByteBuffer);
+
+                    if (nextLeafPos + Integer.BYTES > lastDataPos) {
+                        lastDataPos = nextLeafPos + lastDataPos;
+                        updateMetadata();
+                    }
                 }
             }
             return new TreeNode(
+                    pos,
                     keys,
                     values,
                     true,
@@ -339,7 +397,7 @@ public class DiskTreeManager implements TableDataManager {
 
                 if (i == node.q - 1) {
                     diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize() + scheme.dataSize(),
-                            bytesManipulator.intToBytes(node.next));
+                            bytesManipulator.intToBytes(node.nextPos));
                 }
             }
         }
@@ -376,6 +434,26 @@ public class DiskTreeManager implements TableDataManager {
 
         if (len >= 0) {
             System.arraycopy(source, 0, destination, 0, len);
+        }
+    }
+
+    <T> void copyArray(T[] source, T[] destination, int pos, int len) {
+        if (source.length < len || destination.length < len) {
+            throw new IllegalArgumentException();
+        }
+
+        if (len >= 0) {
+            System.arraycopy(source, pos, destination, 0, len);
+        }
+    }
+
+    void copyArray(int[] source, int[] destination, int pos, int len) {
+        if (source.length < len || destination.length < len) {
+            throw new IllegalArgumentException();
+        }
+
+        if (len >= 0) {
+            System.arraycopy(source, 0, destination, pos, len);
         }
     }
 
