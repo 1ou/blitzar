@@ -188,20 +188,21 @@ public class DiskTreeManager implements TableDataManager {
                 copyArray(n.p, tmp.p, n.q);
                 insertInArray(tmp.keys, key, properlyPosition);
                 insertInArray(tmp.p, lastDataPos, properlyPosition);
+                tmp.q = n.q + 1;
 
                 newNode.nextPos = n.nextPos;
                 int j = (pLeaf + 1) >>> 1;
 
                 n.keys = new Key[pLeaf];
                 n.p = new int[pLeaf + 1];
-                copyArray(tmp.keys, n.keys, j + 1);
-                copyArray(tmp.p, n.p, j + 1);
+                copyArray(tmp.keys, n.keys, j - 1);
+                copyArray(tmp.p, n.p, j - 1);
                 n.nextPos = lastDataPos;
-                n.q = j + 1;
+                n.q = j - 1;
 
-                copyArray(tmp.keys, newNode.keys, j + 1, tmp.q);
-                copyArray(tmp.p, newNode.p, j + 1, tmp.q + 1);
-                newNode.q = (tmp.q + 1) - (j + 1);
+                copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
+                copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
+                newNode.q = tmp.q - j;
                 key = tmp.keys[j];
 
                 boolean finished = false;

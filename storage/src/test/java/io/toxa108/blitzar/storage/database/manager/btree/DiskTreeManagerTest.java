@@ -221,7 +221,7 @@ public class DiskTreeManagerTest {
         for (int i = 0; i < 10; ++i) arr[i] = i;
 
         Integer[] res = new Integer[4];
-        diskTreeManager.copyArray(arr, res, 4, 4);
+        diskTreeManager.copyArray(arr, res, 4, 10);
         Assert.assertArrayEquals(new Integer[] {4, 5, 6, 7}, res);
     }
 
