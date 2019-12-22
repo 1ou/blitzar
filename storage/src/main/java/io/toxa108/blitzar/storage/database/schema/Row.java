@@ -16,4 +16,11 @@ public interface Row {
      * @return key
      */
     Key key();
+
+    /**
+     * Return fields in a row
+     *
+     * @return set of fields
+     */
+    Set<Field> dataFields();
 }

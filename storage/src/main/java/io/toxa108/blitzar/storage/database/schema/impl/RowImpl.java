@@ -5,6 +5,7 @@ import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RowImpl implements Row {
     private final Key key;
@@ -23,5 +24,12 @@ public class RowImpl implements Row {
     @Override
     public Key key() {
         return key;
+    }
+
+    @Override
+    public Set<Field> dataFields() {
+        return fields.stream()
+                .filter(it -> !it.name().equals(key.field().name()))
+                .collect(Collectors.toSet());
     }
 }

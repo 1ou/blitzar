@@ -224,4 +224,71 @@ public class DiskTreeManagerTest {
         diskTreeManager.copyArray(arr, res, 4, 4);
         Assert.assertArrayEquals(new Integer[] {4, 5, 6, 7}, res);
     }
+
+    @Test
+    public void add_rows_when_success() throws IOException {
+        int nameLen = 100;
+        int catLen = 2;
+
+        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        Field fieldName = new FieldImpl(
+                "name",
+                FieldType.VARCHAR,
+                Nullable.NOT_NULL,
+                Unique.NOT_UNIQUE,
+                new byte[nameLen]
+        );
+        Field fieldCategory = new FieldImpl(
+                "category",
+                FieldType.SHORT,
+                Nullable.NOT_NULL,
+                Unique.NOT_UNIQUE,
+                new byte[catLen]
+        );
+
+        Scheme scheme = new SchemeImpl(
+                Set.of(fieldId, fieldName, fieldCategory),
+                Set.of(
+                        new IndexImpl(Set.of("id"), IndexType.PRIMARY)
+                )
+        );
+
+        File file = Files.createTempFile("q1", "12").toFile();
+        file.deleteOnExit();
+        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        DiskTreeManager diskTreeManager = new DiskTreeManager(
+                file,
+                databaseConfiguration,
+                scheme
+        );
+
+        for (int i = 0; i < 100; ++i) {
+            fieldId = new FieldImpl("id", FieldType.LONG,
+                    Nullable.NOT_NULL, Unique.UNIQUE, bytesManipulator.longToBytes(i + 1));
+
+            String name = "justname" + (i + 1) + "%";
+            byte[] nameBytes = new byte[nameLen];
+            System.arraycopy(name.getBytes(), 0, nameBytes, 0, name.length());
+
+            fieldName = new FieldImpl(
+                    "name",
+                    FieldType.VARCHAR,
+                    Nullable.NOT_NULL,
+                    Unique.NOT_UNIQUE,
+                    nameBytes
+            );
+            fieldCategory = new FieldImpl(
+                    "category",
+                    FieldType.SHORT,
+                    Nullable.NOT_NULL,
+                    Unique.NOT_UNIQUE,
+                    bytesManipulator.shortToBytes((short) (i + 1))
+            );
+
+            Key key = new KeyImpl(fieldId);
+            Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
+            diskTreeManager.addRow(row);
+        }
+    }
+
 }

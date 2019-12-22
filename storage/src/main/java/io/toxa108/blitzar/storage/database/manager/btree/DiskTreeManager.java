@@ -94,7 +94,7 @@ public class DiskTreeManager implements TableDataManager {
             this.leaf = isLeaf;
             this.q = q;
             this.nextPos = nextPos;
-            this.p = new int[0];
+            this.p = new int[q + 1];
             this.pos = pos;
         }
 
@@ -162,11 +162,11 @@ public class DiskTreeManager implements TableDataManager {
              */
             if (n.q < this.pLeaf - 1) {
                 insertInArray(n.keys, key, properlyPosition);
-//                insertInArray(n.p, -1, properlyPosition); it is leaf there is no array of p
+                insertInArray(n.p, -1, properlyPosition);
                 n.q++;
                 insertInArray(
                         n.values,
-                        row.fields()
+                        row.dataFields()
                                 .stream()
                                 .map(Field::value)
                                 .reduce((a, b) -> {
@@ -180,7 +180,7 @@ public class DiskTreeManager implements TableDataManager {
                 saveNode(n.pos, n);
             }
             /*
-                Split node before insert
+                Split leaf before insert
              */
             else {
                 TreeNode tmp = new TreeNode(this.pLeaf + 1);
@@ -242,10 +242,10 @@ public class DiskTreeManager implements TableDataManager {
             return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
         }
 
-        Key[] keys = new Key[amountOfEntries];
 
         if (!isLeaf) {
-            int[] p = new int[amountOfEntries + 1];
+            Key[] keys = new Key[this.pNonLeaf];
+            int[] p = new int[this.pNonLeaf + 1];
 
             byte[] entryPosBytes = new byte[Integer.BYTES];
             byte[] tmpByteBuffer = new byte[Integer.BYTES];
@@ -291,7 +291,9 @@ public class DiskTreeManager implements TableDataManager {
                     -1
             );
         } else {
-            byte[][] values = new byte[amountOfEntries][scheme.dataSize()];
+            Key[] keys = new Key[this.pLeaf];
+
+            byte[][] values = new byte[this.pLeaf][scheme.dataSize()];
             int next = -1;
 
             byte[] entryPosBytes = new byte[Integer.BYTES];
@@ -349,7 +351,6 @@ public class DiskTreeManager implements TableDataManager {
     void saveNode(final int pos, final TreeNode node) throws IOException {
         if (!node.leaf) {
             int estimatedSize = estimateSizeOfElementsInNonLeafNode(scheme);
-
             int currPos = pos;
             diskWriter.write(currPos, new byte[]{0});
             currPos++;
