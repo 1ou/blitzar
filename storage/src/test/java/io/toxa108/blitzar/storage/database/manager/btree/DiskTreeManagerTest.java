@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.database.manager.btree;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
@@ -227,41 +228,25 @@ public class DiskTreeManagerTest {
     }
 
     @Test
-    public void insert_in_array_test() throws IOException {
-        File file = Files.createTempFile("q1", "12").toFile();
-        file.deleteOnExit();
-
+    public void insert_in_array_test() {
+        ArrayManipulator arrayManipulator = new ArrayManipulator();
         Integer[] arr = new Integer[10];
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
-                file,
-                new DatabaseConfigurationImpl(1),
-                new SchemeImpl(Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
-                        Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)))
-        );
 
         for (int i = 0; i < 9; ++i) arr[i] = i;
 
-        diskTreeManager.insertInArray(arr, 66, 4);
+        arrayManipulator.insertInArray(arr, 66, 4);
         Assert.assertArrayEquals(new Integer[] {0, 1, 2, 3, 66, 4, 5, 6, 7, 8}, arr);
     }
 
     @Test
-    public void copy_array_test() throws IOException {
-        File file = Files.createTempFile("q1", "12").toFile();
-        file.deleteOnExit();
+    public void copy_array_test() {
+        ArrayManipulator arrayManipulator = new ArrayManipulator();
 
         Integer[] arr = new Integer[10];
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
-                file,
-                new DatabaseConfigurationImpl(1),
-                new SchemeImpl(Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
-                        Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)))
-        );
-
         for (int i = 0; i < 10; ++i) arr[i] = i;
 
         Integer[] res = new Integer[4];
-        diskTreeManager.copyArray(arr, res, 4, 4);
+        arrayManipulator.copyArray(arr, res, 4, 4);
         Assert.assertArrayEquals(new Integer[] {4, 5, 6, 7}, res);
     }
 

@@ -194,6 +194,7 @@ public class DiskTreeManager implements TableDataManager {
             if (n.q < this.pLeaf - 1) {
                 if (n.q == 0) {
                     numberOfUsedBlocks = 1;
+                    updateMetadata();
                 }
 
                 arrayManipulator.insertInArray(n.keys, key, properlyPosition);
@@ -259,6 +260,7 @@ public class DiskTreeManager implements TableDataManager {
                         topNode.q = 1;
                         saveNode(tmpPosition, topNode);
                         numberOfUsedBlocks += 1;
+                        updateMetadata();
                         finished = true;
                     } else {
                         n = stack.pop();
@@ -272,6 +274,7 @@ public class DiskTreeManager implements TableDataManager {
                             arrayManipulator.insertInArray(n.p, newNode.pos, properlyPosition + 1);
                             n.q++;
                             saveNode(n.pos, n);
+                            updateMetadata();
                             finished = true;
                         } else {
                             tmp = new TreeNode(pNonLeaf + 1, scheme.dataSize());
