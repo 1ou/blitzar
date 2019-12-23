@@ -9,4 +9,3 @@
 
 rootProject.name = "blitzar"
 include("storage")
-include("server")
