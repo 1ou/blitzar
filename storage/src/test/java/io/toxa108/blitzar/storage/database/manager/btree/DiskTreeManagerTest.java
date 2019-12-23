@@ -42,7 +42,6 @@ public class DiskTreeManagerTest {
                 Set.of(fieldName)
         ));
     }
-
     @Test
     public void save_and_load_non_leaf_node_when_success() throws IOException {
         Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
@@ -64,7 +63,7 @@ public class DiskTreeManagerTest {
                 scheme
         );
 
-        int n = 10;
+        int n = 48;
         Key[] keys = new Key[n];
         int[] p = new int[n + 1];
         for (int i = 0; i < n; ++i) {
@@ -75,7 +74,48 @@ public class DiskTreeManagerTest {
         }
         p[n] = -1;
 
-        int pos = databaseConfiguration.metadataSize() + 1;
+        int pos = databaseConfiguration.metadataSize();
+        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, p, false, n, -1);
+        diskTreeManager.saveNode(pos, treeNode);
+        DiskTreeManager.TreeNode treeNode1 =
+                diskTreeManager.loadNode(pos);
+
+        Assert.assertEquals(treeNode, treeNode1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void save_and_load_non_leaf_node_when_error() throws IOException {
+        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[100]);
+
+        Scheme scheme = new SchemeImpl(
+                Set.of(fieldId, fieldName),
+                Set.of(
+                        new IndexImpl(Set.of("id"), IndexType.PRIMARY)
+                )
+        );
+
+        File file = Files.createTempFile("t2", "12").toFile();
+        file.deleteOnExit();
+        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
+        DiskTreeManager diskTreeManager = new DiskTreeManager(
+                file,
+                databaseConfiguration,
+                scheme
+        );
+
+        int n = 62;
+        Key[] keys = new Key[n];
+        int[] p = new int[n + 1];
+        for (int i = 0; i < n; ++i) {
+            keys[i] = new KeyImpl(new FieldImpl(
+                    "id", FieldType.LONG, Nullable.NOT_NULL,
+                    Unique.UNIQUE, bytesManipulator.longToBytes(i + 1)));
+            p[i] = -1;
+        }
+        p[n] = -1;
+
+        int pos = databaseConfiguration.metadataSize();
         DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, p, false, n, -1);
         diskTreeManager.saveNode(pos, treeNode);
         DiskTreeManager.TreeNode treeNode1 =
@@ -221,7 +261,7 @@ public class DiskTreeManagerTest {
         for (int i = 0; i < 10; ++i) arr[i] = i;
 
         Integer[] res = new Integer[4];
-        diskTreeManager.copyArray(arr, res, 4, 10);
+        diskTreeManager.copyArray(arr, res, 4, 4);
         Assert.assertArrayEquals(new Integer[] {4, 5, 6, 7}, res);
     }
 
@@ -262,7 +302,7 @@ public class DiskTreeManagerTest {
                 scheme
         );
 
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 1000; ++i) {
             fieldId = new FieldImpl("id", FieldType.LONG,
                     Nullable.NOT_NULL, Unique.UNIQUE, bytesManipulator.longToBytes(i + 1));
 
