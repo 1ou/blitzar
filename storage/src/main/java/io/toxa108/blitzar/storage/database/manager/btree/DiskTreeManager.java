@@ -34,8 +34,8 @@ public class DiskTreeManager implements TableDataManager {
     private final transient Scheme scheme;
     private final transient int pNonLeaf;
     private final transient int pLeaf;
-    private final ArrayManipulator arrayManipulator;
-    private int numberOfUsedBlocks;
+    private final transient ArrayManipulator arrayManipulator;
+    private transient int numberOfUsedBlocks;
 
     public DiskTreeManager(final File file,
                            final DatabaseConfiguration databaseConfiguration,
@@ -63,13 +63,37 @@ public class DiskTreeManager implements TableDataManager {
         diskWriter.write(0, bytesManipulator.intToBytes(numberOfUsedBlocks));
     }
 
+    /**
+     * Abstraction under node
+     */
     public static class TreeNode {
+        /**
+         * Keys
+         */
         Key[] keys;
+        /**
+         * Pointers to childs(arrays of file seeks)
+         */
         int[] p;
+        /**
+         * Entry values
+         */
         byte[][] values;
+        /**
+         * Leaf or not
+         */
         boolean leaf;
+        /**
+         * Number of entries in the node
+         */
         int q;
+        /**
+         * Pointer to the next leaf (file seek)
+         */
         int nextPos;
+        /**
+         * Current position (file seek)
+         */
         int pos;
 
         TreeNode(int q, int dataLen) {
