@@ -336,6 +336,7 @@ public class DiskTreeManagerTest {
             Key key = new KeyImpl(fieldId);
             Row row = diskTreeManager.search(key);
             String compareStr = "justname" + (i + 1) + "%";
+            Assert.assertEquals(row.key(), key);
             Assert.assertEquals(compareStr, new String(row.fieldByName("name").value()).substring(0, compareStr.length()));
         }
     }

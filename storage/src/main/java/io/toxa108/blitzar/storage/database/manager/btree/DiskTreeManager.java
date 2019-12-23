@@ -328,7 +328,7 @@ public class DiskTreeManager implements TableDataManager {
                 })
                 .collect(Collectors.toSet());
         return new RowImpl(
-                key,
+                n.keys[i],
                 fields
         );
     }
@@ -627,7 +627,7 @@ public class DiskTreeManager implements TableDataManager {
                 return m;
             }
         }
-        return l;
+        return -1;
     }
     /**
      * Find properly position in node
