@@ -226,16 +226,16 @@ public class DiskTreeManager implements TableDataManager {
 
                 n.keys = new Key[pLeaf];
                 n.p = new int[pLeaf + 1];
-                arrayManipulator.copyArray(tmp.keys, n.keys, j - 1);
-                arrayManipulator.copyArray(tmp.values, n.values, j - 1);
-                arrayManipulator.copyArray(tmp.p, n.p, j - 1);
-                n.q = j - 1;
+                arrayManipulator.copyArray(tmp.keys, n.keys, j);
+                arrayManipulator.copyArray(tmp.values, n.values, j);
+                arrayManipulator.copyArray(tmp.p, n.p, j);
+                n.q = j;
 
                 arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
                 arrayManipulator.copyArray(tmp.values, newNode.values, j, tmp.q - j);
                 arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
                 newNode.q = tmp.q - j;
-                key = tmp.keys[j];
+                key = tmp.keys[j - 1];
 
                 int newPosLeft = freeSpacePos();
                 int newPosRight = freeSpacePos() + databaseConfiguration.diskPageSize();
@@ -291,9 +291,9 @@ public class DiskTreeManager implements TableDataManager {
 
                             n.keys = new Key[pNonLeaf];
                             n.p = new int[pNonLeaf + 1];
-                            arrayManipulator.copyArray(tmp.keys, n.keys, 0, j - 1);
+                            arrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
                             arrayManipulator.copyArray(tmp.p, n.p, 0, j);
-                            n.q = j - 1;
+                            n.q = j;
                             n.leaf = false;
 
                             arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
@@ -331,11 +331,11 @@ public class DiskTreeManager implements TableDataManager {
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
                 n = loadNode(n.p[q]);
             } else {
-                int fn = search(n.keys, n.q, key);
+                int fn = searchTraverseWay(n.keys, n.q, key);
                 n = loadNode(n.p[fn]);
             }
         }
-        int i = searchKey(n.keys, n.q, key);
+        int i = searchKeyInNode(n.keys, n.q, key);
         if (i == -1) {
             throw new NoSuchElementException();
         }
@@ -590,7 +590,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param key        key
      * @return position of properly key
      */
-    int searchKey(Key[] keys, int keysLength, Key key) {
+    int searchKeyInNode(Key[] keys, int keysLength, Key key) {
         int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
@@ -604,6 +604,30 @@ public class DiskTreeManager implements TableDataManager {
             }
         }
         return -1;
+    }
+
+    /**
+     * Binary search key in node
+     *
+     * @param keys       keys
+     * @param keysLength len of keys
+     * @param key        key
+     * @return position of properly key
+     */
+    int searchTraverseWay(Key[] keys, int keysLength, Key key) {
+        int l = 0, r = keysLength, m;
+        while (l < r) {
+            m = (l + r) >>> 1;
+            int c = keys[m].compareTo(key);
+            if (c > 0) {
+                r = m;
+            } else if (c < 0) {
+                l = m + 1;
+            } else {
+                return m;
+            }
+        }
+        return l;
     }
 
     /**
@@ -697,7 +721,7 @@ public class DiskTreeManager implements TableDataManager {
      * @return position
      */
     int freeSpacePos() {
-        return (numberOfUsedBlocks + 1) * databaseConfiguration.diskPageSize();
+        return (numberOfUsedBlocks + 1) * databaseConfiguration.diskPageSize() + databaseConfiguration.metadataSize();
     }
 
     /**

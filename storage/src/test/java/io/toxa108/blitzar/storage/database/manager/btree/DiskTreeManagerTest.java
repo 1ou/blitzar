@@ -2,7 +2,6 @@ package io.toxa108.blitzar.storage.database.manager.btree;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
-import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
@@ -18,7 +17,6 @@ import java.nio.file.Files;
 import java.util.Set;
 
 public class DiskTreeManagerTest {
-
     private final BytesManipulator bytesManipulator = new BytesManipulatorImpl();
 
     @Test
@@ -150,7 +148,7 @@ public class DiskTreeManagerTest {
                 scheme
         );
 
-        int n = 10;
+        int n = 14;
         Key[] keys = new Key[n];
 
         byte[][] bytes = new byte[n][scheme.recordSize()];
@@ -228,30 +226,49 @@ public class DiskTreeManagerTest {
     }
 
     @Test
-    public void insert_in_array_test() {
-        ArrayManipulator arrayManipulator = new ArrayManipulator();
-        Integer[] arr = new Integer[10];
+    public void add_rows_when_success_case_1() throws IOException {
+        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        Scheme scheme = new SchemeImpl(
+                Set.of(fieldId),
+                Set.of(
+                        new IndexImpl(Set.of("id"), IndexType.PRIMARY)
+                )
+        );
 
-        for (int i = 0; i < 9; ++i) arr[i] = i;
+        File file = Files.createTempFile("q1", "12").toFile();
+        file.deleteOnExit();
 
-        arrayManipulator.insertInArray(arr, 66, 4);
-        Assert.assertArrayEquals(new Integer[] {0, 1, 2, 3, 66, 4, 5, 6, 7, 8}, arr);
+        DatabaseConfiguration databaseConfiguration = new DatabaseConfiguration() {
+            @Override
+            public int metadataSize() {
+                return 1024;
+            }
+
+            @Override
+            public int diskPageSize() {
+                return 120;
+            }
+        };
+
+        DiskTreeManager diskTreeManager = new DiskTreeManager(
+                file,
+                databaseConfiguration,
+                scheme
+        );
+
+        long[] keys = {5, 8, 1, 7, 3};
+        for (long k : keys) {
+            fieldId = new FieldImpl(
+                    "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, bytesManipulator.longToBytes(k));
+
+            Key key = new KeyImpl(fieldId);
+            Row row = new RowImpl(key, Set.of(fieldId));
+            diskTreeManager.addRow(row);
+        }
     }
 
     @Test
-    public void copy_array_test() {
-        ArrayManipulator arrayManipulator = new ArrayManipulator();
-
-        Integer[] arr = new Integer[10];
-        for (int i = 0; i < 10; ++i) arr[i] = i;
-
-        Integer[] res = new Integer[4];
-        arrayManipulator.copyArray(arr, res, 4, 4);
-        Assert.assertArrayEquals(new Integer[] {4, 5, 6, 7}, res);
-    }
-
-    @Test
-    public void add_rows_when_success() throws IOException {
+    public void add_rows_when_success_case_2() throws IOException {
         int nameLen = 100;
         int catLen = 2;
 
