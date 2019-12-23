@@ -8,5 +8,4 @@
  */
 
 rootProject.name = "blitzar"
-include("storage")
-include("server")
+include("server", "storage")

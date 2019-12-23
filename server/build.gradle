@@ -1,8 +1,8 @@
 plugins {
     id 'java'
+    id 'application'
+    id 'com.google.protobuf' version '0.8.8'
 }
-
-version 'unspecified'
 
 sourceCompatibility = 1.8
 
@@ -10,9 +10,38 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java",
+                       "src/main/grpc",
+                       "${protobuf.generatedFilesBaseDir}/main/java",
+                       "${protobuf.generatedFilesBaseDir}/main/grpc"]
+        }
+    }
+}
 
-    compile project(':storage')
+dependencies {
+    implementation 'io.grpc:grpc-netty-shaded:1.26.0'
+    implementation 'io.grpc:grpc-protobuf:1.26.0'
+    implementation 'io.grpc:grpc-stub:1.26.0'
+    compile project(":storage")
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.11.0"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.26.0'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
 }

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package sql;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option java_package = "io.toxa108.blitzar.service.proto";
+option java_multiple_files = true;
+
+service SqlService {
+    rpc request (SqlRequest) returns (SqlResponse);
+}
+
+message SqlRequest {
+    bytes sql = 1;
+}
+
+message SqlResponse {
+    bytes answer = 1;
+}
