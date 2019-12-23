@@ -22,6 +22,14 @@ public class RowImpl implements Row {
     }
 
     @Override
+    public Field fieldByName(String name) {
+        return fields.stream()
+                .filter(it -> it.name().equals(name))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    @Override
     public Key key() {
         return key;
     }

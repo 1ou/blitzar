@@ -11,6 +11,13 @@ public interface Row {
     Set<Field> fields();
 
     /**
+     * Field by name
+     * @param name name
+     * @return field
+     */
+    Field fieldByName(String name);
+
+    /**
      * Return key
      *
      * @return key

@@ -8,6 +8,7 @@ import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
@@ -17,9 +18,8 @@ import io.toxa108.blitzar.storage.io.impl.DiskWriterIoImpl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -165,6 +165,10 @@ public class DiskTreeManager implements TableDataManager {
                 If leaf is not full, insert new entry in leaf
              */
             if (n.q < this.pLeaf - 1) {
+                if (n.q == 0) {
+                    numberOfUsedBlocks = 1;
+                }
+
                 insertInArray(n.keys, key, properlyPosition);
                 insertInArray(n.p, -1, properlyPosition);
                 n.q++;
@@ -205,8 +209,8 @@ public class DiskTreeManager implements TableDataManager {
                 newNode.q = tmp.q - j;
                 key = tmp.keys[j];
 
-                int newPosLeft = n.pos + databaseConfiguration.diskPageSize();
-                int newPosRight = n.pos + databaseConfiguration.diskPageSize() + databaseConfiguration.diskPageSize();
+                int newPosLeft = freeSpacePos();
+                int newPosRight = freeSpacePos() + databaseConfiguration.diskPageSize();
 
                 n.nextPos = newPosRight;
                 n.pos = newPosLeft;
@@ -214,6 +218,8 @@ public class DiskTreeManager implements TableDataManager {
 
                 saveNode(newPosLeft, n);
                 saveNode(newPosRight, newNode);
+
+                numberOfUsedBlocks += 2;
 
                 boolean finished = false;
                 while (!finished) {
@@ -225,6 +231,7 @@ public class DiskTreeManager implements TableDataManager {
                         topNode.leaf = false;
                         topNode.q = 1;
                         saveNode(tmpPosition, topNode);
+                        numberOfUsedBlocks += 1;
                         finished = true;
                     } else {
                         n = stack.pop();
@@ -264,12 +271,66 @@ public class DiskTreeManager implements TableDataManager {
                             newNode.q = tmp.q - j;
                             newNode.leaf = false;
 
+                            newPosLeft = freeSpacePos();
+                            newPosRight = freeSpacePos() + databaseConfiguration.diskPageSize();
+
+                            tmpPosition = n.pos;
+                            n.pos = newPosLeft;
+                            newNode.pos = newPosRight;
+
+                            saveNode(newPosLeft, n);
+                            saveNode(newPosRight, newNode);
+                            numberOfUsedBlocks += 2;
+
                             key = tmp.keys[j - 1];
                         }
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public Row search(Key key) throws IOException {
+        TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
+
+        while (!n.leaf) {
+            int q = n.q;
+            if (key.compareTo(n.keys[0]) < 0) {
+                n = loadNode(n.p[0]);
+            } else if (key.compareTo(n.keys[q - 1]) > 0) {
+                n = loadNode(n.p[q]);
+            } else {
+                int fn = search(n.keys, n.q, key);
+                n = loadNode(n.p[fn]);
+            }
+        }
+        int i = searchKey(n.keys, n.q, key);
+        if (i == -1) {
+            throw new NoSuchElementException();
+        }
+
+        byte[] data = n.values[i];
+        AtomicInteger seek = new AtomicInteger();
+        Set<Field> fields = scheme.dataFields()
+                .stream()
+                .map(it -> {
+                    int s = seek.getAndAdd(it.diskSize());
+                    byte[] bytes = new byte[it.diskSize()];
+                    System.arraycopy(data, s, bytes, 0, it.diskSize());
+                    return new FieldImpl(
+                            it.name(),
+                            it.type(),
+                            it.nullable(),
+                            it.unique(),
+                            bytes
+                    );
+                })
+                .collect(Collectors.toSet());
+        return new RowImpl(
+                key,
+                fields
+        );
     }
 
     /**
@@ -546,6 +607,29 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     /**
+     * Binary search key in node
+     *
+     * @param keys       keys
+     * @param keysLength len of keys
+     * @param key        key
+     * @return position of properly key
+     */
+    int searchKey(Key[] keys, int keysLength, Key key) {
+        int l = 0, r = keysLength, m;
+        while (l < r) {
+            m = (l + r) >>> 1;
+            int c = keys[m].compareTo(key);
+            if (c > 0) {
+                r = m;
+            } else if (c < 0) {
+                l = m + 1;
+            } else {
+                return m;
+            }
+        }
+        return l;
+    }
+    /**
      * Find properly position in node
      *
      * @param keys       keys
@@ -621,6 +705,15 @@ public class DiskTreeManager implements TableDataManager {
 
     int reservedSpaceInNode() {
         return Byte.BYTES + Integer.BYTES;
+    }
+
+    /**
+     * Free space position
+     *
+     * @return position
+     */
+    int freeSpacePos() {
+        return (numberOfUsedBlocks + 1) * databaseConfiguration.diskPageSize();
     }
 
     /**

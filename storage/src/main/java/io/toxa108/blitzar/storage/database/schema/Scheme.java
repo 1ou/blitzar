@@ -57,4 +57,10 @@ public interface Scheme {
      * @return data size
      */
     int dataSize();
+
+    /**
+     * Return data fields
+     * @return only data fields
+     */
+    Set<Field> dataFields();
 }

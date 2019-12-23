@@ -6,6 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Scheme;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SchemeImpl implements Scheme {
     private final Set<Field> fields;
@@ -94,6 +95,13 @@ public class SchemeImpl implements Scheme {
                 .map(Field::diskSize)
                 .reduce(Integer::sum)
                 .orElse(0);
+    }
+
+    @Override
+    public Set<Field> dataFields() {
+        return this.fields.stream()
+                .filter(it -> !primaryIndex().fields().contains(it.name()))
+                .collect(Collectors.toSet());
     }
 
     @Override

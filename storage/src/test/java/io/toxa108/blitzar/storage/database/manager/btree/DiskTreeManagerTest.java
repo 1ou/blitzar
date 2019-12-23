@@ -329,6 +329,14 @@ public class DiskTreeManagerTest {
             Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
             diskTreeManager.addRow(row);
         }
-    }
 
+        for (int i = 0; i < 1000; ++i) {
+            fieldId = new FieldImpl("id", FieldType.LONG,
+                    Nullable.NOT_NULL, Unique.UNIQUE, bytesManipulator.longToBytes(i + 1));
+            Key key = new KeyImpl(fieldId);
+            Row row = diskTreeManager.search(key);
+            String compareStr = "justname" + (i + 1) + "%";
+            Assert.assertEquals(compareStr, new String(row.fieldByName("name").value()).substring(0, compareStr.length()));
+        }
+    }
 }

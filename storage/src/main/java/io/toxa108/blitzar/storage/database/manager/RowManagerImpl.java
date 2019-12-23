@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.database.manager;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.btree.DiskTreeManager;
+import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 
@@ -25,6 +26,15 @@ public class RowManagerImpl implements RowManager {
             diskTreeManager.addRow(row);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Row search(Key key) {
+        try {
+            return diskTreeManager.search(key);
+        } catch (IOException e) {
+            return null; // todo
         }
     }
 }
