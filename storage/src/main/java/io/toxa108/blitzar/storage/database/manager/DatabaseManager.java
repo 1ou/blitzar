@@ -10,6 +10,7 @@ public interface DatabaseManager {
      *
      * @param query DDL query
      * @return result
+     * @throws QueryProcessException exception during process query
      */
     ResultQuery resolveDataDefinitionQuery(DataDefinitionQuery query) throws QueryProcessException;
 }

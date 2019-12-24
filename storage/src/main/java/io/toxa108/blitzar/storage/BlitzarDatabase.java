@@ -1,7 +1,5 @@
 package io.toxa108.blitzar.storage;
 
-import io.toxa108.blitzar.storage.connection.Server;
-import io.toxa108.blitzar.storage.connection.impl.ServerImpl;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
@@ -15,18 +13,26 @@ import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQueryResolverImpl;
 import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
-public class StorageApplication {
+public class BlitzarDatabase {
+    private final DatabaseManager databaseManager;
+    private final QueryProcessor queryProcessor;
 
-    public static void main(String[] args) {
-        final Server server = new ServerImpl(9005);
-
+    public BlitzarDatabase() {
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
         final FileManager fileManager = new FileManagerImpl("/tmp/blitzar", databaseConfiguration);
         final DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);
 
-        final DatabaseManager databaseManager = new DatabaseManagerImpl(dataDefinitionQueryResolver);
-        final QueryProcessor queryProcessor = new QueryProcessorImpl();
+        this.databaseManager = new DatabaseManagerImpl(dataDefinitionQueryResolver);
+        this.queryProcessor = new QueryProcessorImpl(databaseManager);
+    }
+
+    public DatabaseManager databaseManager() {
+        return databaseManager;
+    }
+
+    public QueryProcessor queryProcessor() {
+        return queryProcessor;
     }
 }

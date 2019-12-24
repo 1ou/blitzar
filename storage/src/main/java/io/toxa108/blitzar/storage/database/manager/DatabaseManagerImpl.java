@@ -4,7 +4,6 @@ import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQuery;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
-import io.toxa108.blitzar.storage.query.impl.QueryProcessException;
 
 public class DatabaseManagerImpl implements DatabaseManager {
     private final DataDefinitionQueryResolver dataDefinitionQueryResolver;
@@ -14,7 +13,7 @@ public class DatabaseManagerImpl implements DatabaseManager {
     }
 
     @Override
-    public ResultQuery resolveDataDefinitionQuery(DataDefinitionQuery query) throws QueryProcessException {
+    public ResultQuery resolveDataDefinitionQuery(DataDefinitionQuery query) {
         switch (query.type()) {
             case CREATE_DATABASE:
                 return dataDefinitionQueryResolver.createDatabase(query);

@@ -4,7 +4,7 @@ public interface QueryProcessor {
     /**
      * transform input bytes to the query
      * @param request bytes
-     * @return query
+     * @return result byte array
      */
-    Query process(byte[] request);
+    byte[] process(byte[] request);
 }
