@@ -12,7 +12,7 @@ public class ServerApplication {
     private static BlitzarDatabase database;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        database = new BlitzarDatabase();
+        database = new BlitzarDatabase("/tmp/blitzarprod");
 
         Server server = NettyServerBuilder.forPort(9906)
                 .addService(new SqlServiceImpl(database))
@@ -26,15 +26,17 @@ public class ServerApplication {
     }
 
     private static void dialog() {
-        Scanner scanner =new Scanner(System.in);
-        System.out.println("Time series blitzar database.");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Time series database.");
 
         while (true) {
-            String command = scanner.next();
-            System.out.println(new String(database.queryProcessor().process(command.getBytes())));
+            System.out.println("Enter a command:");
+            String command = scanner.nextLine();
             if ("exit".equals(command)) {
                 break;
             }
+            System.out.println();
+            System.out.println(new String(database.queryProcessor().process(command.getBytes())));
         }
     }
 }

@@ -17,9 +17,9 @@ public class BlitzarDatabase {
     private final DatabaseManager databaseManager;
     private final QueryProcessor queryProcessor;
 
-    public BlitzarDatabase() {
+    public BlitzarDatabase(String path) {
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
-        final FileManager fileManager = new FileManagerImpl("/tmp/blitzar", databaseConfiguration);
+        final FileManager fileManager = new FileManagerImpl(path, databaseConfiguration);
         final DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);

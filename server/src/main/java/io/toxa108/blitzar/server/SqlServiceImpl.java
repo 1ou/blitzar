@@ -11,7 +11,7 @@ public class SqlServiceImpl extends SqlServiceGrpc.SqlServiceImplBase {
     private final BlitzarDatabase database;
 
     public SqlServiceImpl(BlitzarDatabase blitzarDatabase) {
-        this.database = new BlitzarDatabase();
+        this.database = blitzarDatabase;
     }
 
     @Override
