@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.database;
 
 import io.toxa108.blitzar.storage.database.schema.Database;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ public interface DatabaseContext {
      * @param name name
      * @return database
      */
-    Database createDatabase(String name);
+    Database createDatabase(String name) throws IOException;
 
     /**
      * Return databases

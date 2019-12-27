@@ -1,10 +1,12 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,14 +17,17 @@ public class DatabaseImpl implements Database {
     private final FileManager fileManager;
     private final State state;
 
-    public DatabaseImpl(String name, List<Table> tables, FileManager fileManager) {
+    public DatabaseImpl(@NotNull final String name,
+                        @NotNull final List<Table> tables,
+                        @NotNull final FileManager fileManager) {
         this.tables = tables;
         this.name = name;
         this.fileManager = fileManager;
         this.state = State.EXISTS;
     }
 
-    public DatabaseImpl(String name, FileManager fileManager) {
+    public DatabaseImpl(@NotNull final String name,
+                        @NotNull final FileManager fileManager) throws IOException {
         this.name = name;
         this.fileManager = fileManager;
         this.tables = fileManager.loadTables(name);
@@ -35,14 +40,15 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public Optional<Table> findTableByName(String name) {
+    public Optional<Table> findTableByName(@NotNull final String name) {
         return tables.stream()
                 .filter(it -> it.name().equalsIgnoreCase(name))
                 .findAny();
     }
 
     @Override
-    public Table createTable(String name, Scheme scheme) {
+    public Table createTable(@NotNull final String name,
+                             @NotNull final Scheme scheme) throws IOException {
         if (this.state == State.REMOVED) {
             throw new IllegalStateException("Database removed, can't create table.");
         }

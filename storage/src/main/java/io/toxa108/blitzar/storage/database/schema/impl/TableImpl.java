@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.RowManager;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 /**
  * Table doesn't know anything about Database.
- * But knows a lot about below layers (fields, indexes)
+ * But knows about below layers (fields, indexes)
  */
 public class TableImpl implements Table {
     private final String name;
@@ -17,7 +18,9 @@ public class TableImpl implements Table {
     private final RowManager rowManager;
     private final State state;
 
-    public TableImpl(String name, Scheme scheme, RowManager rowManager) {
+    public TableImpl(@NotNull final String name,
+                     @NotNull final Scheme scheme,
+                     @NotNull final RowManager rowManager) {
         this.rowManager = rowManager;
         this.name = name;
         this.state = State.EXISTS;
@@ -40,7 +43,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void addRow(Row row) {
+    public void addRow(@NotNull final Row row) {
         rowManager.add(row);
     }
 

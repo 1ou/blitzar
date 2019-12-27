@@ -1,39 +1,39 @@
 package io.toxa108.blitzar.storage.database;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
 import io.toxa108.blitzar.storage.io.FileManager;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DatabaseContextImpl implements DatabaseContext {
     private final Set<Database> databases;
     private final FileManager fileManager;
 
-    public DatabaseContextImpl(FileManager fileManager) {
+    public DatabaseContextImpl(@NotNull final FileManager fileManager) throws IOException {
         this.fileManager = fileManager;
 
-        this.databases = fileManager.databases()
-                .stream()
-                .map(it -> new DatabaseImpl(it, fileManager))
-                .collect(Collectors.toSet());
+        Set<Database> set = new HashSet<>();
+        for (String it : fileManager.databases()) {
+            DatabaseImpl database = new DatabaseImpl(it, fileManager);
+            set.add(database);
+        }
+        this.databases = set;
     }
 
     @Override
-    public Optional<Database> findByName(String name) {
-        if (name == null || name.isEmpty()) {
-            throw new NullPointerException("Database isn't specified");
-        }
-
+    public Optional<Database> findByName(@NotNull final String name) {
         return databases.stream()
                 .filter(it -> it.name().equals(name))
                 .findAny();
     }
 
     @Override
-    public Database createDatabase(String name) {
+    public Database createDatabase(@NotNull final String name) throws IOException {
         Database database = fileManager.initializeDatabase(name);
         databases.add(database);
         return database;

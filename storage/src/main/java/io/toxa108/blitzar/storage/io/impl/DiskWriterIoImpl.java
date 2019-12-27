@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.io.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.io.DiskWriter;
 
 import java.io.File;
@@ -17,7 +18,7 @@ public class DiskWriterIoImpl implements DiskWriter {
 //    private final FileOutputStream fileOutputStream;
     private final FileChannel fileChannel;
 
-    public DiskWriterIoImpl(File file) throws IOException {
+    public DiskWriterIoImpl(@NotNull final File file) throws IOException {
         this.file = file;
         this.randomAccessFile = new RandomAccessFile(file, "rw");
         this.fileChannel = randomAccessFile.getChannel();
@@ -25,7 +26,7 @@ public class DiskWriterIoImpl implements DiskWriter {
     }
 
     @Override
-    public void write(int pos, byte[] bytes) throws IOException {
+    public void write(@NotNull final int pos, @NotNull final byte[] bytes) throws IOException {
 //        randomAccessFile.seek(pos);
 //        randomAccessFile.write(bytes);
 

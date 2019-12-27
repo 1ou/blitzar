@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Set;
 
 public class FileManagerImplTest {
@@ -23,7 +24,7 @@ public class FileManagerImplTest {
     }
 
     @Test
-    public void save_table_metadata_to_the_table_file_when_success() {
+    public void save_table_metadata_to_the_table_file_when_success() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
         Database database = fileManager.initializeDatabase("test");
         Scheme scheme = new SchemeImpl(

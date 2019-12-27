@@ -20,7 +20,7 @@ public class DiskTreeManagerTest {
     private final BytesManipulator bytesManipulator = new BytesManipulatorImpl();
 
     @Test
-    public void add_element_when_success() {
+    public void add_element_when_success() throws IOException {
         FileManager fileManager = new TestFileManagerImpl(
                 "/tmp/blitzar", new DatabaseConfigurationImpl(16));
         Database database = fileManager.initializeDatabase("test");

@@ -1,5 +1,7 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
+
 import java.util.NoSuchElementException;
 
 public enum Unique {
@@ -14,7 +16,7 @@ public enum Unique {
 
     private final short id;
 
-    private Unique(short id) {
+    private Unique(@NotNull final short id) {
         this.id = id;
     }
 
@@ -22,7 +24,7 @@ public enum Unique {
         return id;
     }
 
-    public static Unique fromId(short id) {
+    public static Unique fromId(@NotNull final short id) {
         for (Unique e : values()) {
             if (e.id == id) {
                 return e;

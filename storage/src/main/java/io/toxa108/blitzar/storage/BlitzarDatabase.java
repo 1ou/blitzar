@@ -13,14 +13,26 @@ import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQueryResolverImpl;
 import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
+import java.io.IOException;
+
 public class BlitzarDatabase {
     private final DatabaseManager databaseManager;
     private final QueryProcessor queryProcessor;
 
-    public BlitzarDatabase(String path) {
+    public BlitzarDatabase(final String path) {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
         final FileManager fileManager = new FileManagerImpl(path, databaseConfiguration);
-        final DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
+        final DatabaseContext databaseContext;
+        try {
+            databaseContext = new DatabaseContextImpl(fileManager);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
+
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);
 

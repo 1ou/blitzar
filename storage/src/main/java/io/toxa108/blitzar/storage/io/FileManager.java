@@ -4,6 +4,7 @@ import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface FileManager {
@@ -20,7 +21,7 @@ public interface FileManager {
      * @param name name
      * @return result query
      */
-    Database initializeDatabase(String name);
+    Database initializeDatabase(String name) throws IOException;
 
     /**
      * Initialize table
@@ -30,7 +31,7 @@ public interface FileManager {
      * @param scheme       scheme
      * @return result query
      */
-    Table initializeTable(String databaseName, String tableName, Scheme scheme);
+    Table initializeTable(String databaseName, String tableName, Scheme scheme) throws IOException;
 
     /**
      * Load tables from disk to main memory
@@ -38,7 +39,7 @@ public interface FileManager {
      * @param databaseName databaseName
      * @return tables
      */
-    List<Table> loadTables(String databaseName);
+    List<Table> loadTables(String databaseName) throws IOException;
 
     /**
      * Load table from disk
@@ -47,7 +48,7 @@ public interface FileManager {
      * @param tableName    table name
      * @return table
      */
-    Table loadTable(String databaseName, String tableName);
+    Table loadTable(String databaseName, String tableName) throws IOException;
 
     /**
      * Clear

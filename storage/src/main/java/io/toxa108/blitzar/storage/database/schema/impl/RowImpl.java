@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
@@ -11,7 +12,7 @@ public class RowImpl implements Row {
     private final Key key;
     private final Set<Field> fields;
 
-    public RowImpl(Key key, Set<Field> fields) {
+    public RowImpl(@NotNull final Key key, @NotNull final Set<Field> fields) {
         this.fields = fields;
         this.key = key;
     }
@@ -22,7 +23,7 @@ public class RowImpl implements Row {
     }
 
     @Override
-    public Field fieldByName(String name) {
+    public Field fieldByName(@NotNull final String name) {
         return fields.stream()
                 .filter(it -> it.name().equals(name))
                 .findFirst()

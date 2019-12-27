@@ -1,21 +1,23 @@
 package io.toxa108.blitzar.storage.database.manager;
 
+import io.toxa108.blitzar.storage.NotNull;
+
 public class ArrayManipulator {
-    public <T> void insertInArray(T[] array, T value, int pos) {
+    public <T> void insertInArray(@NotNull T[] array, @NotNull T value, @NotNull int pos) {
         if (array.length - 1 - pos >= 0) {
             System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
         }
         array[pos] = value;
     }
 
-    public void insertInArray(int[] array, int value, int pos) {
+    public void insertInArray(@NotNull int[] array, @NotNull int value, @NotNull int pos) {
         if (array.length - 1 - pos >= 0) {
             System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
         }
         array[pos] = value;
     }
 
-    public <T> void copyArray(T[] source, T[] destination, int len) {
+    public <T> void copyArray(@NotNull T[] source, @NotNull T[] destination, @NotNull int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }
@@ -25,7 +27,7 @@ public class ArrayManipulator {
         }
     }
 
-    public void copyArray(int[] source, int[] destination, int len) {
+    public void copyArray(@NotNull int[] source, @NotNull int[] destination, @NotNull int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }
@@ -35,7 +37,7 @@ public class ArrayManipulator {
         }
     }
 
-    public <T> void copyArray(T[] source, T[] destination, int pos, int len) {
+    public <T> void copyArray(@NotNull T[] source, @NotNull T[] destination, @NotNull int pos, @NotNull int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }
@@ -45,7 +47,7 @@ public class ArrayManipulator {
         }
     }
 
-    public void copyArray(int[] source, int[] destination, int pos, int len) {
+    public void copyArray(@NotNull int[] source, @NotNull int[] destination, @NotNull int pos, @NotNull int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }

@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.io.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
@@ -23,7 +24,8 @@ public class FileManagerImpl implements FileManager {
     private final int m = 1024;
     private final DatabaseConfiguration databaseConfiguration;
 
-    public FileManagerImpl(String baseFolder, DatabaseConfiguration databaseConfiguration) {
+    public FileManagerImpl(@NotNull final String baseFolder,
+                           @NotNull final DatabaseConfiguration databaseConfiguration) {
         this.baseFolder = baseFolder;
         this.bytesManipulator = new BytesManipulatorImpl();
         this.databaseConfiguration = databaseConfiguration;
@@ -42,11 +44,7 @@ public class FileManagerImpl implements FileManager {
     }
 
     @Override
-    public Database initializeDatabase(String name) {
-        if (name == null) {
-            throw new NullPointerException("The database name is not specified");
-        }
-
+    public Database initializeDatabase(@NotNull final String name) throws IOException {
         if (!name.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect database name");
         }
@@ -55,17 +53,23 @@ public class FileManagerImpl implements FileManager {
         return new DatabaseImpl(file.getName(), this);
     }
 
+    /**
+     * initialize table: create file on disk
+     *
+     * @param databaseName database
+     * @param tableName    name
+     * @param scheme       scheme
+     * @return table
+     * @throws IllegalArgumentException when the name of database of table isn't correct
+     */
     @Override
-    public Table initializeTable(String databaseName, String tableName, Scheme scheme) {
-        if (databaseName == null) {
-            throw new NullPointerException("The database name is not specified");
-        }
+    public Table initializeTable(@NotNull final String databaseName,
+                                 @NotNull final String tableName,
+                                 @NotNull final Scheme scheme) throws IOException {
         if (!databaseName.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect database name");
         }
-        if (tableName == null) {
-            throw new NullPointerException("The table name is not specified");
-        }
+
         if (!tableName.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect table name");
         }
@@ -98,132 +102,134 @@ public class FileManagerImpl implements FileManager {
      *
      * @param file   file
      * @param scheme table scheme
+     * @throws IOException disk io exception
      */
-    private void saveTableScheme(File file, Scheme scheme) {
-        try {
-            RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
-            accessFile.setLength(databaseConfiguration.diskPageSize() * 20);
-            DiskWriter diskWriter = new DiskWriterIoImpl(file);
+    private void saveTableScheme(@NotNull final File file,
+                                 @NotNull final Scheme scheme) throws IOException {
+        RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
+        accessFile.setLength(databaseConfiguration.diskPageSize() * 20);
+        DiskWriter diskWriter = new DiskWriterIoImpl(file);
 
-            int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
-            int startOfIndexes = posOfIndexes;
-            diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
-            int tmpSeek = posOfIndexes;
-            posOfIndexes += Integer.BYTES * scheme.indexes().size() + Integer.BYTES;
+        int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
+        int startOfIndexes = posOfIndexes;
+        diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
+        int tmpSeek = posOfIndexes;
+        posOfIndexes += Integer.BYTES * scheme.indexes().size() + Integer.BYTES;
 
-            for (Index index : scheme.indexes()) {
-                byte[] bytes = index.toBytes();
-                tmpSeek += Integer.BYTES;
-                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfIndexes - startOfIndexes));
-                diskWriter.write(posOfIndexes, bytes);
-                posOfIndexes += bytes.length;
-            }
+        for (Index index : scheme.indexes()) {
+            byte[] bytes = index.toBytes();
+            tmpSeek += Integer.BYTES;
+            diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfIndexes - startOfIndexes));
+            diskWriter.write(posOfIndexes, bytes);
+            posOfIndexes += bytes.length;
+        }
 
-            int posOfFields = databaseConfiguration.diskPageSize() - m;
-            startOfIndexes = posOfFields;
-            diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
-            tmpSeek = posOfFields;
-            posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
+        int posOfFields = databaseConfiguration.diskPageSize() - m;
+        startOfIndexes = posOfFields;
+        diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
+        tmpSeek = posOfFields;
+        posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
 
-            for (Field field : scheme.fields()) {
-                byte[] bytes = field.metadataToBytes();
-                tmpSeek += Integer.BYTES;
-                diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfFields - startOfIndexes));
-                diskWriter.write(posOfFields, bytes);
-                posOfFields += bytes.length;
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Table can't be read from disk");
+        for (Field field : scheme.fields()) {
+            byte[] bytes = field.metadataToBytes();
+            tmpSeek += Integer.BYTES;
+            diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfFields - startOfIndexes));
+            diskWriter.write(posOfFields, bytes);
+            posOfFields += bytes.length;
         }
     }
 
-    private Scheme loadTableScheme(File file) {
-        try {
-            DiskReader diskReader = new DiskReaderIoImpl(file);
-            Set<Index> indexes = new HashSet<>();
+    private Scheme loadTableScheme(@NotNull final File file) throws IOException {
+        DiskReader diskReader = new DiskReaderIoImpl(file);
+        Set<Index> indexes = new HashSet<>();
 
-            int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
-            int startOfIndexes = posOfIndexes;
+        int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
+        int startOfIndexes = posOfIndexes;
 
-            int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
-            for (int i = 0; i < sizeOfIndexes; ++i) {
-                posOfIndexes += Integer.BYTES;
-                int seekOfIndex = bytesManipulator.bytesToInt(
-                        diskReader.read(posOfIndexes, Integer.BYTES));
+        int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
+        for (int i = 0; i < sizeOfIndexes; ++i) {
+            posOfIndexes += Integer.BYTES;
+            int seekOfIndex = bytesManipulator.bytesToInt(
+                    diskReader.read(posOfIndexes, Integer.BYTES));
 
-                int indexSize = bytesManipulator.bytesToInt(
-                        diskReader.read(startOfIndexes + seekOfIndex, Integer.BYTES));
+            int indexSize = bytesManipulator.bytesToInt(
+                    diskReader.read(startOfIndexes + seekOfIndex, Integer.BYTES));
 
-                byte[] bytes = diskReader.read(startOfIndexes + seekOfIndex, indexSize + Integer.BYTES);
-                Index index = new IndexImpl(bytes);
-                indexes.add(index);
-            }
-
-            Set<Field> fields = new HashSet<>();
-            int posOfFields = databaseConfiguration.diskPageSize() - m;
-            int startOfFields = posOfFields;
-
-            int sizeOfFields = bytesManipulator.bytesToInt(diskReader.read(posOfFields, Integer.BYTES));
-            for (int i = 0; i < sizeOfFields; ++i) {
-                posOfFields += Integer.BYTES;
-                int seekOfField = bytesManipulator.bytesToInt(
-                        diskReader.read(posOfFields, Integer.BYTES));
-
-                int fieldSize = bytesManipulator.bytesToInt(
-                        diskReader.read(startOfFields + seekOfField, Integer.BYTES));
-
-                byte[] bytes = diskReader.read(startOfFields + seekOfField, fieldSize + Integer.BYTES);
-                Field field = new FieldImpl(bytes);
-                fields.add(field);
-            }
-
-            return new SchemeImpl(fields, indexes);
-        } catch (IOException e) {
-            throw new IllegalStateException("Table can't be read from disk");
+            byte[] bytes = diskReader.read(startOfIndexes + seekOfIndex, indexSize + Integer.BYTES);
+            Index index = new IndexImpl(bytes);
+            indexes.add(index);
         }
+
+        Set<Field> fields = new HashSet<>();
+        int posOfFields = databaseConfiguration.diskPageSize() - m;
+        int startOfFields = posOfFields;
+
+        int sizeOfFields = bytesManipulator.bytesToInt(diskReader.read(posOfFields, Integer.BYTES));
+        for (int i = 0; i < sizeOfFields; ++i) {
+            posOfFields += Integer.BYTES;
+            int seekOfField = bytesManipulator.bytesToInt(
+                    diskReader.read(posOfFields, Integer.BYTES));
+
+            int fieldSize = bytesManipulator.bytesToInt(
+                    diskReader.read(startOfFields + seekOfField, Integer.BYTES));
+
+            byte[] bytes = diskReader.read(startOfFields + seekOfField, fieldSize + Integer.BYTES);
+            Field field = new FieldImpl(bytes);
+            fields.add(field);
+        }
+
+        return new SchemeImpl(fields, indexes);
     }
 
     @Override
-    public List<Table> loadTables(String databaseName) {
-        File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
+    public List<Table> loadTables(@NotNull final String databaseName) throws IOException {
+        File[] files = new File(baseFolder + "/" + databaseName)
+                .listFiles(File::isFile);
+
         if (files != null) {
-            return Arrays.stream(files)
-                    .map(it -> {
-                                Scheme scheme = this.loadTableScheme(it);
-                                return new TableImpl(
-                                        it.getName(),
-                                        this.loadTableScheme(it),
-                                        new RowManagerImpl(it, scheme, databaseConfiguration)
-                                );
-                            }
-                    )
-                    .collect(Collectors.toList());
+            List<Table> tables = new ArrayList<>();
+            for (File file : files) {
+
+                Scheme scheme = this.loadTableScheme(file);
+                tables.add(new TableImpl(
+                        file.getName(),
+                        scheme,
+                        new RowManagerImpl(file, scheme, databaseConfiguration)
+                ));
+            }
+            return tables;
         } else {
             return new ArrayList<>();
         }
     }
 
     @Override
-    public Table loadTable(String databaseName, String tableName) {
+    public Table loadTable(@NotNull final String databaseName,
+                           @NotNull final String tableName) throws IOException {
         File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
         if (files != null) {
-            return Arrays.stream(files)
-                    .filter(it -> it.getName().equals(tableName))
-                    .map(it -> {
-                                Scheme scheme = this.loadTableScheme(it);
-                                return new TableImpl(
-                                        it.getName(),
-                                        this.loadTableScheme(it),
-                                        new RowManagerImpl(it, scheme, databaseConfiguration)
-                                );
-                            }
-                    )
-                    .findAny()
-                    .orElseThrow(() -> new NoSuchElementException(
-                            String.format("Table %s isn't found on disk", tableName))
+            List<Table> tables = new ArrayList<>();
+            for (File file : files) {
+                if (file.getName().equals(tableName)) {
+                    Scheme scheme = this.loadTableScheme(file);
+                    tables.add(
+                            new TableImpl(
+                                    file.getName(),
+                                    scheme,
+                                    new RowManagerImpl(file, scheme, databaseConfiguration)
+                            )
                     );
+                }
+            }
+
+            if (tables.isEmpty()) {
+                throw new NoSuchElementException(
+                        String.format("Table %s doesn't found on disk", tableName));
+            } else {
+                return tables.get(0);
+            }
         } else {
-            throw new NoSuchElementException(String.format("Table %s isn't found on disk", tableName));
+            throw new NoSuchElementException(String.format("Table %s doesn't found on disk", tableName));
         }
     }
 
@@ -238,7 +244,7 @@ public class FileManagerImpl implements FileManager {
         }
     }
 
-    private void clear(File file) {
+    private void clear(@NotNull final File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files != null) {
@@ -256,8 +262,10 @@ public class FileManagerImpl implements FileManager {
      *
      * @param directory directoryName
      * @return path
+     * @throws IllegalStateException disk io error
      */
-    protected File createDirectory(String directory, String folderName) {
+    protected File createDirectory(@NotNull final String directory,
+                                   @NotNull final String folderName) {
         File newDirectory = new File(directory + "/" + folderName);
         if (newDirectory.mkdir() || newDirectory.exists()) {
             return newDirectory;
@@ -266,7 +274,9 @@ public class FileManagerImpl implements FileManager {
         }
     }
 
-    protected File createFile(String directory, String fileName, String fileExtension) {
+    protected File createFile(@NotNull final String directory,
+                              @NotNull final String fileName,
+                              @NotNull final String fileExtension) {
         return new File(
                 new File(directory),
                 fileName + "." + fileExtension

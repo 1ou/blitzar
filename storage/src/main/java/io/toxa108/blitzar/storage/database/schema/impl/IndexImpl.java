@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
@@ -14,7 +15,7 @@ public class IndexImpl implements Index {
     private final IndexType type;
     private final BytesManipulator bytesManipulator;
 
-    public IndexImpl(byte[] bytes) {
+    public IndexImpl(@NotNull final byte[] bytes) {
         this.bytesManipulator = new BytesManipulatorImpl();
 
         byte[] sizeBytes = new byte[Integer.BYTES];
@@ -33,7 +34,7 @@ public class IndexImpl implements Index {
                 .collect(Collectors.toSet());
     }
 
-    public IndexImpl(Set<String> fields, IndexType type) {
+    public IndexImpl(@NotNull final Set<String> fields, @NotNull final IndexType type) {
         this.fields = fields;
         this.type = type;
         this.bytesManipulator = new BytesManipulatorImpl();

@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +26,7 @@ public class DataDefinitionQueryResolverImplTest {
     }
 
     @Test
-    public void create_database_when_success() {
+    public void create_database_when_success() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
         DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
         DataDefinitionQueryResolver dataDefinitionQueryResolver =
@@ -41,7 +42,7 @@ public class DataDefinitionQueryResolverImplTest {
     }
 
     @Test
-    public void create_database_and_empty_table_when_success() {
+    public void create_database_and_empty_table_when_success() throws IOException {
         String databaseName = "databasee";
         String tableName = "table";
 
@@ -74,7 +75,7 @@ public class DataDefinitionQueryResolverImplTest {
     }
 
     @Test
-    public void create_database_and_table_with_scheme_when_success() {
+    public void create_database_and_table_with_scheme_when_success() throws IOException {
         String databaseName = "databasee";
         String tableName = "table";
 

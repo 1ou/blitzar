@@ -1,5 +1,7 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
+
 import java.util.NoSuchElementException;
 
 public enum Nullable {
@@ -14,7 +16,7 @@ public enum Nullable {
 
     private final short id;
 
-    Nullable(short id) {
+    Nullable(@NotNull final short id) {
         this.id = id;
     }
 
@@ -22,7 +24,7 @@ public enum Nullable {
         return id;
     }
 
-    public static Nullable fromId(short id) {
+    public static Nullable fromId(@NotNull final short id) {
         for (Nullable e : values()) {
             if (e.id == id) {
                 return e;

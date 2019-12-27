@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.database.schema;
 
 import io.toxa108.blitzar.storage.database.schema.impl.State;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ public interface Database {
      * @param scheme scheme
      * @return table
      */
-    Table createTable(String name, Scheme scheme);
+    Table createTable(String name, Scheme scheme) throws IOException;
 
     /**
      * Tables

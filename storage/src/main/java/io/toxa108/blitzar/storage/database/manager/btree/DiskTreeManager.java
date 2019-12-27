@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager.btree;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.TableDataManager;
@@ -96,7 +97,7 @@ public class DiskTreeManager implements TableDataManager {
          */
         int pos;
 
-        TreeNode(int q, int dataLen) {
+        TreeNode(@NotNull final int q, @NotNull final int dataLen) {
             this.keys = new Key[q];
             this.p = new int[q + 1];
             this.leaf = true;
@@ -109,7 +110,12 @@ public class DiskTreeManager implements TableDataManager {
             }
         }
 
-        TreeNode(int pos, Key[] keys, int[] p, boolean isLeaf, int q, int nextPos) {
+        TreeNode(@NotNull final int pos,
+                 @NotNull final Key[] keys,
+                 @NotNull final int[] p,
+                 @NotNull final boolean isLeaf,
+                 @NotNull final int q,
+                 @NotNull final int nextPos) {
             this.keys = keys;
             this.p = p;
             this.leaf = isLeaf;
@@ -119,7 +125,12 @@ public class DiskTreeManager implements TableDataManager {
             this.pos = pos;
         }
 
-        TreeNode(int pos, Key[] keys, byte[][] values, boolean isLeaf, int q, int nextPos) {
+        TreeNode(@NotNull final int pos,
+                 @NotNull final Key[] keys,
+                 @NotNull final byte[][] values,
+                 @NotNull final boolean isLeaf,
+                 @NotNull final int q,
+                 @NotNull final int nextPos) {
             this.keys = keys;
             this.values = values;
             this.leaf = isLeaf;
@@ -158,7 +169,7 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     @Override
-    public void addRow(final Row row) throws IOException {
+    public void addRow(@NotNull final Row row) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
         Key key = row.key();
 
@@ -166,7 +177,7 @@ public class DiskTreeManager implements TableDataManager {
 
         while (!n.leaf) {
             stack.push(n);
-            int q = n.q;
+            final int q = n.q;
             if (key.compareTo(n.keys[0]) < 0) {
                 n = loadNode(n.p[0]);
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
@@ -321,7 +332,7 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     @Override
-    public Row search(Key key) throws IOException {
+    public Row search(@NotNull final Key key) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
 
         while (!n.leaf) {
@@ -369,7 +380,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param row row
      * @return byte array
      */
-    private byte[] rowDataToBytes(Row row) {
+    private byte[] rowDataToBytes(@NotNull final Row row) {
         return row.dataFields()
                 .stream()
                 .map(Field::value)
@@ -388,7 +399,7 @@ public class DiskTreeManager implements TableDataManager {
      * @return tree node
      * @throws IOException in case issue with reading
      */
-    TreeNode loadNode(final int pos) throws IOException {
+    TreeNode loadNode(@NotNull final int pos) throws IOException {
         Field primaryIndexField = scheme.primaryIndexField();
 
         byte[] bytes = diskReader.read(pos, databaseConfiguration.diskPageSize());
@@ -496,7 +507,7 @@ public class DiskTreeManager implements TableDataManager {
         }
     }
 
-    void saveNode(final int pos, final TreeNode node) throws IOException {
+    void saveNode(@NotNull final int pos, @NotNull final TreeNode node) throws IOException {
         if (!node.leaf) {
             int estimatedSize = estimateSizeOfElementsInNonLeafNode(scheme);
             checkNodeSize(node.q, estimatedSize);
@@ -552,7 +563,7 @@ public class DiskTreeManager implements TableDataManager {
         }
     }
 
-    private void checkNodeSize(int size, int availableSize) {
+    private void checkNodeSize(@NotNull final int size, @NotNull final int availableSize) {
         if (availableSize < size) {
             throw new IllegalArgumentException("Node size can't be longer than size of disk page");
         }
@@ -566,7 +577,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param key        key
      * @return position of properly key
      */
-    int search(Key[] keys, int keysLength, Key key) {
+    int search(@NotNull final Key[] keys, @NotNull final int keysLength, @NotNull final Key key) {
         int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
@@ -590,7 +601,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param key        key
      * @return position of properly key
      */
-    int searchKeyInNode(Key[] keys, int keysLength, Key key) {
+    int searchKeyInNode(@NotNull final Key[] keys, @NotNull final int keysLength, @NotNull final Key key) {
         int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
@@ -614,7 +625,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param key        key
      * @return position of properly key
      */
-    int searchTraverseWay(Key[] keys, int keysLength, Key key) {
+    int searchTraverseWay(@NotNull final Key[] keys, @NotNull final int keysLength, @NotNull final Key key) {
         int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
@@ -638,7 +649,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param key        key
      * @return position for insert
      */
-    int findProperlyPosition(Key[] keys, int keysLength, Key key) {
+    int findProperlyPosition(@NotNull final Key[] keys, @NotNull final int keysLength, @NotNull final Key key) {
         int l = 0, r = keysLength, m;
         while (l < r) {
             m = (l + r) >>> 1;
@@ -661,7 +672,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param scheme scheme
      * @return number of elements
      */
-    int estimateSizeOfElementsInLeafNode(Scheme scheme) {
+    int estimateSizeOfElementsInLeafNode(@NotNull final Scheme scheme) {
         int reservedSpace = reservedSpaceInNode();
         int nodeSize = databaseConfiguration.diskPageSize();
         int recordSize = scheme.recordSize()
@@ -680,7 +691,7 @@ public class DiskTreeManager implements TableDataManager {
      * @param scheme scheme
      * @return number of elements
      */
-    int estimateSizeOfElementsInNonLeafNode(Scheme scheme) {
+    int estimateSizeOfElementsInNonLeafNode(@NotNull final Scheme scheme) {
         int reservedSpace = reservedSpaceInNode()
                 + Integer.BYTES; // additional N child pointer
         int nodeSize = databaseConfiguration.diskPageSize();
