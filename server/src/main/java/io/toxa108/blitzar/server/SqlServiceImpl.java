@@ -2,20 +2,20 @@ package io.toxa108.blitzar.server;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
-import io.toxa108.blitzar.service.proto.SqlRequest;
-import io.toxa108.blitzar.service.proto.SqlResponse;
-import io.toxa108.blitzar.service.proto.SqlServiceGrpc;
+import io.toxa108.blitzar.service.proto.*;
 import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.NotNull;
 
 public class SqlServiceImpl extends SqlServiceGrpc.SqlServiceImplBase {
     private final BlitzarDatabase database;
 
-    public SqlServiceImpl(BlitzarDatabase blitzarDatabase) {
+    public SqlServiceImpl(@NotNull final BlitzarDatabase blitzarDatabase) {
         this.database = blitzarDatabase;
     }
 
     @Override
-    public void request(SqlRequest request, StreamObserver<SqlResponse> responseObserver) {
+    public void request(@NotNull final SqlRequest request,
+                        @NotNull final StreamObserver<SqlResponse> responseObserver) {
         database.queryProcessor().process(request.getSql().toByteArray());
 
         byte[] bytes = {0, 1, 2, 3};
@@ -24,6 +24,17 @@ public class SqlServiceImpl extends SqlServiceGrpc.SqlServiceImplBase {
                 .build();
 
         responseObserver.onNext(sqlResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void auth(@NotNull final AuthRequest request,
+                     @NotNull final StreamObserver<AuthResponse> responseObserver) {
+        AuthResponse authResponse = AuthResponse.newBuilder()
+                .setStatus(AuthResponse.Status.ACCEPTED)
+                .build();
+
+        responseObserver.onNext(authResponse);
         responseObserver.onCompleted();
     }
 }

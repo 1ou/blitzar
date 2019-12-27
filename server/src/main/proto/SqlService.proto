@@ -9,11 +9,26 @@ option java_package = "io.toxa108.blitzar.service.proto";
 option java_multiple_files = true;
 
 service SqlService {
+    rpc auth (AuthRequest) returns (AuthResponse);
     rpc request (SqlRequest) returns (SqlResponse);
+}
+
+message AuthRequest {
+    string login = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+    enum Status {
+        ACCEPTED = 0;
+        FORBIDDEN = 1;
+    }
+    Status status = 1;
 }
 
 message SqlRequest {
     bytes sql = 1;
+    string token = 2;
 }
 
 message SqlResponse {

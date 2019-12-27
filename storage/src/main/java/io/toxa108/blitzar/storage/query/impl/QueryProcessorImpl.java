@@ -21,6 +21,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         final String selectKeyword = "select";
         final String insertKeyword = "insert";
         final String deleteKeyword = "delete";
+        final String useKeyword = "use";
         final String tableKeyword = "table";
         final String databaseKeyword = "database";
         final String errorKeyword = "error";
@@ -32,7 +33,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         }
 
         final String[] parts = query.split(splitQuerySign);
-        if (parts.length < 3) {
+        if (parts.length < 2) {
             throw new IllegalArgumentException();
         }
         DataDefinitionQuery dataDefinitionQuery;
@@ -64,8 +65,8 @@ public class QueryProcessorImpl implements QueryProcessor {
                 }
 
                 return databaseManager.resolveDataDefinitionQuery(dataDefinitionQuery).toBytes();
+            case useKeyword:
             case selectKeyword:
-
             case insertKeyword:
             case deleteKeyword:
             default:
