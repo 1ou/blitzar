@@ -5,7 +5,12 @@ plugins {
 }
 
 application {
-    mainClassName = "io.toxa108.storage.StorageApplication"
+    mainClassName = "io.toxa108.storage.BlitzarDatabase"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {

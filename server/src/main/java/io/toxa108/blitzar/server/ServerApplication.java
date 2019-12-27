@@ -4,8 +4,9 @@ import io.grpc.Server;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.toxa108.blitzar.storage.BlitzarDatabase;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Scanner;
+import java.io.InputStreamReader;
 import java.util.concurrent.Executors;
 
 public class ServerApplication {
@@ -14,7 +15,7 @@ public class ServerApplication {
     public static void main(String[] args) throws IOException, InterruptedException {
         database = new BlitzarDatabase("/tmp/blitzarprod");
 
-        Server server = NettyServerBuilder.forPort(9906)
+        Server server = NettyServerBuilder.forPort(9907)
                 .addService(new SqlServiceImpl(database))
                 .build();
 
@@ -26,12 +27,18 @@ public class ServerApplication {
     }
 
     private static void dialog() {
-        Scanner scanner = new Scanner(System.in);
+        BufferedReader ob = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Time series database.");
 
         while (true) {
-            System.out.println("Enter a command:");
-            String command = scanner.nextLine();
+            System.out.println("Enter a string");
+            String command;
+            try {
+                command = ob.readLine();
+            } catch (IOException e) {
+                command = "";
+            }
+
             if ("exit".equals(command)) {
                 break;
             }
