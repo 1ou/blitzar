@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.query.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 
@@ -8,7 +9,7 @@ import java.util.Set;
 public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;
 
-    public QueryProcessorImpl(DatabaseManager databaseManager) {
+    public QueryProcessorImpl(@NotNull final DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
 
