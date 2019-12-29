@@ -8,29 +8,31 @@ public enum FieldType {
     /**
      * 1 byte
      */
-    SHORT((short) 1, false),
+    SHORT((short) 1, false, 2),
     /**
      * 4 bytes
      */
-    INTEGER((short) 2, false),
+    INTEGER((short) 2, false, 4),
     /**
      * 8 bytes
      */
-    LONG((short) 3, false),
+    LONG((short) 3, false, 8),
     /**
      * length * size(char)
      */
-    VARCHAR((short) 4, false);
+    VARCHAR((short) 4, false, 255);
 
     /**
      * TRUE if the size of one record can be different from another one
      */
     private final short id;
     private final boolean variable;
+    private final int size;
 
-    FieldType(@NotNull final short id, @NotNull final boolean variable) {
+    FieldType(@NotNull final short id, @NotNull final boolean variable, @NotNull final int size) {
         this.id = id;
         this.variable = variable;
+        this.size = size;
     }
 
     public boolean isVariable() {
@@ -51,6 +53,6 @@ public enum FieldType {
     }
 
     public int size() {
-        return Short.BYTES;
+        return size;
     }
 }

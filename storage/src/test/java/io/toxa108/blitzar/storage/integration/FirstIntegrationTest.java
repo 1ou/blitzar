@@ -29,10 +29,6 @@ public class FirstIntegrationTest {
                 new String(blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes()));
         Assert.assertEquals("success", ddlDatabaseResult);
 
-//        String changeDatabaseResult =
-//                new String(blitzarDatabase.queryProcessor().process(userContext, "use test;".getBytes()));
-//        Assert.assertEquals("success", changeDatabaseResult);
-
         userContext = new UserContextImpl(
                 "test", new UserImpl("toxa", "123321"));
 
