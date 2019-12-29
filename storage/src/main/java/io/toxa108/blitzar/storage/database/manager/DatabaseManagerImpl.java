@@ -1,15 +1,19 @@
 package io.toxa108.blitzar.storage.database.manager;
 
 import io.toxa108.blitzar.storage.NotNull;
+import io.toxa108.blitzar.storage.database.manager.user.UserManager;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQuery;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 
 public class DatabaseManagerImpl implements DatabaseManager {
+    private final UserManager userManager;
     private final DataDefinitionQueryResolver dataDefinitionQueryResolver;
 
-    public DatabaseManagerImpl(@NotNull DataDefinitionQueryResolver dataDefinitionQueryResolver) {
+    public DatabaseManagerImpl(@NotNull final UserManager userManager,
+                               @NotNull final DataDefinitionQueryResolver dataDefinitionQueryResolver) {
+        this.userManager = userManager;
         this.dataDefinitionQueryResolver = dataDefinitionQueryResolver;
     }
 
@@ -27,5 +31,10 @@ public class DatabaseManagerImpl implements DatabaseManager {
             default:
                 return new EmptySuccessResultQuery();
         }
+    }
+
+    @Override
+    public UserManager userManager() {
+        return userManager;
     }
 }

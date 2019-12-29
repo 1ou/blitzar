@@ -6,6 +6,8 @@ import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.DatabaseContextImpl;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManagerImpl;
+import io.toxa108.blitzar.storage.database.manager.user.UserManager;
+import io.toxa108.blitzar.storage.database.manager.user.UserManagerImpl;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
@@ -36,7 +38,9 @@ public class BlitzarDatabase {
         final DataDefinitionQueryResolver dataDefinitionQueryResolver =
                 new DataDefinitionQueryResolverImpl(databaseContext);
 
-        this.databaseManager = new DatabaseManagerImpl(dataDefinitionQueryResolver);
+        final UserManager userManager = new UserManagerImpl();
+
+        this.databaseManager = new DatabaseManagerImpl(userManager, dataDefinitionQueryResolver);
         this.queryProcessor = new QueryProcessorImpl(databaseManager);
     }
 
