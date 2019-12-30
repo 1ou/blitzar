@@ -16,6 +16,7 @@ public interface DatabaseManager {
 
     /**
      * Apply data manipulation query to the table
+     *
      * @param query DML query
      * @return result query
      */

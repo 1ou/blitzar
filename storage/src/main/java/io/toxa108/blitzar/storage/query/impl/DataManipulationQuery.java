@@ -41,4 +41,8 @@ public class DataManipulationQuery extends AbstractQuery {
     public Type type() {
         return type;
     }
+
+    public Set<Field> fields() {
+        return fields;
+    }
 }

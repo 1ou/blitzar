@@ -29,13 +29,22 @@ public class FirstIntegrationTest {
                 new String(blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes()));
         Assert.assertEquals("success", ddlDatabaseResult);
 
+
         userContext = new UserContextImpl(
                 "test", new UserImpl("toxa", "123321"));
 
         String ddlTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
                         userContext,
-                        "create table money ( time long not null primary key, value long not null );".getBytes())
+                        "create table example ( time long not null primary key, value long not null );".getBytes())
+                );
+
+        Assert.assertEquals("success", ddlTableResult);
+
+        String insertTableResult =
+                new String(blitzarDatabase.queryProcessor().process(
+                        userContext,
+                        "insert into example ( time, value ) values (30000, 200);".getBytes())
                 );
 
         Assert.assertEquals("success", ddlTableResult);
