@@ -3,18 +3,23 @@ package io.toxa108.blitzar.storage.database.manager;
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.user.UserManager;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
+import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQuery;
-import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
+import io.toxa108.blitzar.storage.query.impl.DataManipulationQuery;
+import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
 
 public class DatabaseManagerImpl implements DatabaseManager {
     private final UserManager userManager;
     private final DataDefinitionQueryResolver dataDefinitionQueryResolver;
+    private final DataManipulationQueryResolver dataManipulationQueryResolver;
 
     public DatabaseManagerImpl(@NotNull final UserManager userManager,
-                               @NotNull final DataDefinitionQueryResolver dataDefinitionQueryResolver) {
+                               @NotNull final DataDefinitionQueryResolver dataDefinitionQueryResolver,
+                               @NotNull final DataManipulationQueryResolver dataManipulationQueryResolver) {
         this.userManager = userManager;
         this.dataDefinitionQueryResolver = dataDefinitionQueryResolver;
+        this.dataManipulationQueryResolver = dataManipulationQueryResolver;
     }
 
     @Override
@@ -29,7 +34,23 @@ public class DatabaseManagerImpl implements DatabaseManager {
             case DROP_DATABASE:
                 return dataDefinitionQueryResolver.dropDatabase(query);
             default:
-                return new EmptySuccessResultQuery();
+                return new ErrorResultQuery();
+        }
+    }
+
+    @Override
+    public ResultQuery resolveDataManipulationQuery(DataManipulationQuery query) {
+        switch (query.type()) {
+            case INSERT:
+                return dataManipulationQueryResolver.insert(query);
+            case DELETE:
+                return dataManipulationQueryResolver.delete(query);
+            case UPDATE:
+                return dataManipulationQueryResolver.update(query);
+            case SELECT:
+                return dataManipulationQueryResolver.select(query);
+            default:
+                return new ErrorResultQuery();
         }
     }
 

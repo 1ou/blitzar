@@ -155,4 +155,17 @@ public class QueryProcessorImpl implements QueryProcessor {
         );
         return databaseManager.resolveDataDefinitionQuery(dataDefinitionQuery).toBytes();
     }
+
+    private byte[] insertIntoTable(@NotNull final UserContext userContext, @NotNull final String[] sql) {
+        Set<Field> fields = new HashSet<>();
+
+        DataManipulationQuery dataManipulationQuery = new DataManipulationQuery(
+                userContext.databaseName(),
+                sql[2],
+                DataManipulationQuery.Type.INSERT,
+                fields
+        );
+
+        return databaseManager.resolveDataManipulationQuery(dataManipulationQuery).toBytes();
+    }
 }

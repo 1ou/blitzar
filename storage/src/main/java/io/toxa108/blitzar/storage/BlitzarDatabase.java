@@ -11,8 +11,10 @@ import io.toxa108.blitzar.storage.database.manager.user.UserManagerImpl;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
+import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQueryResolverImpl;
+import io.toxa108.blitzar.storage.query.impl.DataManipulationQueryResolverImpl;
 import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
 import java.io.IOException;
@@ -40,7 +42,10 @@ public class BlitzarDatabase {
 
         final UserManager userManager = new UserManagerImpl();
 
-        this.databaseManager = new DatabaseManagerImpl(userManager, dataDefinitionQueryResolver);
+        final DataManipulationQueryResolver dataManipulationQueryResolver =
+                new DataManipulationQueryResolverImpl(databaseContext);
+
+        this.databaseManager = new DatabaseManagerImpl(userManager, dataDefinitionQueryResolver, dataManipulationQueryResolver);
         this.queryProcessor = new QueryProcessorImpl(databaseManager);
     }
 
