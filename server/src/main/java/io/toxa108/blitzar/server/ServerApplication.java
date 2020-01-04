@@ -15,7 +15,7 @@ public class ServerApplication {
     public static void main(String[] args) throws IOException, InterruptedException {
         database = new BlitzarDatabase("/tmp/blitzarprod");
 
-        Server server = NettyServerBuilder.forPort(9907)
+        Server server = NettyServerBuilder.forPort(Integer.parseInt(args[0]))
                 .addService(new SqlServiceImpl(database))
                 .build();
 
@@ -43,7 +43,7 @@ public class ServerApplication {
                 break;
             }
             System.out.println();
-            System.out.println(new String(database.queryProcessor().process(command.getBytes())));
+            System.out.println(new String(database.queryProcessor().process(null, command.getBytes())));
         }
     }
 }

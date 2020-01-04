@@ -9,3 +9,4 @@
 
 rootProject.name = "blitzar"
 include("server", "storage")
+include("gateway")
