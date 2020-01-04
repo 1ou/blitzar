@@ -16,7 +16,7 @@ public class SqlServiceImpl extends SqlServiceGrpc.SqlServiceImplBase {
     @Override
     public void request(@NotNull final SqlRequest request,
                         @NotNull final StreamObserver<SqlResponse> responseObserver) {
-        database.queryProcessor().process(request.getSql().toByteArray());
+        database.queryProcessor().process(null, request.getSql().toByteArray());
 
         byte[] bytes = {0, 1, 2, 3};
         SqlResponse sqlResponse = SqlResponse.newBuilder()
