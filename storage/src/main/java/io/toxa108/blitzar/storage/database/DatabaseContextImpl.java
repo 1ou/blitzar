@@ -34,9 +34,16 @@ public class DatabaseContextImpl implements DatabaseContext {
 
     @Override
     public Database createDatabase(@NotNull final String name) throws IOException {
-        Database database = fileManager.initializeDatabase(name);
-        databases.add(database);
-        return database;
+        Optional<Database> databaseOptional = databases.stream()
+                .filter(it -> it.name().equals(name))
+                .findFirst();
+        if (databaseOptional.isPresent()) {
+            return databaseOptional.get();
+        } else {
+            Database database = fileManager.initializeDatabase(name);
+            databases.add(database);
+            return database;
+        }
     }
 
     @Override

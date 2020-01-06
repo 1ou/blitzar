@@ -198,7 +198,7 @@ public class FileManagerImpl implements FileManager {
 
                 Scheme scheme = this.loadTableScheme(file);
                 tables.add(new TableImpl(
-                        file.getName(),
+                        file.getName().split("\\.")[0],
                         scheme,
                         new RowManagerImpl(file, scheme, databaseConfiguration)
                 ));

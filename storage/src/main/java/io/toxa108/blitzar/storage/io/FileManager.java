@@ -20,6 +20,7 @@ public interface FileManager {
      *
      * @param name name
      * @return result query
+     * @throws IOException disk io exception
      */
     Database initializeDatabase(String name) throws IOException;
 
@@ -30,6 +31,7 @@ public interface FileManager {
      * @param tableName    name
      * @param scheme       scheme
      * @return result query
+     * @throws IOException disk io exception
      */
     Table initializeTable(String databaseName, String tableName, Scheme scheme) throws IOException;
 
@@ -38,6 +40,7 @@ public interface FileManager {
      *
      * @param databaseName databaseName
      * @return tables
+     * @throws IOException disk io exception
      */
     List<Table> loadTables(String databaseName) throws IOException;
 
@@ -47,6 +50,7 @@ public interface FileManager {
      * @param databaseName database name
      * @param tableName    table name
      * @return table
+     * @throws IOException disk io exception
      */
     Table loadTable(String databaseName, String tableName) throws IOException;
 

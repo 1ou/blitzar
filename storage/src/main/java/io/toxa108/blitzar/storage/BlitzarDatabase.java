@@ -53,7 +53,7 @@ public class BlitzarDatabase {
                 new DataManipulationQueryResolverImpl(databaseContext);
 
         this.databaseManager = new DatabaseManagerImpl(userManager, dataDefinitionQueryResolver, dataManipulationQueryResolver);
-        this.queryProcessor = new QueryProcessorImpl(databaseManager);
+        this.queryProcessor = new QueryProcessorImpl(databaseManager, databaseContext);
     }
 
     public DatabaseManager databaseManager() {

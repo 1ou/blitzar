@@ -1,27 +1,29 @@
 package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
+import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
-import io.toxa108.blitzar.storage.database.schema.Field;
-import io.toxa108.blitzar.storage.database.schema.Index;
+import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.UserContext;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;
+    public final DatabaseContext databaseContext;
 
-    public QueryProcessorImpl(@NotNull final DatabaseManager databaseManager) {
+    public QueryProcessorImpl(@NotNull final DatabaseManager databaseManager,
+                              @NotNull final DatabaseContext databaseContext) {
         this.databaseManager = databaseManager;
+        this.databaseContext = databaseContext;
     }
 
     @Override
-    public byte[] process(@NotNull final UserContext userContext, @NotNull final byte[] request) {
+    public byte[] process(@NotNull final UserContext userContext,
+                          @NotNull final byte[] request) {
         String query = new String(request).toLowerCase();
         final char endOfQuerySign = ';';
         final String splitQuerySign = " ";
@@ -58,9 +60,10 @@ public class QueryProcessorImpl implements QueryProcessor {
                     default:
                         return errorKeyword.getBytes();
                 }
+            case insertKeyword:
+                return insertIntoTable(userContext, parts);
             case useKeyword:
             case selectKeyword:
-            case insertKeyword:
             case deleteKeyword:
             default:
                 break;
@@ -73,9 +76,9 @@ public class QueryProcessorImpl implements QueryProcessor {
         final String name = sql[2];
         final Set<Field> fields = new HashSet<>();
         final Set<Index> indexes = new HashSet<>();
+        final List<String> fieldsSemantic = new ArrayList<>();
 
         boolean startFields = false;
-        List<String> fieldsSemantic = new ArrayList<>();
         int p = 0;
         for (int i = 0; i < sql.length; ++i) {
             if ("(".equals(sql[i])) {
@@ -135,10 +138,10 @@ public class QueryProcessorImpl implements QueryProcessor {
                 indexes.add(index);
             }
 
-            Field field = new FieldImpl(parts[0], type, nullable, unique, new byte[type.size()]);
+            final Field field = new FieldImpl(parts[0], type, nullable, unique, new byte[type.size()]);
             fields.add(field);
         }
-        DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
+        final DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
                 userContext.databaseName(),
                 name,
                 fields,
@@ -150,22 +153,72 @@ public class QueryProcessorImpl implements QueryProcessor {
     }
 
     private byte[] createDatabase(@NotNull final UserContext userContext, @NotNull final String[] sql) {
-        DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
+        final DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
                 sql[2], DataDefinitionQuery.Type.CREATE_DATABASE
         );
         return databaseManager.resolveDataDefinitionQuery(dataDefinitionQuery).toBytes();
     }
 
     private byte[] insertIntoTable(@NotNull final UserContext userContext, @NotNull final String[] sql) {
-        Set<Field> fields = new HashSet<>();
+        final Optional<Database> databaseOptional = databaseContext.findByName(userContext.databaseName());
+        final String tableName = sql[2];
 
-        DataManipulationQuery dataManipulationQuery = new DataManipulationQuery(
-                userContext.databaseName(),
-                sql[2],
-                DataManipulationQuery.Type.INSERT,
-                fields
-        );
+        if (databaseOptional.isPresent()) {
+            final Optional<Table> tableOptional = databaseOptional.get().findTableByName(tableName);
+            if (tableOptional.isPresent()) {
+                final Table table = tableOptional.get();
+                final Scheme scheme = table.scheme();
+                final List<String> schemeFieldsNames = scheme.fields().stream()
+                        .map(Field::name)
+                        .collect(Collectors.toList());
 
-        return databaseManager.resolveDataManipulationQuery(dataManipulationQuery).toBytes();
+                final Set<Field> fields = new HashSet<>();
+                final List<String> inputFieldsNames = Arrays.stream(sql)
+                        .filter(schemeFieldsNames::contains)
+                        .collect(Collectors.toList());
+
+                final List<Field> finalFields = scheme.fields()
+                        .stream()
+                        .filter(it -> inputFieldsNames.contains(it.name()))
+                        .collect(Collectors.toList());
+
+                final List<byte[]> values = new ArrayList<>();
+
+                boolean is = false;
+                for (String s : sql) {
+                    if (is) {
+                        if (s.matches("^[a-zA-Z0-9_]*$")) {
+                            values.add(s.getBytes());
+                        }
+                    }
+                    if ("values".equals(s)) {
+                        is = true;
+                    }
+                }
+                for (int i = 0; i < finalFields.size(); ++i) {
+                    fields.add(new FieldImpl(
+                            finalFields.get(i).name(),
+                            finalFields.get(i).type(),
+                            finalFields.get(i).nullable(),
+                            finalFields.get(i).unique(),
+                            values.get(i)
+                    ));
+                }
+
+                final DataManipulationQuery dataManipulationQuery = new DataManipulationQuery(
+                        userContext.databaseName(),
+                        tableName,
+                        DataManipulationQuery.Type.INSERT,
+                        fields
+                );
+
+                return databaseManager.resolveDataManipulationQuery(dataManipulationQuery).toBytes();
+            }
+        }
+        return error();
+    }
+
+    private byte[] error() {
+        return new ErrorResultQuery().toBytes();
     }
 }

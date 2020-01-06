@@ -36,7 +36,7 @@ public class FirstIntegrationTest {
         String ddlTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
                         userContext,
-                        "create table example ( time long not null primary key, value long not null );".getBytes())
+                        "create table example ( time long not null primary key , value long not null );".getBytes())
                 );
 
         Assert.assertEquals("success", ddlTableResult);
@@ -44,9 +44,9 @@ public class FirstIntegrationTest {
         String insertTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
                         userContext,
-                        "insert into example ( time, value ) values (30000, 200);".getBytes())
+                        "insert into example ( time , value ) values ( 30000 , 200 );".getBytes())
                 );
 
-        Assert.assertEquals("success", ddlTableResult);
+        Assert.assertEquals("success", insertTableResult);
     }
 }

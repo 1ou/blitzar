@@ -25,7 +25,12 @@ public class FieldImpl implements Field {
         this.fieldType = fieldType;
         this.nullable = nullable;
         this.unique = unique;
-        this.valueSize = value.length;
+
+        if (fieldType == FieldType.VARCHAR) {
+            this.valueSize = value.length;
+        } else {
+            this.valueSize = fieldType.size();
+        }
         this.value = value;
     }
 
