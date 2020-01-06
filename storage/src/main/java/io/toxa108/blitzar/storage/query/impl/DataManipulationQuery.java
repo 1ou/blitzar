@@ -25,7 +25,6 @@ public class DataManipulationQuery extends AbstractQuery {
         SELECT
     }
 
-    ;
     private final Type type;
     private final Set<Field> fields;
 

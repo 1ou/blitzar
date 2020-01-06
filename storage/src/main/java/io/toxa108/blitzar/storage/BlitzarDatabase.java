@@ -29,11 +29,18 @@ public class BlitzarDatabase {
         }
 
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
-        final FileManager fileManager = new FileManagerImpl(path, databaseConfiguration);
+        final FileManager fileManager;
+        try {
+            fileManager = new FileManagerImpl(path, databaseConfiguration);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException();
+        }
         final DatabaseContext databaseContext;
         try {
             databaseContext = new DatabaseContextImpl(fileManager);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new IllegalStateException();
         }
 

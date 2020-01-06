@@ -13,6 +13,8 @@ import io.toxa108.blitzar.storage.io.FileManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,11 @@ public class FileManagerImpl implements FileManager {
     private final DatabaseConfiguration databaseConfiguration;
 
     public FileManagerImpl(@NotNull final String baseFolder,
-                           @NotNull final DatabaseConfiguration databaseConfiguration) {
+                           @NotNull final DatabaseConfiguration databaseConfiguration
+    ) throws IOException {
+        if (!new File(baseFolder).exists()) {
+            Files.createDirectory(Path.of(baseFolder));
+        }
         this.baseFolder = baseFolder;
         this.bytesManipulator = new BytesManipulatorImpl();
         this.databaseConfiguration = databaseConfiguration;

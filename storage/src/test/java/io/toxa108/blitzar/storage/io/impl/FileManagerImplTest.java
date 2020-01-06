@@ -18,7 +18,7 @@ public class FileManagerImplTest {
     DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
         fileManager.clear();
     }

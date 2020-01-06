@@ -9,11 +9,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class TestFileManagerImpl extends FileManagerImpl {
-    public TestFileManagerImpl(String baseFolder, DatabaseConfiguration databaseConfiguration) {
+    public TestFileManagerImpl(String baseFolder, DatabaseConfiguration databaseConfiguration) throws IOException {
         super(baseFolder, databaseConfiguration);
     }
 
-    public TestFileManagerImpl(String baseFolder) {
+    public TestFileManagerImpl(String baseFolder) throws IOException {
         super(baseFolder, new DatabaseConfigurationImpl(16));
     }
 

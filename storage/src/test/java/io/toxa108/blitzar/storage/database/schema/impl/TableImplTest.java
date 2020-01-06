@@ -21,6 +21,9 @@ public class TableImplTest {
     DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
     FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
 
+    public TableImplTest() throws IOException {
+    }
+
     @Before
     public void before() {
         fileManager.clear();

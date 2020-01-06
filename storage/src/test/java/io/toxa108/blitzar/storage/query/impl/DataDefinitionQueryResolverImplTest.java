@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 public class DataDefinitionQueryResolverImplTest {
     @Before
-    public void before() {
+    public void before() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
         fileManager.clear();
     }

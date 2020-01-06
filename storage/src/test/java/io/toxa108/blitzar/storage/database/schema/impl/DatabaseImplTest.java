@@ -16,6 +16,9 @@ public class DatabaseImplTest {
     private final FileManager fileManager = new FileManagerImpl("/tmp/blitzar",
             new DatabaseConfigurationImpl(16));
 
+    public DatabaseImplTest() throws IOException {
+    }
+
     @Before
     public void before() {
         fileManager.clear();
