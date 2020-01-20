@@ -2,10 +2,12 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.RowManager;
+import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -45,6 +47,16 @@ public class TableImpl implements Table {
     @Override
     public void addRow(@NotNull final Row row) {
         rowManager.add(row);
+    }
+
+    @Override
+    public List<Row> search() {
+        return rowManager.search();
+    }
+
+    @Override
+    public List<Row> search(Key key) {
+        return rowManager.search(key);
     }
 
     @Override

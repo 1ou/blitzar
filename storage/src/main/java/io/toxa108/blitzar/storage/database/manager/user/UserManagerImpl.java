@@ -16,4 +16,9 @@ public class UserManagerImpl implements UserManager {
     public User createUser(@NotNull final String login, @NotNull final String password) {
         return users.put(login, new UserImpl(login, password));
     }
+
+    @Override
+    public void clear() {
+        users.clear();
+    }
 }

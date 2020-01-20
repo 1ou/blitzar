@@ -8,4 +8,9 @@ public interface UserManager {
      * @return user
      */
     User createUser(String login, String password);
+
+    /**
+     * Clear
+     */
+    void clear();
 }

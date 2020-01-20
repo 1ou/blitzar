@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Set;
 
 public class DiskTreeManagerTest {
@@ -336,10 +337,10 @@ public class DiskTreeManagerTest {
             fieldId = new FieldImpl("id", FieldType.LONG,
                     Nullable.NOT_NULL, Unique.UNIQUE, bytesManipulator.longToBytes(i + 1));
             Key key = new KeyImpl(fieldId);
-            Row row = diskTreeManager.search(key);
+            List<Row> rows = diskTreeManager.search(key);
             String compareStr = "justname" + (i + 1) + "%";
-            Assert.assertEquals(row.key(), key);
-            Assert.assertEquals(compareStr, new String(row.fieldByName("name").value()).substring(0, compareStr.length()));
+            Assert.assertEquals(rows.get(0).key(), key);
+            Assert.assertEquals(compareStr, new String(rows.get(0).fieldByName("name").value()).substring(0, compareStr.length()));
         }
     }
 }

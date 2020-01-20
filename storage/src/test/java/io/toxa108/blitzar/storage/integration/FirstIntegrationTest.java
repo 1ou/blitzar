@@ -15,6 +15,7 @@ public class FirstIntegrationTest {
 
     @Before
     public void init() {
+        blitzarDatabase.clear();
         user = blitzarDatabase.databaseManager().userManager().createUser("toxa", "123321");
     }
 
@@ -48,5 +49,14 @@ public class FirstIntegrationTest {
                 );
 
         Assert.assertEquals("success", insertTableResult);
+
+
+        String selectFromTableResult =
+                new String(blitzarDatabase.queryProcessor().process(
+                        userContext,
+                        "select * from example;".getBytes())
+                );
+
+        Assert.assertEquals("", selectFromTableResult);
     }
 }

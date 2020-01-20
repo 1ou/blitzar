@@ -25,6 +25,8 @@ import java.io.IOException;
 public class BlitzarDatabase {
     private final DatabaseManager databaseManager;
     private final QueryProcessor queryProcessor;
+    private final FileManager fileManager;
+    private final DatabaseContext databaseContext;
 
     public BlitzarDatabase(final String path) {
         if (path == null || path.isEmpty()) {
@@ -32,14 +34,13 @@ public class BlitzarDatabase {
         }
 
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
-        final FileManager fileManager;
         try {
             fileManager = new FileManagerImpl(path, databaseConfiguration);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException();
         }
-        final DatabaseContext databaseContext;
+
         try {
             databaseContext = new DatabaseContextImpl(fileManager);
         } catch (IOException e) {
@@ -61,6 +62,12 @@ public class BlitzarDatabase {
 
     public DatabaseManager databaseManager() {
         return databaseManager;
+    }
+
+    public void clear() {
+        fileManager.clear();
+        databaseManager.userManager().clear();
+        databaseContext.databases().clear();
     }
 
     public QueryProcessor queryProcessor() {

@@ -83,7 +83,7 @@ public class FileManagerImpl implements FileManager {
         File file = createFile(baseFolder + "/" + databaseName, tableName, this.tableExtension);
         this.saveTableScheme(file, scheme);
         return new TableImpl(
-                file.getName(),
+                file.getName().split("\\.")[0],
                 scheme,
                 new RowManagerImpl(file, scheme, databaseConfiguration)
         );
@@ -220,7 +220,7 @@ public class FileManagerImpl implements FileManager {
                     Scheme scheme = this.loadTableScheme(file);
                     tables.add(
                             new TableImpl(
-                                    file.getName(),
+                                    file.getName().split("\\.")[0],
                                     scheme,
                                     new RowManagerImpl(file, scheme, databaseConfiguration)
                             )

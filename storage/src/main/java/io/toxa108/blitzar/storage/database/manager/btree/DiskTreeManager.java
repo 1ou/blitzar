@@ -332,7 +332,7 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     @Override
-    public Row search(@NotNull final Key key) throws IOException {
+    public List<Row> search(@NotNull final Key key) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
 
         while (!n.leaf) {
@@ -368,10 +368,53 @@ public class DiskTreeManager implements TableDataManager {
                     );
                 })
                 .collect(Collectors.toSet());
-        return new RowImpl(
+        return List.of(new RowImpl(
                 n.keys[i],
                 fields
-        );
+        ));
+    }
+
+    @Override
+    public List<Row> search() throws IOException {
+        List<Row> result = new ArrayList<>();
+        TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
+
+        while (!n.leaf) {
+            n = loadNode(n.p[0]);
+        }
+
+        while (true) {
+            for (int i = 0; i < n.q; ++i) {
+                byte[] data = n.values[i];
+                AtomicInteger seek = new AtomicInteger();
+                Set<Field> fields = scheme.dataFields()
+                        .stream()
+                        .map(it -> {
+                            int s = seek.getAndAdd(it.diskSize());
+                            byte[] bytes = new byte[it.diskSize()];
+                            System.arraycopy(data, s, bytes, 0, it.diskSize());
+                            return new FieldImpl(
+                                    it.name(),
+                                    it.type(),
+                                    it.nullable(),
+                                    it.unique(),
+                                    bytes
+                            );
+                        })
+                        .collect(Collectors.toSet());
+                result.add(new RowImpl(
+                        n.keys[i],
+                        fields
+                ));
+            }
+
+            if (n.nextPos == -1) {
+                break;
+            }
+            n = loadNode(n.nextPos);
+        }
+
+        return result;
     }
 
     /**

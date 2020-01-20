@@ -62,8 +62,9 @@ public class QueryProcessorImpl implements QueryProcessor {
                 }
             case insertKeyword:
                 return insertIntoTable(userContext, parts);
-            case useKeyword:
             case selectKeyword:
+                return selectFromTable(userContext, parts);
+            case useKeyword:
             case deleteKeyword:
             default:
                 break;
@@ -213,6 +214,22 @@ public class QueryProcessorImpl implements QueryProcessor {
                 );
 
                 return databaseManager.resolveDataManipulationQuery(dataManipulationQuery).toBytes();
+            }
+        }
+        return error();
+    }
+
+    private byte[] selectFromTable(@NotNull final UserContext userContext, @NotNull final String[] sql) {
+        final Optional<Database> databaseOptional = databaseContext.findByName(userContext.databaseName());
+        final String tableName = sql[3];
+
+        if (databaseOptional.isPresent()) {
+            final Optional<Table> tableOptional = databaseOptional.get().findTableByName(tableName);
+            if (tableOptional.isPresent()) {
+                final Table table = tableOptional.get();
+                final Scheme scheme = table.scheme();
+                table.search();
+                return error();
             }
         }
         return error();
