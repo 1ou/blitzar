@@ -19,6 +19,9 @@ import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
 import java.io.IOException;
 
+/**
+ * Timeseries database
+ */
 public class BlitzarDatabase {
     private final DatabaseManager databaseManager;
     private final QueryProcessor queryProcessor;
