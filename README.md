@@ -16,8 +16,8 @@ Todo:
 2. Storing tables
     - metadata +
     - data in b-tree +
-3. Server
+3. Server +
 4. Translate sql queries
 5. Database transactions
-6. Service discovery
+6. Service discovery +
 7. Distributed version
