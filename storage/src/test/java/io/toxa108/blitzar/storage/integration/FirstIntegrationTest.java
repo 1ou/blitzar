@@ -50,7 +50,6 @@ public class FirstIntegrationTest {
 
         Assert.assertEquals("success", insertTableResult);
 
-
         String selectFromTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
                         userContext,

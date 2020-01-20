@@ -44,7 +44,7 @@ public class ServerApplication {
         System.out.println("Time series database.");
 
         while (true) {
-            System.out.println("Enter a string");
+            System.out.println("Enter a command:");
             String command;
             try {
                 command = ob.readLine();

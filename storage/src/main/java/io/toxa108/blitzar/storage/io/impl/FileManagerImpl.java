@@ -216,7 +216,7 @@ public class FileManagerImpl implements FileManager {
         if (files != null) {
             List<Table> tables = new ArrayList<>();
             for (File file : files) {
-                if (file.getName().equals(tableName)) {
+                if (file.getName().split("\\.")[0].equals(tableName)) {
                     Scheme scheme = this.loadTableScheme(file);
                     tables.add(
                             new TableImpl(
