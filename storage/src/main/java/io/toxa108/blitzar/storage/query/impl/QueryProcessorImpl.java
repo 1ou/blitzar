@@ -5,10 +5,7 @@ import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.UserContext;
-import io.toxa108.blitzar.storage.query.operation.CreateDatabaseCommand;
-import io.toxa108.blitzar.storage.query.operation.CreateTableCommand;
-import io.toxa108.blitzar.storage.query.operation.InsertToTableCommand;
-import io.toxa108.blitzar.storage.query.operation.SelectFromTableCommand;
+import io.toxa108.blitzar.storage.query.command.*;
 
 public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;
@@ -33,6 +30,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         final String useKeyword = "use";
         final String tableKeyword = "table";
         final String databaseKeyword = "database";
+        final String showKeyword = "show";
         final String errorKeyword = "error";
 
         if (query.charAt(query.length() - 1) != endOfQuerySign) {
@@ -46,9 +44,10 @@ public class QueryProcessorImpl implements QueryProcessor {
             throw new IllegalArgumentException();
         }
 
+        final String act = parts[1];
+
         switch (parts[0]) {
             case createKeyword:
-                final String act = parts[1];
                 switch (act) {
                     case tableKeyword:
                         return new CreateTableCommand(databaseManager).execute(userContext, parts);
@@ -63,6 +62,13 @@ public class QueryProcessorImpl implements QueryProcessor {
             case selectKeyword:
                 return new SelectFromTableCommand(databaseContext, databaseManager)
                         .execute(userContext, parts);
+            case showKeyword:
+                switch (act) {
+                    case "databases":
+                        return new ShowDatabasesCommand(databaseContext).execute(userContext, parts);
+                    case "tables":
+                        return new ShowTablesCommand(databaseContext).execute(userContext, parts);
+                }
             case useKeyword:
             case deleteKeyword:
             default:

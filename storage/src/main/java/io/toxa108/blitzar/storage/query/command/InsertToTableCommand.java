@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.query.operation;
+package io.toxa108.blitzar.storage.query.command;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;

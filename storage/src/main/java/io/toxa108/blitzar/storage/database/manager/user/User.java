@@ -6,4 +6,10 @@ public interface User {
      * @return login
      */
     String login();
+
+    /**
+     * Return user password
+     * @return password
+     */
+    String password();
 }

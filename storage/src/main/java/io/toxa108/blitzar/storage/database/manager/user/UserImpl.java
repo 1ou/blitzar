@@ -15,4 +15,9 @@ public class UserImpl implements User {
     public String login() {
         return login;
     }
+
+    @Override
+    public String password() {
+        return encryptPassword;
+    }
 }

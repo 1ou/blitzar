@@ -8,11 +8,15 @@ import io.grpc.Server;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.database.manager.user.AccessDeniedException;
+import io.toxa108.blitzar.storage.query.UserContext;
+import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
@@ -22,6 +26,7 @@ public class ServerApplication {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         database = new BlitzarDatabase("/tmp/blitzarprod");
+        database.databaseManager().userManager().createUser("admin", "123");
 
         port = args.length > 0 ? Integer.parseInt(args[0]) : 9009;
         Server server = NettyServerBuilder.forPort(port)
@@ -42,21 +47,41 @@ public class ServerApplication {
     private static void dialog() {
         BufferedReader ob = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Time series database.");
+        Optional<UserContext> userContext = Optional.empty();
 
         while (true) {
-            System.out.println("Enter a command:");
-            String command;
-            try {
-                command = ob.readLine();
-            } catch (IOException e) {
-                command = "";
-            }
+            if (userContext.isEmpty()) {
+                System.out.println("Enter login & password:");
 
-            if ("exit".equals(command)) {
-                break;
+                String login, password;
+                try {
+                    login = ob.readLine();
+                    password = ob.readLine();
+                    userContext = Optional.of(
+                            new UserContextImpl(
+                                    database.databaseManager().userManager().authorize(login, password)
+                            )
+                    );
+                } catch (IOException ignored) {
+                } catch (AccessDeniedException e) {
+                    System.out.println("Wrong credentials. Try again.");
+                }
+            } else {
+                System.out.println("Enter a command:");
+                String command;
+                try {
+                    command = ob.readLine();
+                } catch (IOException e) {
+                    command = "";
+                }
+
+                if ("exit".equals(command)) {
+                    break;
+                }
+                System.out.println();
+                System.out.println(new String(database.queryProcessor().process(
+                        userContext.get(), command.getBytes())));
             }
-            System.out.println();
-            System.out.println(new String(database.queryProcessor().process(null, command.getBytes())));
         }
     }
 

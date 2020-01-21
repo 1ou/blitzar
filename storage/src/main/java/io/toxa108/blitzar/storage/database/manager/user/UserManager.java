@@ -10,6 +10,14 @@ public interface UserManager {
     User createUser(String login, String password);
 
     /**
+     * Authorize user
+     * @param login login
+     * @param password password
+     * @return user
+     */
+    User authorize(String login, String password) throws AccessDeniedException;
+
+    /**
      * Clear
      */
     void clear();
