@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.command;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.query.UserContext;
 
 public interface SqlCommand {
@@ -10,5 +9,5 @@ public interface SqlCommand {
      * @param sql sql request
      * @return bytes
      */
-    byte[] execute(UserContext userContext, @NotNull final String[] sql);
+    byte[] execute(UserContext userContext, String[] sql);
 }

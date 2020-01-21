@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.query.command;
+package io.toxa108.blitzar.storage.query.command.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
@@ -9,6 +9,7 @@ import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
+import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.DataManipulationQuery;
 import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
 

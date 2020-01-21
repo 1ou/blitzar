@@ -5,7 +5,7 @@ import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.UserContext;
-import io.toxa108.blitzar.storage.query.command.*;
+import io.toxa108.blitzar.storage.query.command.impl.*;
 
 public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;

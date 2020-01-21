@@ -1,10 +1,12 @@
-package io.toxa108.blitzar.storage.query.command;
+package io.toxa108.blitzar.storage.query.command.impl;
 
+import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.query.UserContext;
+import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQuery;
 import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
 
@@ -16,12 +18,12 @@ import java.util.Set;
 public class CreateTableCommand implements SqlCommand {
     private final DatabaseManager databaseManager;
 
-    public CreateTableCommand(DatabaseManager databaseManager) {
+    public CreateTableCommand(@NotNull final DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
 
     @Override
-    public byte[] execute(UserContext userContext, String[] sql) {
+    public byte[] execute(@NotNull final UserContext userContext, @NotNull final String[] sql) {
         final String name = sql[2];
         final Set<Field> fields = new HashSet<>();
         final Set<Index> indexes = new HashSet<>();
