@@ -11,14 +11,18 @@ Create table: ```create table example (time long not null primary key, value lon
 Insert into table: ```insert into example (time , value) values (30000, 200);```
 
 
-Todo:
+First raw release: 0.0.1
 
+Todo
 1. Storing databases +
 2. Storing tables
     - metadata +
     - data in b-tree +
 3. Server +
-4. Translate sql queries
+4. Process sql queries +
 5. Database transactions
 6. Service discovery +
-7. Distributed version
+
+Next:
+
+1. Distributed version
