@@ -5,8 +5,7 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.io.Byteble;
-import io.toxa108.blitzar.storage.io.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
+import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,12 +13,10 @@ import java.util.stream.Collectors;
 public class RowImpl implements Row, Byteble {
     private final Key key;
     private final Set<Field> fields;
-    private final BytesManipulator bytesManipulator;
 
     public RowImpl(@NotNull final Key key, @NotNull final Set<Field> fields) {
         this.fields = fields;
         this.key = key;
-        this.bytesManipulator = new BytesManipulatorImpl();
     }
 
     @Override
@@ -54,13 +51,13 @@ public class RowImpl implements Row, Byteble {
                     String v;
                     switch (it.type()) {
                         case SHORT:
-                            v = String.valueOf(bytesManipulator.bytesToShort(it.value()));
+                            v = String.valueOf(BytesManipulator.bytesToShort(it.value()));
                             break;
                         case INTEGER:
-                            v = String.valueOf(bytesManipulator.bytesToInt(it.value()));
+                            v = String.valueOf(BytesManipulator.bytesToInt(it.value()));
                             break;
                         case LONG:
-                            v = String.valueOf(bytesManipulator.bytesToLong(it.value()));
+                            v = String.valueOf(BytesManipulator.bytesToLong(it.value()));
                             break;
                         case VARCHAR:
                             v = new String(it.value());

@@ -12,8 +12,7 @@ import io.toxa108.blitzar.storage.inmemory.InMemoryBPlusTreeRepository;
 import io.toxa108.blitzar.storage.inmemory.InMemoryHashMapRepository;
 import io.toxa108.blitzar.storage.inmemory.InMemoryTreeRepository;
 import io.toxa108.blitzar.storage.inmemory.Repository;
-import io.toxa108.blitzar.storage.io.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
+import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -85,8 +84,6 @@ public class RepositoryInsertBenchmark {
 
     @Benchmark
     public void test_bplus_tree_disk_insert(Blackhole blackhole) throws IOException {
-        BytesManipulator bytesManipulator = new BytesManipulatorImpl();
-
         Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
         Scheme scheme = new SchemeImpl(
                 Set.of(fieldId),
@@ -118,7 +115,7 @@ public class RepositoryInsertBenchmark {
 
         for (int i = 1; i <= N; i++) {
             fieldId = new FieldImpl(
-                    "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, bytesManipulator.longToBytes(i));
+                    "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i));
 
             Key key = new KeyImpl(fieldId);
             Row row = new RowImpl(key, Set.of(fieldId));

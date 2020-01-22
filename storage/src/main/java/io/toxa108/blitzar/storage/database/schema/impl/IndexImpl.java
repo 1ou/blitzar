@@ -2,8 +2,7 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Index;
-import io.toxa108.blitzar.storage.io.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
+import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 import java.util.Objects;
 import java.util.Set;
@@ -13,18 +12,15 @@ import java.util.stream.Stream;
 public class IndexImpl implements Index {
     private final Set<String> fields;
     private final IndexType type;
-    private final BytesManipulator bytesManipulator;
 
     public IndexImpl(@NotNull final byte[] bytes) {
-        this.bytesManipulator = new BytesManipulatorImpl();
-
         byte[] sizeBytes = new byte[Integer.BYTES];
         byte[] indexTypeBytes = new byte[Short.BYTES];
         System.arraycopy(bytes, 0, sizeBytes, 0, Integer.BYTES);
         System.arraycopy(bytes, Integer.BYTES, indexTypeBytes, 0, Short.BYTES);
 
-        int size = bytesManipulator.bytesToInt(sizeBytes);
-        type = IndexType.fromId(bytesManipulator.bytesToShort(indexTypeBytes));
+        int size = BytesManipulator.bytesToInt(sizeBytes);
+        type = IndexType.fromId(BytesManipulator.bytesToShort(indexTypeBytes));
 
         int fieldsMetadataSize = size - Short.BYTES;
         byte[] fieldsBytes = new byte[fieldsMetadataSize];
@@ -37,7 +33,6 @@ public class IndexImpl implements Index {
     public IndexImpl(@NotNull final Set<String> fields, @NotNull final IndexType type) {
         this.fields = fields;
         this.type = type;
-        this.bytesManipulator = new BytesManipulatorImpl();
     }
 
     @Override
@@ -58,8 +53,8 @@ public class IndexImpl implements Index {
                         .reduce(Integer::sum)
                         .orElse(0);
 
-        byte[] sizeBytes = bytesManipulator.intToBytes(size);
-        byte[] typeBytes = bytesManipulator.shortToBytes(type.id());
+        byte[] sizeBytes = BytesManipulator.intToBytes(size);
+        byte[] typeBytes = BytesManipulator.shortToBytes(type.id());
         byte[] fieldsBytes = fields.stream()
                 .map(it -> (it + "%").getBytes())
                 .reduce((a, b) -> {

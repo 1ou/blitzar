@@ -5,7 +5,6 @@ import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
-import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -22,7 +21,6 @@ public class FileManagerImpl implements FileManager {
     protected final String baseFolder;
     private final String nameRegex = "^[a-zA-Z0-9_]*$";
     private final String tableExtension = "ddd";
-    private final BytesManipulator bytesManipulator;
     private final int m = 1024;
     private final DatabaseConfiguration databaseConfiguration;
 
@@ -33,7 +31,6 @@ public class FileManagerImpl implements FileManager {
             Files.createDirectory(Path.of(baseFolder));
         }
         this.baseFolder = baseFolder;
-        this.bytesManipulator = new BytesManipulatorImpl();
         this.databaseConfiguration = databaseConfiguration;
     }
 
@@ -118,28 +115,28 @@ public class FileManagerImpl implements FileManager {
 
         int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
         int startOfIndexes = posOfIndexes;
-        diskWriter.write(posOfIndexes, bytesManipulator.intToBytes(scheme.indexes().size()));
+        diskWriter.write(posOfIndexes, BytesManipulator.intToBytes(scheme.indexes().size()));
         int tmpSeek = posOfIndexes;
         posOfIndexes += Integer.BYTES * scheme.indexes().size() + Integer.BYTES;
 
         for (Index index : scheme.indexes()) {
             byte[] bytes = index.toBytes();
             tmpSeek += Integer.BYTES;
-            diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfIndexes - startOfIndexes));
+            diskWriter.write(tmpSeek, BytesManipulator.intToBytes(posOfIndexes - startOfIndexes));
             diskWriter.write(posOfIndexes, bytes);
             posOfIndexes += bytes.length;
         }
 
         int posOfFields = databaseConfiguration.diskPageSize() - m;
         startOfIndexes = posOfFields;
-        diskWriter.write(posOfFields, bytesManipulator.intToBytes(scheme.fields().size()));
+        diskWriter.write(posOfFields, BytesManipulator.intToBytes(scheme.fields().size()));
         tmpSeek = posOfFields;
         posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
 
         for (Field field : scheme.fields()) {
             byte[] bytes = field.metadataToBytes();
             tmpSeek += Integer.BYTES;
-            diskWriter.write(tmpSeek, bytesManipulator.intToBytes(posOfFields - startOfIndexes));
+            diskWriter.write(tmpSeek, BytesManipulator.intToBytes(posOfFields - startOfIndexes));
             diskWriter.write(posOfFields, bytes);
             posOfFields += bytes.length;
         }
@@ -152,13 +149,13 @@ public class FileManagerImpl implements FileManager {
         int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
         int startOfIndexes = posOfIndexes;
 
-        int sizeOfIndexes = bytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
+        int sizeOfIndexes = BytesManipulator.bytesToInt(diskReader.read(posOfIndexes, Integer.BYTES));
         for (int i = 0; i < sizeOfIndexes; ++i) {
             posOfIndexes += Integer.BYTES;
-            int seekOfIndex = bytesManipulator.bytesToInt(
+            int seekOfIndex = BytesManipulator.bytesToInt(
                     diskReader.read(posOfIndexes, Integer.BYTES));
 
-            int indexSize = bytesManipulator.bytesToInt(
+            int indexSize = BytesManipulator.bytesToInt(
                     diskReader.read(startOfIndexes + seekOfIndex, Integer.BYTES));
 
             byte[] bytes = diskReader.read(startOfIndexes + seekOfIndex, indexSize + Integer.BYTES);
@@ -170,13 +167,13 @@ public class FileManagerImpl implements FileManager {
         int posOfFields = databaseConfiguration.diskPageSize() - m;
         int startOfFields = posOfFields;
 
-        int sizeOfFields = bytesManipulator.bytesToInt(diskReader.read(posOfFields, Integer.BYTES));
+        int sizeOfFields = BytesManipulator.bytesToInt(diskReader.read(posOfFields, Integer.BYTES));
         for (int i = 0; i < sizeOfFields; ++i) {
             posOfFields += Integer.BYTES;
-            int seekOfField = bytesManipulator.bytesToInt(
+            int seekOfField = BytesManipulator.bytesToInt(
                     diskReader.read(posOfFields, Integer.BYTES));
 
-            int fieldSize = bytesManipulator.bytesToInt(
+            int fieldSize = BytesManipulator.bytesToInt(
                     diskReader.read(startOfFields + seekOfField, Integer.BYTES));
 
             byte[] bytes = diskReader.read(startOfFields + seekOfField, fieldSize + Integer.BYTES);

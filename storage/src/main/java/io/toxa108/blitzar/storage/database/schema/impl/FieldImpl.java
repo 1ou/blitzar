@@ -2,8 +2,7 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
-import io.toxa108.blitzar.storage.io.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
+import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 import java.util.Objects;
 
@@ -14,7 +13,6 @@ public class FieldImpl implements Field {
     private final Unique unique;
     private final byte[] value;
     private final int valueSize;
-    private final BytesManipulator bytesManipulator = new BytesManipulatorImpl();
 
     public FieldImpl(@NotNull final String name,
                      @NotNull final FieldType fieldType,
@@ -48,10 +46,10 @@ public class FieldImpl implements Field {
         System.arraycopy(bytes, Integer.BYTES + Short.BYTES, nullableBytes, 0, Short.BYTES);
         System.arraycopy(bytes, Integer.BYTES + Short.BYTES + Short.BYTES, uniqueBytes, 0, Short.BYTES);
 
-        int size = bytesManipulator.bytesToInt(sizeBytes);
-        fieldType = FieldType.fromId(bytesManipulator.bytesToShort(fieldTypeBytes));
-        nullable = Nullable.fromId(bytesManipulator.bytesToShort(nullableBytes));
-        unique = Unique.fromId(bytesManipulator.bytesToShort(uniqueBytes));
+        int size = BytesManipulator.bytesToInt(sizeBytes);
+        fieldType = FieldType.fromId(BytesManipulator.bytesToShort(fieldTypeBytes));
+        nullable = Nullable.fromId(BytesManipulator.bytesToShort(nullableBytes));
+        unique = Unique.fromId(BytesManipulator.bytesToShort(uniqueBytes));
 
         int fieldNameSize = size - Short.BYTES - Short.BYTES - Short.BYTES;
         byte[] fieldNameBytes = new byte[fieldNameSize];
@@ -92,10 +90,10 @@ public class FieldImpl implements Field {
                 + Short.BYTES
                 + Short.BYTES;
 
-        byte[] sizeBytes = bytesManipulator.intToBytes(size);
-        byte[] fieldTypeBytes = bytesManipulator.shortToBytes(fieldType.id());
-        byte[] nullableBytes = bytesManipulator.shortToBytes(nullable.id());
-        byte[] uniqueBytes = bytesManipulator.shortToBytes(unique.id());
+        byte[] sizeBytes = BytesManipulator.intToBytes(size);
+        byte[] fieldTypeBytes = BytesManipulator.shortToBytes(fieldType.id());
+        byte[] nullableBytes = BytesManipulator.shortToBytes(nullable.id());
+        byte[] uniqueBytes = BytesManipulator.shortToBytes(unique.id());
         byte[] fieldsBytes = (name + "%").getBytes();
 
         byte[] resultBytes = new byte[sizeBytes.length + size];

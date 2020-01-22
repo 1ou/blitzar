@@ -11,10 +11,9 @@ import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
-import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
-import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
+import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.DiskReaderIoImpl;
 import io.toxa108.blitzar.storage.io.impl.DiskWriterIoImpl;
 
@@ -31,7 +30,6 @@ public class DiskTreeManager implements TableDataManager {
     private final DiskReader diskReader;
     private final DiskWriter diskWriter;
     private final DatabaseConfiguration databaseConfiguration;
-    private final BytesManipulator bytesManipulator;
     private final Scheme scheme;
     private final int pNonLeaf;
     private final int pLeaf;
@@ -45,7 +43,6 @@ public class DiskTreeManager implements TableDataManager {
             this.diskReader = new DiskReaderIoImpl(file);
             this.diskWriter = new DiskWriterIoImpl(file);
             this.databaseConfiguration = databaseConfiguration;
-            this.bytesManipulator = new BytesManipulatorImpl();
             this.scheme = scheme;
             this.arrayManipulator = new ArrayManipulator();
             this.pLeaf = estimateSizeOfElementsInLeafNode(scheme);
@@ -57,11 +54,11 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     private void initMetadata() throws IOException {
-        numberOfUsedBlocks = bytesManipulator.bytesToInt(diskReader.read(0, Integer.BYTES));
+        numberOfUsedBlocks = BytesManipulator.bytesToInt(diskReader.read(0, Integer.BYTES));
     }
 
     private void updateMetadata() throws IOException {
-        diskWriter.write(0, bytesManipulator.intToBytes(numberOfUsedBlocks));
+        diskWriter.write(0, BytesManipulator.intToBytes(numberOfUsedBlocks));
     }
 
     /**
@@ -449,7 +446,7 @@ public class DiskTreeManager implements TableDataManager {
         boolean isLeaf = bytes[0] == 1;
         byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
         System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
-        int amountOfEntries = bytesManipulator.bytesToInt(amountOfEntriesBytes);
+        int amountOfEntries = BytesManipulator.bytesToInt(amountOfEntriesBytes);
 
         if (amountOfEntries == 0) {
             return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
@@ -467,12 +464,12 @@ public class DiskTreeManager implements TableDataManager {
                 System.arraycopy(
                         bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
-                int posOfIndex = bytesManipulator.bytesToInt(entryPosBytes) - pos;
+                int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
                 System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
-                sizeOfCurrentIndex = bytesManipulator.bytesToInt(tmpByteBuffer);
+                sizeOfCurrentIndex = BytesManipulator.bytesToInt(tmpByteBuffer);
 
                 System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
-                p[i] = bytesManipulator.bytesToInt(tmpByteBuffer);
+                p[i] = BytesManipulator.bytesToInt(tmpByteBuffer);
                 byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
                 System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
                 keys[i] = new KeyImpl(new FieldImpl(
@@ -486,7 +483,7 @@ public class DiskTreeManager implements TableDataManager {
                 if (i == amountOfEntries - 1) {
                     int pNextPos = posOfIndex + Integer.BYTES * 2 + currentIndexBytes.length;
                     System.arraycopy(bytes, pNextPos, tmpByteBuffer, 0, Integer.BYTES);
-                    p[i + 1] = bytesManipulator.bytesToInt(tmpByteBuffer);
+                    p[i + 1] = BytesManipulator.bytesToInt(tmpByteBuffer);
                 }
             }
             return new TreeNode(
@@ -511,12 +508,12 @@ public class DiskTreeManager implements TableDataManager {
                 System.arraycopy(
                         bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
-                int posOfIndex = bytesManipulator.bytesToInt(entryPosBytes) - pos;
+                int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
                 System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
-                sizeOfCurrentIndex = bytesManipulator.bytesToInt(tmpByteBuffer);
+                sizeOfCurrentIndex = BytesManipulator.bytesToInt(tmpByteBuffer);
 
                 System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
-                sizeOfCurrentData = bytesManipulator.bytesToInt(tmpByteBuffer);
+                sizeOfCurrentData = BytesManipulator.bytesToInt(tmpByteBuffer);
 
                 byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
                 byte[] currentDataBytes = new byte[sizeOfCurrentData];
@@ -536,7 +533,7 @@ public class DiskTreeManager implements TableDataManager {
                 if (i == amountOfEntries - 1) {
                     int nextLeafPos = posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex + sizeOfCurrentData;
                     System.arraycopy(bytes, nextLeafPos, tmpByteBuffer, 0, Integer.BYTES);
-                    next = bytesManipulator.bytesToInt(tmpByteBuffer);
+                    next = BytesManipulator.bytesToInt(tmpByteBuffer);
                 }
             }
             return new TreeNode(
@@ -558,23 +555,23 @@ public class DiskTreeManager implements TableDataManager {
             int currPos = pos;
             diskWriter.write(currPos, new byte[]{0});
             currPos++;
-            diskWriter.write(currPos, bytesManipulator.intToBytes(node.q));
+            diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
 
             for (int i = 0; i < node.q; ++i) {
                 currPos += Integer.BYTES;
                 int posOfIndex = pos + reservedSpaceInNode()
                         + estimatedSize * Integer.BYTES + i * primaryIndexNonVariableRecordSize();
 
-                diskWriter.write(currPos, bytesManipulator.intToBytes(posOfIndex));
-                diskWriter.write(posOfIndex, bytesManipulator.intToBytes(scheme.primaryIndexSize()));
-                diskWriter.write(posOfIndex + Integer.BYTES, bytesManipulator.intToBytes(node.p[i]));
+                diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
+                diskWriter.write(posOfIndex, BytesManipulator.intToBytes(scheme.primaryIndexSize()));
+                diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(node.p[i]));
                 byte[] indexValue = node.keys[i].field().value();
                 diskWriter.write(posOfIndex + 2 * Integer.BYTES, indexValue);
 
                 if (i == node.q - 1) {
                     diskWriter.write(
                             posOfIndex + 2 * Integer.BYTES + indexValue.length,
-                            bytesManipulator.intToBytes(node.p[node.q]));
+                            BytesManipulator.intToBytes(node.p[node.q]));
                 }
             }
         } else {
@@ -584,23 +581,23 @@ public class DiskTreeManager implements TableDataManager {
             int currPos = pos;
             diskWriter.write(currPos, new byte[]{1});
             currPos++;
-            diskWriter.write(currPos, bytesManipulator.intToBytes(node.q));
+            diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
 
             for (int i = 0; i < node.q; ++i) {
                 currPos += Integer.BYTES;
                 int posOfIndex = pos + reservedSpaceInNode()
                         + estimatedSize * Integer.BYTES + i * dataNonVariableRecordSize();
 
-                diskWriter.write(currPos, bytesManipulator.intToBytes(posOfIndex));
-                diskWriter.write(posOfIndex, bytesManipulator.intToBytes(scheme.primaryIndexSize()));
-                diskWriter.write(posOfIndex + Integer.BYTES, bytesManipulator.intToBytes(scheme.dataSize()));
+                diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
+                diskWriter.write(posOfIndex, BytesManipulator.intToBytes(scheme.primaryIndexSize()));
+                diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(scheme.dataSize()));
 
                 diskWriter.write(posOfIndex + 2 * Integer.BYTES, node.keys[i].field().value());
                 diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize(), node.values[i]);
 
                 if (i == node.q - 1) {
                     diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize() + scheme.dataSize(),
-                            bytesManipulator.intToBytes(node.nextPos));
+                            BytesManipulator.intToBytes(node.nextPos));
                 }
             }
         }
