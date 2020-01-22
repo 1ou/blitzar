@@ -2,7 +2,7 @@
 
 Distributed timeseries database. With SQL syntax.
 
-Create database: ```create database_name;```
+Create database: ```create database database_name;```
 
 Use database: ```use database_name;```
 
