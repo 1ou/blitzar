@@ -56,6 +56,6 @@ public class FirstIntegrationTest {
                         "select * from example;".getBytes())
                 );
 
-        Assert.assertEquals("", selectFromTableResult);
+        Assert.assertNotNull(selectFromTableResult);
     }
 }

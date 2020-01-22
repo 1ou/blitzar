@@ -17,6 +17,13 @@ public class ArrayManipulator {
         array[pos] = value;
     }
 
+    public void insertInArray(@NotNull byte[] array, @NotNull byte value, @NotNull int pos) {
+        if (array.length - 1 - pos >= 0) {
+            System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
+        }
+        array[pos] = value;
+    }
+
     public <T> void copyArray(@NotNull T[] source, @NotNull T[] destination, @NotNull int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();

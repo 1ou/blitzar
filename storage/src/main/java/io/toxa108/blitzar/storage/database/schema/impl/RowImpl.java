@@ -4,17 +4,22 @@ import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
+import io.toxa108.blitzar.storage.io.Byteble;
+import io.toxa108.blitzar.storage.io.BytesManipulator;
+import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RowImpl implements Row {
+public class RowImpl implements Row, Byteble {
     private final Key key;
     private final Set<Field> fields;
+    private final BytesManipulator bytesManipulator;
 
     public RowImpl(@NotNull final Key key, @NotNull final Set<Field> fields) {
         this.fields = fields;
         this.key = key;
+        this.bytesManipulator = new BytesManipulatorImpl();
     }
 
     @Override
@@ -42,4 +47,30 @@ public class RowImpl implements Row {
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public byte[] toBytes() {
+        return fields.stream()
+                .map(it -> {
+                    String v;
+                    switch (it.type()) {
+                        case SHORT:
+                            v = String.valueOf(bytesManipulator.bytesToShort(it.value()));
+                            break;
+                        case INTEGER:
+                            v = String.valueOf(bytesManipulator.bytesToInt(it.value()));
+                            break;
+                        case LONG:
+                            v = String.valueOf(bytesManipulator.bytesToLong(it.value()));
+                            break;
+                        case VARCHAR:
+                            v = new String(it.value());
+                            break;
+                        default:
+                            v = "";
+                    }
+                    return String.format("%s %s", it.name(), v);
+                })
+                .collect(Collectors.joining(" | "))
+                .getBytes();
+    }
 }
