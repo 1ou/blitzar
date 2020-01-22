@@ -5,8 +5,9 @@ import io.toxa108.blitzar.storage.query.UserContext;
 public interface SqlCommand {
     /**
      * Execute sql command
+     *
      * @param userContext user context
-     * @param sql sql request
+     * @param sql         sql request
      * @return bytes
      */
     byte[] execute(UserContext userContext, String[] sql);

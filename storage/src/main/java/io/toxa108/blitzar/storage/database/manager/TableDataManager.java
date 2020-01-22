@@ -20,7 +20,7 @@ public interface TableDataManager {
      *
      * @param key key
      * @return row
-     * @throws IOException disk io exception
+     * @throws IOException disk io issue
      */
     List<Row> search(Key key) throws IOException;
 
@@ -28,7 +28,7 @@ public interface TableDataManager {
      * Search
      *
      * @return row
-     * @throws IOException disk io exception
+     * @throws IOException disk io issue
      */
     List<Row> search() throws IOException;
 }

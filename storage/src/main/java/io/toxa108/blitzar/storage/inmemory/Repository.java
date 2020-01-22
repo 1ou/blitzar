@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.database;
+package io.toxa108.blitzar.storage.inmemory;
 
 import io.toxa108.blitzar.storage.inmemory.entity.Result;
 

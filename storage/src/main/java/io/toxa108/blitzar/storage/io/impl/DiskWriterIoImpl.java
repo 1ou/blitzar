@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
- * Disk writer shouldn'n know about all high level logic. It works only with bytes and files.
+ * Disk writer shouldn't know about all high level logic. It works only with bytes and files.
  */
 public class DiskWriterIoImpl implements DiskWriter {
     private final File file;

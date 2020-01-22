@@ -28,15 +28,15 @@ import java.util.stream.Collectors;
  * Threadsafe b-plus-tree on disk realization
  */
 public class DiskTreeManager implements TableDataManager {
-    private final transient DiskReader diskReader;
-    private final transient DiskWriter diskWriter;
-    private final transient DatabaseConfiguration databaseConfiguration;
-    private final transient BytesManipulator bytesManipulator;
-    private final transient Scheme scheme;
-    private final transient int pNonLeaf;
-    private final transient int pLeaf;
-    private final transient ArrayManipulator arrayManipulator;
-    private transient int numberOfUsedBlocks;
+    private final DiskReader diskReader;
+    private final DiskWriter diskWriter;
+    private final DatabaseConfiguration databaseConfiguration;
+    private final BytesManipulator bytesManipulator;
+    private final Scheme scheme;
+    private final int pNonLeaf;
+    private final int pLeaf;
+    private final ArrayManipulator arrayManipulator;
+    private int numberOfUsedBlocks;
 
     public DiskTreeManager(final File file,
                            final DatabaseConfiguration databaseConfiguration,

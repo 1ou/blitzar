@@ -5,6 +5,6 @@ import io.toxa108.blitzar.storage.query.ResultQuery;
 public class ErrorResultQuery implements ResultQuery {
     @Override
     public byte[] toBytes() {
-        return new byte[0];
+        return "error".getBytes();
     }
 }

@@ -2,7 +2,6 @@ package io.toxa108.blitzar.storage.benchmark;
 
 import io.toxa108.blitzar.storage.BlitzarDatabase;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.Repository;
 import io.toxa108.blitzar.storage.database.manager.btree.DiskTreeManager;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
@@ -12,6 +11,7 @@ import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.inmemory.InMemoryBPlusTreeRepository;
 import io.toxa108.blitzar.storage.inmemory.InMemoryHashMapRepository;
 import io.toxa108.blitzar.storage.inmemory.InMemoryTreeRepository;
+import io.toxa108.blitzar.storage.inmemory.Repository;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulatorImpl;
 import org.openjdk.jmh.annotations.State;

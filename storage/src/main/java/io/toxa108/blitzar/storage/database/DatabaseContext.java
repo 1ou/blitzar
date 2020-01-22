@@ -18,6 +18,7 @@ public interface DatabaseContext {
      * Create database
      * @param name name
      * @return database
+     * @throws IOException disk io issue
      */
     Database createDatabase(String name) throws IOException;
 

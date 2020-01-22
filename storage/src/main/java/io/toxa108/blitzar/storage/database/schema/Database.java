@@ -28,6 +28,7 @@ public interface Database {
      * @param name   table name
      * @param scheme scheme
      * @return table
+     * @throws IOException disk io issue
      */
     Table createTable(String name, Scheme scheme) throws IOException;
 

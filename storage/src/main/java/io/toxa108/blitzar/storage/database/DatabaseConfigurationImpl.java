@@ -2,6 +2,9 @@ package io.toxa108.blitzar.storage.database;
 
 import io.toxa108.blitzar.storage.NotNull;
 
+/**
+ * The configuration of the database
+ */
 public class DatabaseConfigurationImpl implements DatabaseConfiguration {
     /**
      * Metadata size in bytes

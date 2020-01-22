@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.inmemory;
 
-import io.toxa108.blitzar.storage.database.Repository;
 import io.toxa108.blitzar.storage.inmemory.entity.Result;
 
 import java.util.Comparator;

@@ -14,6 +14,7 @@ public interface UserManager {
      * @param login login
      * @param password password
      * @return user
+     * @throws AccessDeniedException user can't be authorized
      */
     User authorize(String login, String password) throws AccessDeniedException;
 

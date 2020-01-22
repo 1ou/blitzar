@@ -3,6 +3,9 @@ package io.toxa108.blitzar.storage.io.impl;
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.io.BytesManipulator;
 
+/**
+ * It is the place for static methods but let's try interface...
+ */
 public class BytesManipulatorImpl implements BytesManipulator {
 
     @Override
