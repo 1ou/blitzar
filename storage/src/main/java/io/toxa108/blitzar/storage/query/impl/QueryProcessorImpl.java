@@ -8,6 +8,7 @@ import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.impl.*;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.PatternSyntaxException;
 
 public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;
@@ -37,7 +38,7 @@ public class QueryProcessorImpl implements QueryProcessor {
             );
         }
 
-        String query = new String(request).toLowerCase();
+        String query = optimizeQuery(request);
         final char endOfQuerySign = ';';
         final String splitQuerySign = " ";
         final String createKeyword = "create";
@@ -97,5 +98,28 @@ public class QueryProcessorImpl implements QueryProcessor {
         }
 
         return errorKeyword.getBytes();
+    }
+
+    String optimizeQuery(@NotNull final byte[] request) {
+        final String query = new String(request).toLowerCase();
+        final StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < query.length(); ++i) {
+            char c = query.charAt(i);
+            try {
+                if (!Character.toString(c).matches("^[a-zA-Z0-9_; ]*$")) {
+                    stringBuilder.append(" ")
+                            .append(c)
+                            .append(" ");
+                } else {
+                    stringBuilder.append(c);
+                }
+            } catch (PatternSyntaxException exception) {
+                stringBuilder.append(" ")
+                        .append(c)
+                        .append(" ");
+            }
+        }
+        return stringBuilder.toString().replaceAll(" {2,}", " ");
     }
 }
