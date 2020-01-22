@@ -9,7 +9,6 @@ import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
@@ -472,7 +471,7 @@ public class DiskTreeManager implements TableDataManager {
                 p[i] = BytesManipulator.bytesToInt(tmpByteBuffer);
                 byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
                 System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
-                keys[i] = new KeyImpl(new FieldImpl(
+                keys[i] = Key.fromField(new FieldImpl(
                         primaryIndexField.name(),
                         primaryIndexField.type(),
                         primaryIndexField.nullable(),
@@ -521,7 +520,7 @@ public class DiskTreeManager implements TableDataManager {
                 System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex,
                         currentDataBytes, 0, sizeOfCurrentData);
 
-                keys[i] = new KeyImpl(new FieldImpl(
+                keys[i] = Key.fromField(new FieldImpl(
                         primaryIndexField.name(),
                         primaryIndexField.type(),
                         primaryIndexField.nullable(),

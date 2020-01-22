@@ -117,7 +117,7 @@ public class RepositoryInsertBenchmark {
             fieldId = new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i));
 
-            Key key = new KeyImpl(fieldId);
+            Key key = Key.fromField(fieldId);
             Row row = new RowImpl(key, Set.of(fieldId));
             diskTreeManager.addRow(row);
         }

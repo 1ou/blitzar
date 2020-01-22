@@ -36,7 +36,7 @@ public class DiskTreeManagerTest {
         Table table = database.createTable("table", scheme);
 
         table.addRow(new RowImpl(
-                new KeyImpl(fieldId),
+                Key.fromField(fieldId),
                 Set.of(fieldName)
         ));
     }
@@ -65,7 +65,7 @@ public class DiskTreeManagerTest {
         Key[] keys = new Key[n];
         int[] p = new int[n + 1];
         for (int i = 0; i < n; ++i) {
-            keys[i] = new KeyImpl(new FieldImpl(
+            keys[i] = Key.fromField(new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL,
                     Unique.UNIQUE, BytesManipulator.longToBytes(i + 1)));
             p[i] = -1;
@@ -106,7 +106,7 @@ public class DiskTreeManagerTest {
         Key[] keys = new Key[n];
         int[] p = new int[n + 1];
         for (int i = 0; i < n; ++i) {
-            keys[i] = new KeyImpl(new FieldImpl(
+            keys[i] = Key.fromField(new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL,
                     Unique.UNIQUE, BytesManipulator.longToBytes(i + 1)));
             p[i] = -1;
@@ -152,7 +152,7 @@ public class DiskTreeManagerTest {
 
         byte[][] bytes = new byte[n][scheme.recordSize()];
         for (int i = 0; i < n; ++i) {
-            keys[i] = new KeyImpl(new FieldImpl(
+            keys[i] = Key.fromField(new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL,
                     Unique.UNIQUE, BytesManipulator.longToBytes(i + 1)));
 
@@ -218,7 +218,7 @@ public class DiskTreeManagerTest {
                 scheme
         );
 
-        Key key = new KeyImpl(fieldId);
+        Key key = Key.fromField(fieldId);
         Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
 
         diskTreeManager.addRow(row);
@@ -260,7 +260,7 @@ public class DiskTreeManagerTest {
             fieldId = new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(k));
 
-            Key key = new KeyImpl(fieldId);
+            Key key = Key.fromField(fieldId);
             Row row = new RowImpl(key, Set.of(fieldId));
             diskTreeManager.addRow(row);
         }
@@ -326,7 +326,7 @@ public class DiskTreeManagerTest {
                     BytesManipulator.shortToBytes((short) (i + 1))
             );
 
-            Key key = new KeyImpl(fieldId);
+            Key key = Key.fromField(fieldId);
             Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
             diskTreeManager.addRow(row);
         }
@@ -334,7 +334,7 @@ public class DiskTreeManagerTest {
         for (int i = 0; i < 1000; ++i) {
             fieldId = new FieldImpl("id", FieldType.LONG,
                     Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i + 1));
-            Key key = new KeyImpl(fieldId);
+            Key key = Key.fromField(fieldId);
             List<Row> rows = diskTreeManager.search(key);
             String compareStr = "justname" + (i + 1) + "%";
             Assert.assertEquals(rows.get(0).key(), key);

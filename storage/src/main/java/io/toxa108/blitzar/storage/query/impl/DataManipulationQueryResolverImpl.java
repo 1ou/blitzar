@@ -4,7 +4,6 @@ import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Table;
-import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
 import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
@@ -23,7 +22,7 @@ public class DataManipulationQueryResolverImpl implements DataManipulationQueryR
                 .findTableByName(query.tableName())
                 .orElseThrow();
 
-        final Key key = new KeyImpl(table.scheme().primaryIndexField());
+        final Key key = Key.fromField(table.scheme().primaryIndexField());
         table.addRow(new RowImpl(key, query.fields()));
 
         return new EmptySuccessResultQuery();
