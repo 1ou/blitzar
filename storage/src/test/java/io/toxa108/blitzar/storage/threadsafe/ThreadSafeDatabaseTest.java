@@ -29,8 +29,8 @@ public class ThreadSafeDatabaseTest {
                         "123"
                 )
         );
-//        blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes());
-//        blitzarDatabase.queryProcessor().process(userContext, "use test;".getBytes());
+        blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes());
+        blitzarDatabase.queryProcessor().process(userContext, "use test;".getBytes());
         blitzarDatabase.queryProcessor().process(userContext, "create table example (time long not null primary key, value long not null);".getBytes());
     }
 

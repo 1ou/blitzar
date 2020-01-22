@@ -50,6 +50,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         final String databaseKeyword = "database";
         final String showKeyword = "show";
         final String errorKeyword = "error";
+        final short minParts = 2;
 
         if (query.charAt(query.length() - 1) != endOfQuerySign) {
             throw new IllegalArgumentException();
@@ -58,7 +59,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         }
 
         final String[] parts = query.split(splitQuerySign);
-        if (parts.length < 2) {
+        if (parts.length < minParts) {
             throw new IllegalArgumentException();
         }
 
@@ -105,7 +106,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         final StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 0; i < query.length(); ++i) {
-            char c = query.charAt(i);
+            final char c = query.charAt(i);
             try {
                 if (!Character.toString(c).matches("^[a-zA-Z0-9_; ]*$")) {
                     stringBuilder.append(" ")
