@@ -8,11 +8,13 @@ import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.impl.*;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;
     public final DatabaseContext databaseContext;
+    private Pattern patternQuery = Pattern.compile("^[a-zA-Z0-9_; ]*$");
 
     /**
      * key - login
@@ -108,7 +110,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         for (int i = 0; i < query.length(); ++i) {
             final char c = query.charAt(i);
             try {
-                if (!Character.toString(c).matches("^[a-zA-Z0-9_; ]*$")) {
+                if (!patternQuery.matcher(Character.toString(c)).matches()) {
                     stringBuilder.append(" ")
                             .append(c)
                             .append(" ");
