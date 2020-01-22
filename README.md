@@ -1,16 +1,15 @@
 # blitzar
 
-The code style.
+Distributed timeseries database. With SQL syntax.
 
-Not a single null
+Create database: ```create database_name;```
 
-Not a single public static method
+Use database: ```use database_name;```
 
-Min number of mutable classes
+Create table: ```create table example (time long not null primary key, value long not null);```
 
-Not a single instanceof keyword, type casting, or reflection
+Insert into table: ```insert into example (time , value) values (30000, 200);```
 
-I'm trying to use here as many interfaces as I can. I'm trying to find the border with enough amount of structures. (when it's better to use abstract class, when class, when interface). I'm thinking it's kinda The Sixth Sense :) 
 
 Todo:
 
