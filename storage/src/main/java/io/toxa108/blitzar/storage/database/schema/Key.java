@@ -10,6 +10,10 @@ public interface Key extends Comparable<Key> {
      */
     Field field();
 
+    /*
+     todo i need more time to decide is whether it bad practice or not
+     */
+
     /**
      * Create new instance of {@link Key} from {@link Field}
      *
