@@ -1,25 +1,28 @@
 # blitzar
 
-The code style.
+Distributed timeseries database. With SQL syntax.
 
-Not a single null
+Create database: ```create database database_name;```
 
-Not a single public static method
+Use database: ```use database_name;```
 
-Min number of mutable classes
+Create table: ```create table example (time long not null primary key, value long not null);```
 
-Not a single instanceof keyword, type casting, or reflection
+Insert into table: ```insert into example (time , value) values (30000, 200);```
 
-I'm trying to use here as many interfaces as I can. I'm trying to find the border with enough amount of structures. (when it's better to use abstract class, when class, when interface). I'm thinking it's kinda The Sixth Sense :) 
 
-Todo:
+First raw release: 0.0.1
 
+Todo
 1. Storing databases +
 2. Storing tables
     - metadata +
     - data in b-tree +
 3. Server +
-4. Translate sql queries
+4. Process sql queries +
 5. Database transactions
 6. Service discovery +
-7. Distributed version
+
+Next:
+
+1. Distributed version
