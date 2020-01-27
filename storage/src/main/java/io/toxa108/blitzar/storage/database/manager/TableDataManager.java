@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager;
 
-import io.toxa108.blitzar.storage.database.schema.Key;
+import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
 
 import java.io.IOException;
@@ -18,11 +18,11 @@ public interface TableDataManager {
     /**
      * Search by key
      *
-     * @param key key
+     * @param field field
      * @return row
      * @throws IOException disk io issue
      */
-    List<Row> search(Key key) throws IOException;
+    List<Row> search(Field field) throws IOException;
 
     /**
      * Search

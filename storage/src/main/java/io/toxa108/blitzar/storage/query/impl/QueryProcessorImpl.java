@@ -43,14 +43,6 @@ public class QueryProcessorImpl implements QueryProcessor {
         String query = optimizeQuery(request);
         final char endOfQuerySign = ';';
         final String splitQuerySign = " ";
-        final String createKeyword = "create";
-        final String selectKeyword = "select";
-        final String insertKeyword = "insert";
-        final String deleteKeyword = "delete";
-        final String useKeyword = "use";
-        final String tableKeyword = "table";
-        final String databaseKeyword = "database";
-        final String showKeyword = "show";
         final String errorKeyword = "error";
         final short minParts = 2;
 
@@ -65,37 +57,37 @@ public class QueryProcessorImpl implements QueryProcessor {
             throw new IllegalArgumentException();
         }
 
-        final String act = parts[1];
+        final SqlReservedWords command = SqlReservedWords.valueOf(parts[0].toUpperCase());
 
-        switch (parts[0]) {
-            case createKeyword:
-                switch (act) {
-                    case tableKeyword:
+        switch (command) {
+            case CREATE:
+                switch (SqlReservedWords.valueOf(parts[1].toUpperCase())) {
+                    case TABLE:
                         return new CreateTableCommand(databaseManager).execute(userContext, parts);
-                    case databaseKeyword:
+                    case DATABASE:
                         return new CreateDatabaseCommand(databaseManager).execute(userContext, parts);
                     default:
                         return errorKeyword.getBytes();
                 }
-            case insertKeyword:
+            case INSERT:
                 return new InsertToTableCommand(databaseContext, databaseManager)
                         .execute(userContext, parts);
-            case selectKeyword:
+            case SELECT:
                 return new SelectFromTableCommand(databaseContext, databaseManager)
                         .execute(userContext, parts);
-            case showKeyword:
-                switch (act) {
-                    case "databases":
+            case SHOW:
+                switch (SqlReservedWords.valueOf(parts[1].toUpperCase())) {
+                    case DATABASES:
                         return new ShowDatabasesCommand(databaseContext).execute(userContext, parts);
-                    case "tables":
+                    case TABLES:
                         return new ShowTablesCommand(databaseContext).execute(userContext, parts);
                     default:
                         return errorKeyword.getBytes();
                 }
-            case useKeyword:
+            case USE:
                 usersActiveDatabases.put(userContext.user().login(), parts[1]);
                 break;
-            case deleteKeyword:
+            case DELETE:
             default:
                 break;
         }

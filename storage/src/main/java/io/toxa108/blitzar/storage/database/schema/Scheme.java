@@ -54,13 +54,31 @@ public interface Scheme {
 
     /**
      * Record size (exclude primary index)
+     *
      * @return data size
      */
     int dataSize();
 
     /**
      * Return data fields
+     *
      * @return only data fields
      */
     Set<Field> dataFields();
+
+    /**
+     * Return true if scheme contains index
+     *
+     * @param indexName index name
+     * @return true or false
+     */
+    boolean containIndex(String indexName);
+
+    /**
+     * Return field by name
+     * @param fieldName field name
+     * @return field
+     * @throws java.util.NoSuchElementException if field doesn't exist
+     */
+    Field fieldByName(String fieldName);
 }

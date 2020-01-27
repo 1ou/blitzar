@@ -5,13 +5,19 @@ import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Database;
+import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Table;
-import io.toxa108.blitzar.storage.io.Byteble;
+import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.RowsToBytesImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.StringToDataImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
 
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static io.toxa108.blitzar.storage.query.impl.SqlReservedWords.WHERE;
 
 public class SelectFromTableCommand implements SqlCommand {
     private final DatabaseContext databaseContext;
@@ -34,17 +40,40 @@ public class SelectFromTableCommand implements SqlCommand {
             final Optional<Table> tableOptional = databaseOptional.get().findTableByName(tableName);
             if (tableOptional.isPresent()) {
                 final Table table = tableOptional.get();
-                return table.search()
-                        .stream()
-                        .map(it -> {
-                            byte[] bytes = ((Byteble) it).toBytes();
-                            return new String(bytes) + "\n";
-                        })
-                        .reduce((l, r) -> l + r)
-                        .orElse("")
-                        .getBytes();
+
+                if (Stream.of(sql).anyMatch(it -> it.equalsIgnoreCase(WHERE.name()))) {
+                    final Field field = table.scheme().fieldByName(extractFieldName(sql));
+                    final Field fieldWithValue = new FieldImpl(
+                            field.name(),
+                            field.type(),
+                            field.nullable(),
+                            field.unique(),
+                            new StringToDataImpl(extractFieldValue(sql), field.type()).transform()
+                    );
+                    return new RowsToBytesImpl(table.search(fieldWithValue)).transform();
+                } else {
+                    return new RowsToBytesImpl(table.search()).transform();
+                }
             }
         }
         return new ErrorResultQuery().toBytes();
+    }
+
+    private String extractFieldName(@NotNull final String[] sql) {
+        for (int i = 0; i < sql.length; ++i) {
+            if (sql[i].equalsIgnoreCase(WHERE.name()) && i < sql.length - 1) {
+                return sql[i + 1];
+            }
+        }
+        throw new IllegalStateException("Incorrect sql");
+    }
+
+    private String extractFieldValue(@NotNull final String[] sql) {
+        for (int i = 0; i < sql.length; ++i) {
+            if ("=".equals(sql[i]) && i < sql.length - 1) {
+                return sql[i + 1];
+            }
+        }
+        throw new IllegalStateException("Incorrect sql");
     }
 }

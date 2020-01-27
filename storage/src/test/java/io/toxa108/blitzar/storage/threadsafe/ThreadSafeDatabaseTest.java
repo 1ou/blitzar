@@ -43,7 +43,7 @@ public class ThreadSafeDatabaseTest {
             futures.add(service.submit(() -> {
                 String nanoTime = String.valueOf(System.nanoTime());
                 String query = String.format(
-                        "insert into example ( time , value ) values ( %s , %s );", nanoTime, nanoTime);
+                        "insert into example (time, value) values (%s, %s);", nanoTime, nanoTime);
 
                 blitzarDatabase.queryProcessor().process(userContext, query.getBytes());
                 return blitzarDatabase.queryProcessor().process(

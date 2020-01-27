@@ -9,6 +9,7 @@ import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
 import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
@@ -328,6 +329,56 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     @Override
+    public List<Row> search(@NotNull final Field field) throws IOException {
+        if (scheme.containIndex(field.name())) {
+            return search(new KeyImpl(field));
+        }
+
+        List<Row> foundedRows = new ArrayList<>();
+        TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
+
+        while (!n.leaf) {
+            n = loadNode(n.p[0]);
+        }
+
+        while (true) {
+            for (int i = 0; i < n.q; ++i) {
+                byte[] data = n.values[i];
+                AtomicInteger seek = new AtomicInteger();
+                Set<Field> fields = scheme.dataFields()
+                        .stream()
+                        .map(it -> {
+                            int s = seek.getAndAdd(it.diskSize());
+                            byte[] bytes = new byte[it.diskSize()];
+                            System.arraycopy(data, s, bytes, 0, it.diskSize());
+                            return new FieldImpl(
+                                    it.name(),
+                                    it.type(),
+                                    it.nullable(),
+                                    it.unique(),
+                                    bytes
+                            );
+                        })
+                        .collect(Collectors.toSet());
+
+                if (fields.stream().anyMatch(
+                        it -> it.name().equals(field.name()) && Arrays.equals(it.value(), field.value()))) {
+                    foundedRows.add(new RowImpl(
+                            n.keys[i],
+                            fields
+                    ));
+                }
+            }
+
+            if (n.nextPos == -1) {
+                break;
+            }
+            n = loadNode(n.nextPos);
+        }
+        return foundedRows;
+    }
+
+
     public List<Row> search(@NotNull final Key key) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
 
@@ -372,7 +423,7 @@ public class DiskTreeManager implements TableDataManager {
 
     @Override
     public List<Row> search() throws IOException {
-        List<Row> result = new ArrayList<>();
+        List<Row> foundedRows = new ArrayList<>();
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
 
         while (!n.leaf) {
@@ -398,7 +449,7 @@ public class DiskTreeManager implements TableDataManager {
                             );
                         })
                         .collect(Collectors.toSet());
-                result.add(new RowImpl(
+                foundedRows.add(new RowImpl(
                         n.keys[i],
                         fields
                 ));
@@ -410,7 +461,7 @@ public class DiskTreeManager implements TableDataManager {
             n = loadNode(n.nextPos);
         }
 
-        return result;
+        return foundedRows;
     }
 
     /**
@@ -471,7 +522,7 @@ public class DiskTreeManager implements TableDataManager {
                 p[i] = BytesManipulator.bytesToInt(tmpByteBuffer);
                 byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
                 System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
-                keys[i] = Key.fromField(new FieldImpl(
+                keys[i] = new KeyImpl(new FieldImpl(
                         primaryIndexField.name(),
                         primaryIndexField.type(),
                         primaryIndexField.nullable(),
@@ -520,7 +571,7 @@ public class DiskTreeManager implements TableDataManager {
                 System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex,
                         currentDataBytes, 0, sizeOfCurrentData);
 
-                keys[i] = Key.fromField(new FieldImpl(
+                keys[i] = new KeyImpl(new FieldImpl(
                         primaryIndexField.name(),
                         primaryIndexField.type(),
                         primaryIndexField.nullable(),

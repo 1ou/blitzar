@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager;
 
-import io.toxa108.blitzar.storage.database.schema.Key;
+import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
 
 import java.util.List;
@@ -14,12 +14,12 @@ public interface RowManager {
     void add(Row row);
 
     /**
-     * Search by key
+     * Search by field
      *
-     * @param key key
+     * @param field field
      * @return rows
      */
-    List<Row> search(Key key);
+    List<Row> search(Field field);
 
     /**
      * Search

@@ -39,9 +39,9 @@ public interface Table {
     List<Row> search();
 
     /**
-     * Search
-     * @param key key
+     * Search by field
+     * @param field field
      * @return data
      */
-    List<Row> search(Key key);
+    List<Row> search(Field field);
 }

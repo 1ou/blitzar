@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.database.schema.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.RowManager;
-import io.toxa108.blitzar.storage.database.schema.Key;
+import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
@@ -55,8 +55,8 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public List<Row> search(Key key) {
-        return rowManager.search(key);
+    public List<Row> search(Field field) {
+        return rowManager.search(field);
     }
 
     @Override

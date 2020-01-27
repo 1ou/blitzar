@@ -5,6 +5,7 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -103,6 +104,19 @@ public class SchemeImpl implements Scheme {
         return this.fields.stream()
                 .filter(it -> !primaryIndex().fields().contains(it.name()))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean containIndex(@NotNull final String indexName) {
+        return this.indexes.stream().anyMatch(it -> it.fields().size() == 1 && it.fields().contains(indexName));
+    }
+
+    @Override
+    public Field fieldByName(@NotNull final String fieldName) {
+        return this.fields.stream()
+                .filter(it -> it.name().equals(fieldName))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Field " + fieldName + " isn't found"));
     }
 
     @Override

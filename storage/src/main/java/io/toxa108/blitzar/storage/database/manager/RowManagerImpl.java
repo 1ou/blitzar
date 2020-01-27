@@ -3,7 +3,7 @@ package io.toxa108.blitzar.storage.database.manager;
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.btree.DiskTreeManager;
-import io.toxa108.blitzar.storage.database.schema.Key;
+import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 
@@ -34,9 +34,9 @@ public class RowManagerImpl implements RowManager {
     }
 
     @Override
-    public List<Row> search(Key key) {
+    public List<Row> search(Field field) {
         try {
-            return diskTreeManager.search(key);
+            return diskTreeManager.search(field);
         } catch (IOException e) {
             return null; // todo
         }

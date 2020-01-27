@@ -50,12 +50,36 @@ public class FirstIntegrationTest {
 
         Assert.assertEquals("success", insertTableResult);
 
+        insertTableResult =
+                new String(blitzarDatabase.queryProcessor().process(
+                        userContext,
+                        "insert into example ( time , value ) values ( 30001 , 201 );".getBytes())
+                );
+
+        Assert.assertEquals("success", insertTableResult);
+
         String selectFromTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
                         userContext,
                         "select * from example;".getBytes())
                 );
 
-        Assert.assertNotNull(selectFromTableResult);
+        Assert.assertEquals("value 200\nvalue 201\n", selectFromTableResult);
+
+        String selectFromWhereTableResult =
+                new String(blitzarDatabase.queryProcessor().process(
+                        userContext,
+                        "select * from example where time = 30000;".getBytes())
+                );
+
+        Assert.assertEquals("value 200\n", selectFromWhereTableResult);
+
+        selectFromWhereTableResult =
+                new String(blitzarDatabase.queryProcessor().process(
+                        userContext,
+                        "select * from example where value = 201;".getBytes())
+                );
+
+        Assert.assertEquals("value 201\n", selectFromWhereTableResult);
     }
 }

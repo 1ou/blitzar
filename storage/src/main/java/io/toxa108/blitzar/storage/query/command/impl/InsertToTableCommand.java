@@ -2,12 +2,14 @@ package io.toxa108.blitzar.storage.query.command.impl;
 
 import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
+import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.StringToDataImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.DataManipulationQuery;
@@ -19,11 +21,13 @@ import java.util.stream.Collectors;
 public class InsertToTableCommand implements SqlCommand {
     private final DatabaseContext databaseContext;
     private final DatabaseManager databaseManager;
+    private final ArrayManipulator arrayManipulator;
 
     public InsertToTableCommand(@NotNull final DatabaseContext databaseContext,
                                 @NotNull final DatabaseManager databaseManager) {
         this.databaseContext = databaseContext;
         this.databaseManager = databaseManager;
+        this.arrayManipulator = new ArrayManipulator();
     }
 
     @Override
@@ -51,13 +55,13 @@ public class InsertToTableCommand implements SqlCommand {
                         .filter(it -> inputFieldsNames.contains(it.name()))
                         .collect(Collectors.toList());
 
-                final List<byte[]> values = new ArrayList<>();
+                final List<String> values = new ArrayList<>();
 
                 boolean is = false;
                 for (String s : sql) {
                     if (is) {
                         if (s.matches("^[a-zA-Z0-9_]*$")) {
-                            values.add(s.getBytes());
+                            values.add(s);
                         }
                     }
                     if ("values".equals(s)) {
@@ -70,7 +74,7 @@ public class InsertToTableCommand implements SqlCommand {
                             finalFields.get(i).type(),
                             finalFields.get(i).nullable(),
                             finalFields.get(i).unique(),
-                            values.get(i)
+                            new StringToDataImpl(values.get(i), finalFields.get(i).type()).transform()
                     ));
                 }
 

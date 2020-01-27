@@ -17,6 +17,15 @@ public class ArrayManipulator {
         array[pos] = value;
     }
 
+    public byte[] invert(@NotNull final byte[] array) {
+        for (int i = 0; i < array.length / 2; ++i) {
+            byte tmp = array[i];
+            array[i] = array[array.length - i - 1];
+            array[array.length - i - 1] = tmp;
+        }
+        return array;
+    }
+
     public void insertInArray(@NotNull byte[] array, @NotNull byte value, @NotNull int pos) {
         if (array.length - 1 - pos >= 0) {
             System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
