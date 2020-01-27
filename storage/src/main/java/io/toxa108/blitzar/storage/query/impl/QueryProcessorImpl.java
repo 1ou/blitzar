@@ -8,6 +8,7 @@ import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.impl.*;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -15,6 +16,7 @@ public class QueryProcessorImpl implements QueryProcessor {
     public final DatabaseManager databaseManager;
     public final DatabaseContext databaseContext;
     private Pattern patternQuery = Pattern.compile("^[a-zA-Z0-9_; ]*$");
+    private final Semaphore semaphore;
 
     /**
      * key - login
@@ -27,11 +29,14 @@ public class QueryProcessorImpl implements QueryProcessor {
         this.databaseManager = databaseManager;
         this.databaseContext = databaseContext;
         this.usersActiveDatabases = new ConcurrentHashMap<>();
+        this.semaphore = new Semaphore(50, true);
     }
 
     @Override
     public byte[] process(@NotNull UserContext userContext,
                           @NotNull final byte[] request) {
+        semaphore.tryAcquire(1);
+
         String contextDatabaseName = usersActiveDatabases.get(userContext.user().login());
         if (contextDatabaseName != null) {
             userContext = new UserContextImpl(
@@ -92,6 +97,7 @@ public class QueryProcessorImpl implements QueryProcessor {
                 break;
         }
 
+        semaphore.release();
         return errorKeyword.getBytes();
     }
 
