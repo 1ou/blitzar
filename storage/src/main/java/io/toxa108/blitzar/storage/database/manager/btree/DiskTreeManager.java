@@ -166,7 +166,7 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     @Override
-    public void addRow(@NotNull final Row row) throws IOException {
+    public synchronized void addRow(@NotNull final Row row) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
         Key key = row.key();
 

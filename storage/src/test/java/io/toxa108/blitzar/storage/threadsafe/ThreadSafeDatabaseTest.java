@@ -3,18 +3,15 @@ package io.toxa108.blitzar.storage.threadsafe;
 import io.toxa108.blitzar.storage.BlitzarDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.UserImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
+import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class ThreadSafeDatabaseTest {
     private BlitzarDatabase blitzarDatabase;
@@ -37,27 +34,33 @@ public class ThreadSafeDatabaseTest {
     @Test
     public void test() throws ExecutionException, InterruptedException {
         int threads = 10;
+        CountDownLatch countDownLatch = new CountDownLatch(threads);
         ExecutorService service = Executors.newFixedThreadPool(threads);
-        Collection<Future<byte[]>> futures = new ArrayList<>(threads);
+        List<String> keys = new CopyOnWriteArrayList<>();
+        Collection<Future<String>> futures = new ArrayList<>(threads);
+
         for (int t = 0; t < threads; ++t) {
             futures.add(service.submit(() -> {
                 String nanoTime = String.valueOf(System.nanoTime());
+                keys.add(nanoTime);
                 String query = String.format(
                         "insert into example (time, value) values (%s, %s);", nanoTime, nanoTime);
+                System.out.println("Thread: " + Thread.currentThread().getName() + "Query: " + query);
 
-                blitzarDatabase.queryProcessor().process(userContext, query.getBytes());
-                return blitzarDatabase.queryProcessor().process(
-                        userContext,
-                        String.format("select * from example where time = %s;", nanoTime).getBytes()
-                );
+                String result = new String(blitzarDatabase.queryProcessor().process(userContext, query.getBytes()));
+                System.out.println("Thread: " + Thread.currentThread().getName() + "Result: " + result);
+
+                countDownLatch.countDown();
+                return result;
             }));
         }
 
-        Set<String> results = new HashSet<>();
-        for (Future<byte[]> f : futures) {
-            results.add(new String(f.get()));
+        for (Future<String> f : futures) {
+            String r = f.get();
+            System.out.println(new String(new EmptySuccessResultQuery().toBytes()) + " == " + r);
         }
 
+        countDownLatch.await();
         String all = new String(blitzarDatabase.queryProcessor().process(
                 userContext,
                 "select * from example;".getBytes()
