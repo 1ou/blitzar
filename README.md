@@ -6,13 +6,13 @@ Create database: ```create database database_name;```
 
 Use database: ```use database_name;```
 
-Create table: ```create table example (time long not null primary key, value long not null);```
+Create table: ```create table database_name (time long not null primary key, value long not null);```
 
-Insert into table: ```insert into example (time , value) values (30000, 200);```
+Insert into table: ```insert into database_name (time , value) values (30000, 200);```
 
-Select from table: ```select * from example;```
+Select from table: ```select * from database_name;```
 
-Select from table with condition: ```select * from example where time = 30000;```
+Select from table with condition: ```select * from database_name where time = 30000;```
 
 
 First raw release: 0.0.1
