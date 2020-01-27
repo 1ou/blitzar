@@ -10,6 +10,10 @@ Create table: ```create table example (time long not null primary key, value lon
 
 Insert into table: ```insert into example (time , value) values (30000, 200);```
 
+Select from table: ```select * from example;```
+
+Select from table with condition: ```select * from example where time = 30000;```
+
 
 First raw release: 0.0.1
 
