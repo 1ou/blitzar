@@ -35,7 +35,7 @@ public class QueryProcessorImpl implements QueryProcessor {
     @Override
     public byte[] process(@NotNull UserContext userContext,
                           @NotNull final byte[] request) {
-        semaphore.tryAcquire(1);
+        semaphore.tryAcquire();
 
         String contextDatabaseName = usersActiveDatabases.get(userContext.user().login());
         if (contextDatabaseName != null) {

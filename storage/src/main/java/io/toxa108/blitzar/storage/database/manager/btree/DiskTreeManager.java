@@ -69,26 +69,32 @@ public class DiskTreeManager implements TableDataManager {
          * Keys
          */
         Key[] keys;
+
         /**
          * Pointers to childs(arrays of file seeks)
          */
         int[] p;
+
         /**
          * Entry values
          */
         byte[][] values;
+
         /**
          * Leaf or not
          */
         boolean leaf;
+
         /**
          * Number of entries in the node
          */
         int q;
+
         /**
          * Pointer to the next leaf (file seek)
          */
         int nextPos;
+
         /**
          * Current position (file seek)
          */
@@ -122,12 +128,12 @@ public class DiskTreeManager implements TableDataManager {
             this.pos = pos;
         }
 
-        TreeNode(@NotNull final int pos,
+        TreeNode(final int pos,
                  @NotNull final Key[] keys,
                  @NotNull final byte[][] values,
-                 @NotNull final boolean isLeaf,
-                 @NotNull final int q,
-                 @NotNull final int nextPos) {
+                 final boolean isLeaf,
+                 final int q,
+                 final int nextPos) {
             this.keys = keys;
             this.values = values;
             this.leaf = isLeaf;
