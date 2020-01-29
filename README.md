@@ -40,6 +40,7 @@ Queries
 ```
 User can insert, select data with conditions like (>, <, =, <>). 
 The join syntax is not available because there are no relations between tables. 
+For now there is ability only to insert data, the update and delete operations are not supported yet.
 
 create database database_name;
 use database_name;
@@ -70,5 +71,6 @@ The efficiency of the library wasn't the goal of blitzar that's why there are no
 ### Release: 1.0.0
 
 - [ ]  Database transactions
+- [ ]  Batch insert
 - [ ]  Benchmarks
 - [ ]  Distributed version
