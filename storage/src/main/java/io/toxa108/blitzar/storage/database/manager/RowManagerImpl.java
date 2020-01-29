@@ -20,7 +20,7 @@ public class RowManagerImpl implements RowManager {
                           final DatabaseConfiguration databaseConfiguration) {
         this.file = file;
         this.scheme = scheme;
-        this.diskTreeManager = new DiskTreeManager(file, databaseConfiguration, scheme);
+        this.diskTreeManager = new DiskTreeManager(file, databaseConfiguration, scheme, new LockManagerImpl());
     }
 
     @Override

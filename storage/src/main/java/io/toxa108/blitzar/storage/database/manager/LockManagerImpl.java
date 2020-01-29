@@ -10,16 +10,21 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  */
 public class LockManagerImpl implements LockManager {
-    private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, ReentrantLock>> map =
+    private final ConcurrentHashMap<Integer, ReentrantLock> map =
             new ConcurrentHashMap<>(1024);
 
     @Override
-    public void shared(String id, int x) {
+    public void shared(int x) {
 
     }
 
     @Override
-    public void exclusive(String id, int x) {
+    public void exclusive(int x) {
+
+    }
+
+    @Override
+    public void unlock(int x) {
 
     }
 }
