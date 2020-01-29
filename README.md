@@ -1,6 +1,6 @@
 # blitzar
 
-The Blitzar is a distributed timeseries database with sql syntax. 
+The Blitzar is a timeseries database with sql syntax. 
 The data storing in the b+tree data structure on the disk. 
 
 Capabilities
