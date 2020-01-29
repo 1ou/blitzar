@@ -3,23 +3,23 @@
 The Blitzar is a distributed timeseries database with sql syntax. 
 The data storing in the b+tree data structure on the disk. 
 
-Capabilities.
+Capabilities
 ======
 
-User.
+User
 ------
 ```
 The database doesn't support permissions yet.
 There is only a capability to create User with login and password to manage databases and tables. 
 ```
 
-Structure.
+Structure
 ------
 ```
 User is able to create databases and tables inside of them.
 ```
 
-Data types:
+Data types
 ------
 ```
 - short (2 bytes)
@@ -28,14 +28,14 @@ Data types:
 - varchar(n bytes)
 ```
 
-Indexes.
+Indexes
 ------
 ```
 The tables are support primary (clustered) indexes. 
 That's why there is capability of creation only 1 index per table. Index is able to contain 1 to N columns. 
 ```
 
-Queries:
+Queries
 ------
 ```
 User can insert, select data with conditions like (>, <, =, <>). 
@@ -50,7 +50,7 @@ select * from database_name where time = 30000;
 select value from database_name where time > 30000 and time < 40000;
 ```
 
-Benchmarks.
+Benchmarks
 ------
 ```
 The efficiency of the library wasn't the goal of blitzar that's why there are no high expectations.
