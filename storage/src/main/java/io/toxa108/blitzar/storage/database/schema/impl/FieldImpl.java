@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
@@ -14,11 +13,11 @@ public class FieldImpl implements Field {
     private final byte[] value;
     private final int valueSize;
 
-    public FieldImpl(@NotNull final String name,
-                     @NotNull final FieldType fieldType,
-                     @NotNull final Nullable nullable,
-                     @NotNull final Unique unique,
-                     @NotNull final byte[] value) {
+    public FieldImpl(final String name,
+                     final FieldType fieldType,
+                     final Nullable nullable,
+                     final Unique unique,
+                     final byte[] value) {
         this.name = name;
         this.fieldType = fieldType;
         this.nullable = nullable;
@@ -32,7 +31,7 @@ public class FieldImpl implements Field {
         this.value = value;
     }
 
-    public FieldImpl(@NotNull final byte[] bytes) {
+    public FieldImpl(final byte[] bytes) {
         this.valueSize = 0;
         value = new byte[0];
 

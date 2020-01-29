@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.command.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
@@ -24,15 +23,15 @@ public class SelectFromTableCommand implements SqlCommand {
     private final DatabaseManager databaseManager;
     private final ArrayManipulator arrayManipulator;
 
-    public SelectFromTableCommand(@NotNull final DatabaseContext databaseContext,
-                                  @NotNull final DatabaseManager databaseManager) {
+    public SelectFromTableCommand(final DatabaseContext databaseContext,
+                                  final DatabaseManager databaseManager) {
         this.databaseContext = databaseContext;
         this.databaseManager = databaseManager;
         this.arrayManipulator = new ArrayManipulator();
     }
 
     @Override
-    public byte[] execute(@NotNull final UserContext userContext, @NotNull final String[] sql) {
+    public byte[] execute(final UserContext userContext, final String[] sql) {
         final Optional<Database> databaseOptional = databaseContext.findByName(userContext.databaseName());
         final String tableName = sql[3];
 
@@ -59,7 +58,7 @@ public class SelectFromTableCommand implements SqlCommand {
         return new ErrorResultQuery().toBytes();
     }
 
-    private String extractFieldName(@NotNull final String[] sql) {
+    private String extractFieldName(final String[] sql) {
         for (int i = 0; i < sql.length; ++i) {
             if (sql[i].equalsIgnoreCase(WHERE.name()) && i < sql.length - 1) {
                 return sql[i + 1];
@@ -68,7 +67,7 @@ public class SelectFromTableCommand implements SqlCommand {
         throw new IllegalStateException("Incorrect sql");
     }
 
-    private String extractFieldValue(@NotNull final String[] sql) {
+    private String extractFieldValue(final String[] sql) {
         for (int i = 0; i < sql.length; ++i) {
             if ("=".equals(sql[i]) && i < sql.length - 1) {
                 return sql[i + 1];

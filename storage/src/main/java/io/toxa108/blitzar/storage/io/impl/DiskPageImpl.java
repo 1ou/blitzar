@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.io.DiskPage;
 
 public class DiskPageImpl implements DiskPage {
@@ -14,7 +13,7 @@ public class DiskPageImpl implements DiskPage {
         this.size = 16;
     }
 
-    public DiskPageImpl(@NotNull final int size) {
+    public DiskPageImpl(final int size) {
         this.size = size;
     }
 

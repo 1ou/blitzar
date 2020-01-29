@@ -24,6 +24,7 @@ sourceSets.create("jmh") {
 
 dependencies {
     implementation("org.projectlombok:lombok:1.18.10")
+    implementation("com.google.guava:guava:22.0")
 
     "jmhImplementation"(project)
     "jmhImplementation"("org.openjdk.jmh:jmh-core:1.21")

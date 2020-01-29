@@ -1,7 +1,5 @@
 package io.toxa108.blitzar.storage.database.manager.user;
 
-import io.toxa108.blitzar.storage.NotNull;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +11,7 @@ public class UserManagerImpl implements UserManager {
     }
 
     @Override
-    public User createUser(@NotNull final String login, @NotNull final String password) {
+    public User createUser(final String login, final String password) {
         return users.put(login, new UserImpl(login, password));
     }
 

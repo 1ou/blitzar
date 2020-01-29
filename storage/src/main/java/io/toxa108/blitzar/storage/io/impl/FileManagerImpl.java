@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
@@ -24,8 +23,8 @@ public class FileManagerImpl implements FileManager {
     private final int m = 1024;
     private final DatabaseConfiguration databaseConfiguration;
 
-    public FileManagerImpl(@NotNull final String baseFolder,
-                           @NotNull final DatabaseConfiguration databaseConfiguration
+    public FileManagerImpl(final String baseFolder,
+                           final DatabaseConfiguration databaseConfiguration
     ) throws IOException {
         if (!new File(baseFolder).exists()) {
             Files.createDirectory(Path.of(baseFolder));
@@ -47,7 +46,7 @@ public class FileManagerImpl implements FileManager {
     }
 
     @Override
-    public Database initializeDatabase(@NotNull final String name) throws IOException {
+    public Database initializeDatabase(final String name) throws IOException {
         if (!name.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect database name");
         }
@@ -66,9 +65,9 @@ public class FileManagerImpl implements FileManager {
      * @throws IllegalArgumentException when the name of database of table isn't correct
      */
     @Override
-    public Table initializeTable(@NotNull final String databaseName,
-                                 @NotNull final String tableName,
-                                 @NotNull final Scheme scheme) throws IOException {
+    public Table initializeTable(final String databaseName,
+                                 final String tableName,
+                                 final Scheme scheme) throws IOException {
         if (!databaseName.matches(nameRegex)) {
             throw new IllegalArgumentException("Incorrect database name");
         }
@@ -107,8 +106,8 @@ public class FileManagerImpl implements FileManager {
      * @param scheme table scheme
      * @throws IOException disk io exception
      */
-    private void saveTableScheme(@NotNull final File file,
-                                 @NotNull final Scheme scheme) throws IOException {
+    private void saveTableScheme(final File file,
+                                 final Scheme scheme) throws IOException {
         RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
         accessFile.setLength(databaseConfiguration.diskPageSize() * 20);
         DiskWriter diskWriter = new DiskWriterIoImpl(file);
@@ -142,7 +141,7 @@ public class FileManagerImpl implements FileManager {
         }
     }
 
-    private Scheme loadTableScheme(@NotNull final File file) throws IOException {
+    private Scheme loadTableScheme(final File file) throws IOException {
         DiskReader diskReader = new DiskReaderIoImpl(file);
         Set<Index> indexes = new HashSet<>();
 
@@ -185,7 +184,7 @@ public class FileManagerImpl implements FileManager {
     }
 
     @Override
-    public List<Table> loadTables(@NotNull final String databaseName) throws IOException {
+    public List<Table> loadTables(final String databaseName) throws IOException {
         File[] files = new File(baseFolder + "/" + databaseName)
                 .listFiles(File::isFile);
 
@@ -207,8 +206,8 @@ public class FileManagerImpl implements FileManager {
     }
 
     @Override
-    public Table loadTable(@NotNull final String databaseName,
-                           @NotNull final String tableName) throws IOException {
+    public Table loadTable(final String databaseName,
+                           final String tableName) throws IOException {
         File[] files = new File(baseFolder + "/" + databaseName).listFiles(File::isFile);
         if (files != null) {
             List<Table> tables = new ArrayList<>();
@@ -247,7 +246,7 @@ public class FileManagerImpl implements FileManager {
         }
     }
 
-    private void clear(@NotNull final File file) {
+    private void clear(final File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files != null) {
@@ -267,8 +266,8 @@ public class FileManagerImpl implements FileManager {
      * @return path
      * @throws IllegalStateException disk io error
      */
-    protected File createDirectory(@NotNull final String directory,
-                                   @NotNull final String folderName) {
+    protected File createDirectory(final String directory,
+                                   final String folderName) {
         File newDirectory = new File(directory + "/" + folderName);
         if (newDirectory.mkdir() || newDirectory.exists()) {
             return newDirectory;
@@ -277,9 +276,9 @@ public class FileManagerImpl implements FileManager {
         }
     }
 
-    protected File createFile(@NotNull final String directory,
-                              @NotNull final String fileName,
-                              @NotNull final String fileExtension) {
+    protected File createFile(final String directory,
+                              final String fileName,
+                              final String fileExtension) {
         return new File(
                 new File(directory),
                 fileName + "." + fileExtension

@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -14,7 +13,7 @@ public class DatabaseContextImpl implements DatabaseContext {
     private final Set<Database> databases;
     private final FileManager fileManager;
 
-    public DatabaseContextImpl(@NotNull final FileManager fileManager) throws IOException {
+    public DatabaseContextImpl(final FileManager fileManager) throws IOException {
         this.fileManager = fileManager;
 
         Set<Database> set = new HashSet<>();
@@ -26,14 +25,14 @@ public class DatabaseContextImpl implements DatabaseContext {
     }
 
     @Override
-    public Optional<Database> findByName(@NotNull final String name) {
+    public Optional<Database> findByName(final String name) {
         return databases.stream()
                 .filter(it -> it.name().equals(name))
                 .findAny();
     }
 
     @Override
-    public Database createDatabase(@NotNull final String name) throws IOException {
+    public Database createDatabase(final String name) throws IOException {
         Optional<Database> databaseOptional = databases.stream()
                 .filter(it -> it.name().equals(name))
                 .findFirst();

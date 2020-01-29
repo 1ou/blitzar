@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
@@ -14,7 +13,7 @@ public class SchemeImpl implements Scheme {
     private final Set<Field> fields;
     private final Set<Index> indexes;
 
-    public SchemeImpl(@NotNull final Set<Field> fields, @NotNull final Set<Index> indexes) {
+    public SchemeImpl(final Set<Field> fields, final Set<Index> indexes) {
         if (indexes.stream().filter(it -> it.type() == IndexType.PRIMARY).count() > 1) {
             throw new IllegalArgumentException("Table must include only one PRIMARY index");
         }
@@ -107,12 +106,12 @@ public class SchemeImpl implements Scheme {
     }
 
     @Override
-    public boolean containIndex(@NotNull final String indexName) {
+    public boolean containIndex(final String indexName) {
         return this.indexes.stream().anyMatch(it -> it.fields().size() == 1 && it.fields().contains(indexName));
     }
 
     @Override
-    public Field fieldByName(@NotNull final String fieldName) {
+    public Field fieldByName(final String fieldName) {
         return this.fields.stream()
                 .filter(it -> it.name().equals(fieldName))
                 .findAny()

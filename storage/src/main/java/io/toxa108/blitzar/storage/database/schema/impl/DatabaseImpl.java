@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
@@ -17,17 +16,17 @@ public class DatabaseImpl implements Database {
     private final FileManager fileManager;
     private final State state;
 
-    public DatabaseImpl(@NotNull final String name,
-                        @NotNull final List<Table> tables,
-                        @NotNull final FileManager fileManager) {
+    public DatabaseImpl(final String name,
+                        final List<Table> tables,
+                        final FileManager fileManager) {
         this.tables = tables;
         this.name = name;
         this.fileManager = fileManager;
         this.state = State.EXISTS;
     }
 
-    public DatabaseImpl(@NotNull final String name,
-                        @NotNull final FileManager fileManager) throws IOException {
+    public DatabaseImpl(final String name,
+                        final FileManager fileManager) throws IOException {
         this.name = name;
         this.fileManager = fileManager;
         this.tables = fileManager.loadTables(name);
@@ -40,15 +39,15 @@ public class DatabaseImpl implements Database {
     }
 
     @Override
-    public Optional<Table> findTableByName(@NotNull final String name) {
+    public Optional<Table> findTableByName(final String name) {
         return tables.stream()
                 .filter(it -> it.name().equalsIgnoreCase(name))
                 .findAny();
     }
 
     @Override
-    public Table createTable(@NotNull final String name,
-                             @NotNull final Scheme scheme) throws IOException {
+    public Table createTable(final String name,
+                             final Scheme scheme) throws IOException {
         if (this.state == State.REMOVED) {
             throw new IllegalStateException("Database removed, can't create table.");
         }

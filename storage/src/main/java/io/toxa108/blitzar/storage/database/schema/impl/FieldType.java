@@ -1,7 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
-
 import java.util.NoSuchElementException;
 
 public enum FieldType {
@@ -29,7 +27,7 @@ public enum FieldType {
     private final boolean variable;
     private final int size;
 
-    FieldType(@NotNull final short id, @NotNull final boolean variable, @NotNull final int size) {
+    FieldType(final short id, final boolean variable, final int size) {
         this.id = id;
         this.variable = variable;
         this.size = size;
@@ -43,7 +41,7 @@ public enum FieldType {
         return id;
     }
 
-    public static FieldType fromId(@NotNull final short id) {
+    public static FieldType fromId(final short id) {
         for (FieldType e : values()) {
             if (e.id == id) {
                 return e;

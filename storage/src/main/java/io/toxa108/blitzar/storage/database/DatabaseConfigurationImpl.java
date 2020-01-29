@@ -1,7 +1,5 @@
 package io.toxa108.blitzar.storage.database;
 
-import io.toxa108.blitzar.storage.NotNull;
-
 /**
  * The configuration of the database
  */
@@ -16,7 +14,7 @@ public class DatabaseConfigurationImpl implements DatabaseConfiguration {
      */
     private final int diskPageSize;
 
-    public DatabaseConfigurationImpl(@NotNull final int diskPageSize) {
+    public DatabaseConfigurationImpl(final int diskPageSize) {
         this.metadataSize = 1024 * diskPageSize;
         this.diskPageSize = 1024 * diskPageSize;
     }

@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.command.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
@@ -23,16 +22,16 @@ public class InsertToTableCommand implements SqlCommand {
     private final DatabaseManager databaseManager;
     private final ArrayManipulator arrayManipulator;
 
-    public InsertToTableCommand(@NotNull final DatabaseContext databaseContext,
-                                @NotNull final DatabaseManager databaseManager) {
+    public InsertToTableCommand(final DatabaseContext databaseContext,
+                                final DatabaseManager databaseManager) {
         this.databaseContext = databaseContext;
         this.databaseManager = databaseManager;
         this.arrayManipulator = new ArrayManipulator();
     }
 
     @Override
-    public byte[] execute(@NotNull final UserContext userContext,
-                          @NotNull final String[] sql) {
+    public byte[] execute(final UserContext userContext,
+                          final String[] sql) {
         final Optional<Database> databaseOptional = databaseContext.findByName(userContext.databaseName());
         final String tableName = sql[2];
 

@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.query.QueryContext;
@@ -8,7 +7,7 @@ import io.toxa108.blitzar.storage.query.QueryContext;
 public class DatabaseScopeQueryContextImpl implements QueryContext {
     private final Database database;
 
-    public DatabaseScopeQueryContextImpl(@NotNull final Database database) {
+    public DatabaseScopeQueryContextImpl(final Database database) {
         this.database = database;
     }
 

@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.RowManager;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
@@ -20,9 +19,9 @@ public class TableImpl implements Table {
     private final RowManager rowManager;
     private final State state;
 
-    public TableImpl(@NotNull final String name,
-                     @NotNull final Scheme scheme,
-                     @NotNull final RowManager rowManager) {
+    public TableImpl(final String name,
+                     final Scheme scheme,
+                     final RowManager rowManager) {
         this.rowManager = rowManager;
         this.name = name;
         this.state = State.EXISTS;
@@ -45,7 +44,7 @@ public class TableImpl implements Table {
     }
 
     @Override
-    public void addRow(@NotNull final Row row) {
+    public void addRow(final Row row) {
         rowManager.add(row);
     }
 

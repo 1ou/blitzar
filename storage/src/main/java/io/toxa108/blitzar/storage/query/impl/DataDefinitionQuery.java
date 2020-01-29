@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 
@@ -12,19 +11,19 @@ public class DataDefinitionQuery extends AbstractQuery {
     private final Set<Field> fields;
     private final Set<Index> indexes;
 
-    public DataDefinitionQuery(@NotNull final String database,
-                               @NotNull final Type type) {
+    public DataDefinitionQuery(final String database,
+                               final Type type) {
         super(database, "");
         this.type = type;
         this.fields = new LinkedHashSet<>();
         this.indexes = new LinkedHashSet<>();
     }
 
-    public DataDefinitionQuery(@NotNull final String database,
-                               @NotNull final String table,
-                               @NotNull final Set<Field> fields,
-                               @NotNull final Set<Index> indexes,
-                               @NotNull final Type type) {
+    public DataDefinitionQuery(final String database,
+                               final String table,
+                               final Set<Field> fields,
+                               final Set<Index> indexes,
+                               final Type type) {
         super(database, table);
         this.type = type;
         this.fields = fields;

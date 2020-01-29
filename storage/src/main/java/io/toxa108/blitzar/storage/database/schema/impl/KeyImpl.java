@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
@@ -10,12 +9,12 @@ import java.util.Objects;
 public class KeyImpl implements Key {
     private final Field field;
 
-    public KeyImpl(@NotNull final Field field) {
+    public KeyImpl(final Field field) {
         this.field = field;
     }
 
     @Override
-    public int compareTo(@NotNull final Key key) {
+    public int compareTo(final Key key) {
         switch (key.field().type()) {
             case SHORT:
                 return Short.compare(BytesManipulator.bytesToShort(field.value()),

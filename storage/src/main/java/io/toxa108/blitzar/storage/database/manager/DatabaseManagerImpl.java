@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.manager;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.manager.user.UserManager;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
@@ -14,16 +13,16 @@ public class DatabaseManagerImpl implements DatabaseManager {
     private final DataDefinitionQueryResolver dataDefinitionQueryResolver;
     private final DataManipulationQueryResolver dataManipulationQueryResolver;
 
-    public DatabaseManagerImpl(@NotNull final UserManager userManager,
-                               @NotNull final DataDefinitionQueryResolver dataDefinitionQueryResolver,
-                               @NotNull final DataManipulationQueryResolver dataManipulationQueryResolver) {
+    public DatabaseManagerImpl(final UserManager userManager,
+                               final DataDefinitionQueryResolver dataDefinitionQueryResolver,
+                               final DataManipulationQueryResolver dataManipulationQueryResolver) {
         this.userManager = userManager;
         this.dataDefinitionQueryResolver = dataDefinitionQueryResolver;
         this.dataManipulationQueryResolver = dataManipulationQueryResolver;
     }
 
     @Override
-    public ResultQuery resolveDataDefinitionQuery(@NotNull DataDefinitionQuery query) {
+    public ResultQuery resolveDataDefinitionQuery(DataDefinitionQuery query) {
         switch (query.type()) {
             case CREATE_DATABASE:
                 return dataDefinitionQueryResolver.createDatabase(query);

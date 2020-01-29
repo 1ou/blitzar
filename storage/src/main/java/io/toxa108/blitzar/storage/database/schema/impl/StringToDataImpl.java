@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.schema.StringToData;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
@@ -8,8 +7,8 @@ public class StringToDataImpl implements StringToData {
     private final String data;
     private final FieldType fieldType;
 
-    public StringToDataImpl(@NotNull final String data,
-                            @NotNull final FieldType fieldType) {
+    public StringToDataImpl(final String data,
+                            final FieldType fieldType) {
         this.data = data;
         this.fieldType = fieldType;
     }

@@ -1,23 +1,21 @@
 package io.toxa108.blitzar.storage.database.manager;
 
-import io.toxa108.blitzar.storage.NotNull;
-
 public class ArrayManipulator {
-    public <T> void insertInArray(@NotNull T[] array, @NotNull T value, @NotNull int pos) {
+    public <T> void insertInArray(T[] array, T value, int pos) {
         if (array.length - 1 - pos >= 0) {
             System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
         }
         array[pos] = value;
     }
 
-    public void insertInArray(@NotNull int[] array, @NotNull int value, @NotNull int pos) {
+    public void insertInArray(int[] array, int value, int pos) {
         if (array.length - 1 - pos >= 0) {
             System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
         }
         array[pos] = value;
     }
 
-    public byte[] invert(@NotNull final byte[] array) {
+    public byte[] invert(final byte[] array) {
         for (int i = 0; i < array.length / 2; ++i) {
             byte tmp = array[i];
             array[i] = array[array.length - i - 1];
@@ -26,14 +24,14 @@ public class ArrayManipulator {
         return array;
     }
 
-    public void insertInArray(@NotNull byte[] array, @NotNull byte value, @NotNull int pos) {
+    public void insertInArray(byte[] array, byte value, int pos) {
         if (array.length - 1 - pos >= 0) {
             System.arraycopy(array, pos, array, pos + 1, array.length - 1 - pos);
         }
         array[pos] = value;
     }
 
-    public <T> void copyArray(@NotNull T[] source, @NotNull T[] destination, @NotNull int len) {
+    public <T> void copyArray(T[] source, T[] destination, int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }
@@ -43,7 +41,7 @@ public class ArrayManipulator {
         }
     }
 
-    public void copyArray(@NotNull int[] source, @NotNull int[] destination, @NotNull int len) {
+    public void copyArray(int[] source, int[] destination, int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }
@@ -53,7 +51,7 @@ public class ArrayManipulator {
         }
     }
 
-    public <T> void copyArray(@NotNull T[] source, @NotNull T[] destination, @NotNull int pos, @NotNull int len) {
+    public <T> void copyArray(T[] source, T[] destination, int pos, int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }
@@ -63,7 +61,7 @@ public class ArrayManipulator {
         }
     }
 
-    public void copyArray(@NotNull int[] source, @NotNull int[] destination, @NotNull int pos, @NotNull int len) {
+    public void copyArray(int[] source, int[] destination, int pos, int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }

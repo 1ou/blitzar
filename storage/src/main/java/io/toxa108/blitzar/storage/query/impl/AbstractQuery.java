@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.query.Query;
 import io.toxa108.blitzar.storage.query.QueryContext;
 
@@ -9,8 +8,8 @@ public class AbstractQuery implements Query {
     private final String tableName;
     private QueryContext queryContext;
 
-    public AbstractQuery(@NotNull final String databaseName,
-                         @NotNull final String tableName) {
+    public AbstractQuery(final String databaseName,
+                         final String tableName) {
         this.databaseName = databaseName;
         this.tableName = tableName;
     }

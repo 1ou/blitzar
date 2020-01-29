@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.query.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.database.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
@@ -24,8 +23,8 @@ public class QueryProcessorImpl implements QueryProcessor {
      */
     private final ConcurrentHashMap<String, String> usersActiveDatabases;
 
-    public QueryProcessorImpl(@NotNull final DatabaseManager databaseManager,
-                              @NotNull final DatabaseContext databaseContext) {
+    public QueryProcessorImpl(final DatabaseManager databaseManager,
+                              final DatabaseContext databaseContext) {
         this.databaseManager = databaseManager;
         this.databaseContext = databaseContext;
         this.usersActiveDatabases = new ConcurrentHashMap<>();
@@ -33,8 +32,8 @@ public class QueryProcessorImpl implements QueryProcessor {
     }
 
     @Override
-    public byte[] process(@NotNull UserContext userContext,
-                          @NotNull final byte[] request) {
+    public byte[] process(UserContext userContext,
+                          final byte[] request) {
         semaphore.tryAcquire();
 
         String contextDatabaseName = usersActiveDatabases.get(userContext.user().login());
@@ -101,7 +100,7 @@ public class QueryProcessorImpl implements QueryProcessor {
         return errorKeyword.getBytes();
     }
 
-    String optimizeQuery(@NotNull final byte[] request) {
+    String optimizeQuery(final byte[] request) {
         final String query = new String(request).toLowerCase();
         final StringBuilder stringBuilder = new StringBuilder();
 

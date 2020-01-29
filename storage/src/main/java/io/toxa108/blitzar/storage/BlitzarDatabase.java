@@ -28,7 +28,7 @@ public class BlitzarDatabase {
     private final FileManager fileManager;
     private final DatabaseContext databaseContext;
 
-    public BlitzarDatabase(final String path) {
+    public BlitzarDatabase(@Nullable final String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException();
         }

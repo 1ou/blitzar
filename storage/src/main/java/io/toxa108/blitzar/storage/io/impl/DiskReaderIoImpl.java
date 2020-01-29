@@ -1,6 +1,5 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import io.toxa108.blitzar.storage.NotNull;
 import io.toxa108.blitzar.storage.io.DiskReader;
 
 import java.io.File;
@@ -20,7 +19,7 @@ public class DiskReaderIoImpl implements DiskReader {
     private final FileChannel fileChannel;
     private final ByteBuffer byteBuffer;
 
-    public DiskReaderIoImpl(@NotNull final File file) throws IOException {
+    public DiskReaderIoImpl(final File file) throws IOException {
         this.file = file;
         this.randomAccessFile = new RandomAccessFile(file, "r");
         this.fileInputStream = new FileInputStream(randomAccessFile.getFD());
@@ -29,7 +28,7 @@ public class DiskReaderIoImpl implements DiskReader {
     }
 
     @Override
-    public byte[] read(@NotNull final int pos, @NotNull final int len) throws IOException {
+    public byte[] read(final int pos, final int len) throws IOException {
 //        randomAccessFile.seek(pos);
 //        byte[] res = new byte[len];
 //        randomAccessFile.read(res);
