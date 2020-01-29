@@ -2,6 +2,7 @@ package io.toxa108.blitzar.storage.database.manager.btree;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.manager.LockManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -58,7 +59,8 @@ public class DiskTreeManagerTest {
         DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme
+                scheme,
+                new LockManagerImpl()
         );
 
         int n = 48;
@@ -73,9 +75,9 @@ public class DiskTreeManagerTest {
         p[n] = -1;
 
         int pos = databaseConfiguration.metadataSize();
-        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, p, false, n, -1);
+        TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
         diskTreeManager.saveNode(pos, treeNode);
-        DiskTreeManager.TreeNode treeNode1 =
+        TreeNode treeNode1 =
                 diskTreeManager.loadNode(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
@@ -99,7 +101,8 @@ public class DiskTreeManagerTest {
         DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme
+                scheme,
+                new LockManagerImpl()
         );
 
         int n = 62;
@@ -114,9 +117,9 @@ public class DiskTreeManagerTest {
         p[n] = -1;
 
         int pos = databaseConfiguration.metadataSize();
-        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, p, false, n, -1);
+        TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
         diskTreeManager.saveNode(pos, treeNode);
-        DiskTreeManager.TreeNode treeNode1 =
+        TreeNode treeNode1 =
                 diskTreeManager.loadNode(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
@@ -144,7 +147,8 @@ public class DiskTreeManagerTest {
         DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme
+                scheme,
+                new LockManagerImpl()
         );
 
         int n = 14;
@@ -168,9 +172,9 @@ public class DiskTreeManagerTest {
         }
 
         int pos = databaseConfiguration.metadataSize() + 1;
-        DiskTreeManager.TreeNode treeNode = new DiskTreeManager.TreeNode(pos, keys, bytes, true, n, -1);
+        TreeNode treeNode = new TreeNode(pos, keys, bytes, true, n, -1);
         diskTreeManager.saveNode(pos, treeNode);
-        DiskTreeManager.TreeNode treeNode1 =
+        TreeNode treeNode1 =
                 diskTreeManager.loadNode(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
@@ -215,7 +219,8 @@ public class DiskTreeManagerTest {
         DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme
+                scheme,
+                new LockManagerImpl()
         );
 
         Key key = new KeyImpl(fieldId);
@@ -252,7 +257,8 @@ public class DiskTreeManagerTest {
         DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme
+                scheme,
+                new LockManagerImpl()
         );
 
         long[] keys = {5, 8, 1, 7, 3};
@@ -300,7 +306,8 @@ public class DiskTreeManagerTest {
         DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme
+                scheme,
+                new LockManagerImpl()
         );
 
         for (int i = 0; i < 1000; ++i) {

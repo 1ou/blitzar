@@ -93,7 +93,7 @@ class TreeNode {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DiskTreeManager.TreeNode treeNode = (DiskTreeManager.TreeNode) o;
+        TreeNode treeNode = (TreeNode) o;
         return leaf == treeNode.leaf &&
                 pos == treeNode.pos &&
                 q == treeNode.q &&
