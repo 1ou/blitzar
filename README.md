@@ -33,6 +33,7 @@ Select from table with range condition:
 - [x]  Service discovery
 - [ ]  Process sql queries (in progress)
 - [ ]  Locking - thread safe version of database (in progress)
+- [ ]  Bloom filter (in progress)
 - [ ]  Database transactions
 
 Future:
