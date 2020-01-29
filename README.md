@@ -30,10 +30,12 @@ Select from table with range condition:
 - [x]  Storing databases
 - [x]  Storing tables
 - [x]  Server
-- [ ]  Process sql queries (in progress)
-- [ ]  Database transactions (in progress)
 - [x]  Service discovery
+- [ ]  Process sql queries (in progress)
+- [ ]  Locking - thread safe version of database (in progress)
+- [ ]  Database transactions
 
 Future:
 
-Distributed version.
+- [ ]  Benchmarks
+- [ ]  Distributed version
