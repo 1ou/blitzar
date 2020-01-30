@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.database.manager;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *
@@ -10,21 +10,37 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  */
 public class LockManagerImpl implements LockManager {
-    private final ConcurrentHashMap<Integer, ReentrantLock> map =
+    private final ConcurrentHashMap<String, ReentrantReadWriteLock> map =
             new ConcurrentHashMap<>(1024);
 
     @Override
     public void shared(int x) {
-
+        ReentrantReadWriteLock lock = map.computeIfAbsent(String.valueOf(x), k -> new ReentrantReadWriteLock(true));
+        if (lock.isWriteLocked()) {
+            lock.writeLock().lock();
+        }
+        lock.readLock().lock();
     }
 
     @Override
     public void exclusive(int x) {
-
+        ReentrantReadWriteLock lock = map.computeIfAbsent(String.valueOf(x), k -> new ReentrantReadWriteLock(true));
+        lock.writeLock().lock();
     }
 
     @Override
-    public void unlock(int x) {
+    public void unshared(int x) {
+        ReentrantReadWriteLock lock = map.get(String.valueOf(x));
+        if (lock != null) {
+            lock.readLock().unlock();
+        }
+    }
 
+    @Override
+    public void unexclusive(int x) {
+        ReentrantReadWriteLock lock = map.get(String.valueOf(x));
+        if (lock != null) {
+            lock.writeLock().unlock();
+        }
     }
 }

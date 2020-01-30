@@ -3,6 +3,7 @@ package io.toxa108.blitzar.storage.database.manager.btree;
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.LockManager;
+import io.toxa108.blitzar.storage.database.manager.LockManagerImpl;
 import io.toxa108.blitzar.storage.database.manager.TableDataManager;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
@@ -36,6 +37,7 @@ public class DiskTreeManager implements TableDataManager {
     private final ArrayManipulator arrayManipulator;
     private int numberOfUsedBlocks;
     private final SearchKeys searchKeys;
+    private final LockManager lockManager;
 
     public DiskTreeManager(final File file,
                            final DatabaseConfiguration databaseConfiguration,
@@ -50,6 +52,7 @@ public class DiskTreeManager implements TableDataManager {
             this.pLeaf = estimateSizeOfElementsInLeafNode(scheme);
             this.pNonLeaf = estimateSizeOfElementsInNonLeafNode(scheme);
             this.searchKeys = new SearchKeys();
+            this.lockManager = new LockManagerImpl();
             initMetadata();
         } catch (IOException e) {
             throw new IllegalArgumentException();
@@ -65,7 +68,7 @@ public class DiskTreeManager implements TableDataManager {
     }
 
     @Override
-    public synchronized void addRow(final Row row) throws IOException {
+    public void addRow(final Row row) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
         Key key = row.key();
 
@@ -277,7 +280,6 @@ public class DiskTreeManager implements TableDataManager {
         return foundedRows;
     }
 
-
     public List<Row> search(final Key key) throws IOException {
         TreeNode n = loadNode(databaseConfiguration.metadataSize() + 1);
 
@@ -389,166 +391,176 @@ public class DiskTreeManager implements TableDataManager {
      * @throws IOException in case issue with reading
      */
     TreeNode loadNode(final int pos) throws IOException {
-        Field primaryIndexField = scheme.primaryIndexField();
+        lockManager.shared(pos);
+        try {
+            Field primaryIndexField = scheme.primaryIndexField();
 
-        byte[] bytes = diskReader.read(pos, databaseConfiguration.diskPageSize());
-        boolean isLeaf = bytes[0] == 1;
-        byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
-        System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
-        int amountOfEntries = BytesManipulator.bytesToInt(amountOfEntriesBytes);
+            byte[] bytes = diskReader.read(pos, databaseConfiguration.diskPageSize());
+            boolean isLeaf = bytes[0] == 1;
+            byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
+            System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
+            int amountOfEntries = BytesManipulator.bytesToInt(amountOfEntriesBytes);
 
-        if (amountOfEntries == 0) {
-            return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
-        }
-
-        if (!isLeaf) {
-            Key[] keys = new Key[this.pNonLeaf];
-            int[] p = new int[this.pNonLeaf + 1];
-
-            byte[] entryPosBytes = new byte[Integer.BYTES];
-            byte[] tmpByteBuffer = new byte[Integer.BYTES];
-            int sizeOfCurrentIndex;
-
-            for (int i = 0; i < amountOfEntries; ++i) {
-                System.arraycopy(
-                        bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
-
-                int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
-                System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
-                sizeOfCurrentIndex = BytesManipulator.bytesToInt(tmpByteBuffer);
-
-                System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
-                p[i] = BytesManipulator.bytesToInt(tmpByteBuffer);
-                byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
-                System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
-                keys[i] = new KeyImpl(new FieldImpl(
-                        primaryIndexField.name(),
-                        primaryIndexField.type(),
-                        primaryIndexField.nullable(),
-                        primaryIndexField.unique(),
-                        currentIndexBytes)
-                );
-
-                if (i == amountOfEntries - 1) {
-                    int pNextPos = posOfIndex + Integer.BYTES * 2 + currentIndexBytes.length;
-                    System.arraycopy(bytes, pNextPos, tmpByteBuffer, 0, Integer.BYTES);
-                    p[i + 1] = BytesManipulator.bytesToInt(tmpByteBuffer);
-                }
+            if (amountOfEntries == 0) {
+                return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][scheme.dataSize()], true, 0, -1);
             }
-            return new TreeNode(
-                    pos,
-                    keys,
-                    p,
-                    false,
-                    amountOfEntries,
-                    -1
-            );
-        } else {
-            Key[] keys = new Key[this.pLeaf];
 
-            byte[][] values = new byte[this.pLeaf][scheme.dataSize()];
-            int next = -1;
+            if (!isLeaf) {
+                Key[] keys = new Key[this.pNonLeaf];
+                int[] p = new int[this.pNonLeaf + 1];
 
-            byte[] entryPosBytes = new byte[Integer.BYTES];
-            byte[] tmpByteBuffer = new byte[Integer.BYTES];
-            int sizeOfCurrentIndex, sizeOfCurrentData;
+                byte[] entryPosBytes = new byte[Integer.BYTES];
+                byte[] tmpByteBuffer = new byte[Integer.BYTES];
+                int sizeOfCurrentIndex;
 
-            for (int i = 0; i < amountOfEntries; ++i) {
-                System.arraycopy(
-                        bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
+                for (int i = 0; i < amountOfEntries; ++i) {
+                    System.arraycopy(
+                            bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
-                int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
-                System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
-                sizeOfCurrentIndex = BytesManipulator.bytesToInt(tmpByteBuffer);
+                    int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
+                    System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
+                    sizeOfCurrentIndex = BytesManipulator.bytesToInt(tmpByteBuffer);
 
-                System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
-                sizeOfCurrentData = BytesManipulator.bytesToInt(tmpByteBuffer);
+                    System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
+                    p[i] = BytesManipulator.bytesToInt(tmpByteBuffer);
+                    byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
+                    System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
+                    keys[i] = new KeyImpl(new FieldImpl(
+                            primaryIndexField.name(),
+                            primaryIndexField.type(),
+                            primaryIndexField.nullable(),
+                            primaryIndexField.unique(),
+                            currentIndexBytes)
+                    );
 
-                byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
-                byte[] currentDataBytes = new byte[sizeOfCurrentData];
-                System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES, currentIndexBytes, 0, sizeOfCurrentIndex);
-                System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex,
-                        currentDataBytes, 0, sizeOfCurrentData);
-
-                keys[i] = new KeyImpl(new FieldImpl(
-                        primaryIndexField.name(),
-                        primaryIndexField.type(),
-                        primaryIndexField.nullable(),
-                        primaryIndexField.unique(),
-                        currentIndexBytes)
-                );
-                values[i] = currentDataBytes;
-
-                if (i == amountOfEntries - 1) {
-                    int nextLeafPos = posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex + sizeOfCurrentData;
-                    System.arraycopy(bytes, nextLeafPos, tmpByteBuffer, 0, Integer.BYTES);
-                    next = BytesManipulator.bytesToInt(tmpByteBuffer);
+                    if (i == amountOfEntries - 1) {
+                        int pNextPos = posOfIndex + Integer.BYTES * 2 + currentIndexBytes.length;
+                        System.arraycopy(bytes, pNextPos, tmpByteBuffer, 0, Integer.BYTES);
+                        p[i + 1] = BytesManipulator.bytesToInt(tmpByteBuffer);
+                    }
                 }
+                return new TreeNode(
+                        pos,
+                        keys,
+                        p,
+                        false,
+                        amountOfEntries,
+                        -1
+                );
+            } else {
+                Key[] keys = new Key[this.pLeaf];
+
+                byte[][] values = new byte[this.pLeaf][scheme.dataSize()];
+                int next = -1;
+
+                byte[] entryPosBytes = new byte[Integer.BYTES];
+                byte[] tmpByteBuffer = new byte[Integer.BYTES];
+                int sizeOfCurrentIndex, sizeOfCurrentData;
+
+                for (int i = 0; i < amountOfEntries; ++i) {
+                    System.arraycopy(
+                            bytes, reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
+
+                    int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
+                    System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
+                    sizeOfCurrentIndex = BytesManipulator.bytesToInt(tmpByteBuffer);
+
+                    System.arraycopy(bytes, posOfIndex + Integer.BYTES, tmpByteBuffer, 0, Integer.BYTES);
+                    sizeOfCurrentData = BytesManipulator.bytesToInt(tmpByteBuffer);
+
+                    byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
+                    byte[] currentDataBytes = new byte[sizeOfCurrentData];
+                    System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES, currentIndexBytes, 0, sizeOfCurrentIndex);
+                    System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex,
+                            currentDataBytes, 0, sizeOfCurrentData);
+
+                    keys[i] = new KeyImpl(new FieldImpl(
+                            primaryIndexField.name(),
+                            primaryIndexField.type(),
+                            primaryIndexField.nullable(),
+                            primaryIndexField.unique(),
+                            currentIndexBytes)
+                    );
+                    values[i] = currentDataBytes;
+
+                    if (i == amountOfEntries - 1) {
+                        int nextLeafPos = posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex + sizeOfCurrentData;
+                        System.arraycopy(bytes, nextLeafPos, tmpByteBuffer, 0, Integer.BYTES);
+                        next = BytesManipulator.bytesToInt(tmpByteBuffer);
+                    }
+                }
+                return new TreeNode(
+                        pos,
+                        keys,
+                        values,
+                        true,
+                        amountOfEntries,
+                        next
+                );
             }
-            return new TreeNode(
-                    pos,
-                    keys,
-                    values,
-                    true,
-                    amountOfEntries,
-                    next
-            );
+        } finally {
+            lockManager.unshared(pos);
         }
     }
 
     void saveNode(final int pos, final TreeNode node) throws IOException {
-        if (!node.leaf) {
-            int estimatedSize = estimateSizeOfElementsInNonLeafNode(scheme);
-            checkNodeSize(node.q, estimatedSize);
+        lockManager.exclusive(pos);
+        try {
+            if (!node.leaf) {
+                int estimatedSize = estimateSizeOfElementsInNonLeafNode(scheme);
+                checkNodeSize(node.q, estimatedSize);
 
-            int currPos = pos;
-            diskWriter.write(currPos, new byte[]{0});
-            currPos++;
-            diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
+                int currPos = pos;
+                diskWriter.write(currPos, new byte[]{0});
+                currPos++;
+                diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
 
-            for (int i = 0; i < node.q; ++i) {
-                currPos += Integer.BYTES;
-                int posOfIndex = pos + reservedSpaceInNode()
-                        + estimatedSize * Integer.BYTES + i * primaryIndexNonVariableRecordSize();
+                for (int i = 0; i < node.q; ++i) {
+                    currPos += Integer.BYTES;
+                    int posOfIndex = pos + reservedSpaceInNode()
+                            + estimatedSize * Integer.BYTES + i * primaryIndexNonVariableRecordSize();
 
-                diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
-                diskWriter.write(posOfIndex, BytesManipulator.intToBytes(scheme.primaryIndexSize()));
-                diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(node.p[i]));
-                byte[] indexValue = node.keys[i].field().value();
-                diskWriter.write(posOfIndex + 2 * Integer.BYTES, indexValue);
+                    diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
+                    diskWriter.write(posOfIndex, BytesManipulator.intToBytes(scheme.primaryIndexSize()));
+                    diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(node.p[i]));
+                    byte[] indexValue = node.keys[i].field().value();
+                    diskWriter.write(posOfIndex + 2 * Integer.BYTES, indexValue);
 
-                if (i == node.q - 1) {
-                    diskWriter.write(
-                            posOfIndex + 2 * Integer.BYTES + indexValue.length,
-                            BytesManipulator.intToBytes(node.p[node.q]));
+                    if (i == node.q - 1) {
+                        diskWriter.write(
+                                posOfIndex + 2 * Integer.BYTES + indexValue.length,
+                                BytesManipulator.intToBytes(node.p[node.q]));
+                    }
+                }
+            } else {
+                int estimatedSize = estimateSizeOfElementsInLeafNode(scheme);
+                checkNodeSize(node.q, estimatedSize);
+
+                int currPos = pos;
+                diskWriter.write(currPos, new byte[]{1});
+                currPos++;
+                diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
+
+                for (int i = 0; i < node.q; ++i) {
+                    currPos += Integer.BYTES;
+                    int posOfIndex = pos + reservedSpaceInNode()
+                            + estimatedSize * Integer.BYTES + i * dataNonVariableRecordSize();
+
+                    diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
+                    diskWriter.write(posOfIndex, BytesManipulator.intToBytes(scheme.primaryIndexSize()));
+                    diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(scheme.dataSize()));
+
+                    diskWriter.write(posOfIndex + 2 * Integer.BYTES, node.keys[i].field().value());
+                    diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize(), node.values[i]);
+
+                    if (i == node.q - 1) {
+                        diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize() + scheme.dataSize(),
+                                BytesManipulator.intToBytes(node.nextPos));
+                    }
                 }
             }
-        } else {
-            int estimatedSize = estimateSizeOfElementsInLeafNode(scheme);
-            checkNodeSize(node.q, estimatedSize);
-
-            int currPos = pos;
-            diskWriter.write(currPos, new byte[]{1});
-            currPos++;
-            diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
-
-            for (int i = 0; i < node.q; ++i) {
-                currPos += Integer.BYTES;
-                int posOfIndex = pos + reservedSpaceInNode()
-                        + estimatedSize * Integer.BYTES + i * dataNonVariableRecordSize();
-
-                diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
-                diskWriter.write(posOfIndex, BytesManipulator.intToBytes(scheme.primaryIndexSize()));
-                diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(scheme.dataSize()));
-
-                diskWriter.write(posOfIndex + 2 * Integer.BYTES, node.keys[i].field().value());
-                diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize(), node.values[i]);
-
-                if (i == node.q - 1) {
-                    diskWriter.write(posOfIndex + 2 * Integer.BYTES + scheme.primaryIndexSize() + scheme.dataSize(),
-                            BytesManipulator.intToBytes(node.nextPos));
-                }
-            }
+        } finally {
+            lockManager.unexclusive(pos);
         }
     }
 

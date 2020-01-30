@@ -16,9 +16,17 @@ public interface LockManager {
     void exclusive(int x);
 
     /**
-     * Unlock file position
+     * Unlock read
      *
-     * @param x  position
+     * @param x position
      */
-    void unlock(int x);
+    void unshared(int x);
+
+
+    /**
+     * Unlock exclusive
+     *
+     * @param x position
+     */
+    void unexclusive(int x);
 }
