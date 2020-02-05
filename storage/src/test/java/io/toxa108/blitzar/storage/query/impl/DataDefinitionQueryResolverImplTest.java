@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.query.impl;
 
-import io.toxa108.blitzar.storage.database.DatabaseContext;
-import io.toxa108.blitzar.storage.database.DatabaseContextImpl;
+import io.toxa108.blitzar.storage.database.context.DatabaseContext;
+import io.toxa108.blitzar.storage.database.context.impl.DatabaseContextImpl;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.impl.*;

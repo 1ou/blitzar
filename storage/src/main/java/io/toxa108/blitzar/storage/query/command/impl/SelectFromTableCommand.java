@@ -1,14 +1,14 @@
 package io.toxa108.blitzar.storage.query.command.impl;
 
-import io.toxa108.blitzar.storage.database.DatabaseContext;
+import io.toxa108.blitzar.storage.database.context.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.RowToBytesImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.StringToDataImpl;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.RowToBytesImpl;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.StringToDataImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;

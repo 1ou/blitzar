@@ -1,8 +1,8 @@
 package io.toxa108.blitzar.storage.benchmark;
 
 import io.toxa108.blitzar.storage.BlitzarDatabase;
-import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.manager.btree.impl.DiskTreeManager;
+import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.DiskTreeManager;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;

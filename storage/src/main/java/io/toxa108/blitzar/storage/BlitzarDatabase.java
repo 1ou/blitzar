@@ -1,9 +1,9 @@
 package io.toxa108.blitzar.storage;
 
-import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
-import io.toxa108.blitzar.storage.database.DatabaseContext;
-import io.toxa108.blitzar.storage.database.DatabaseContextImpl;
+import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
+import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.context.DatabaseContext;
+import io.toxa108.blitzar.storage.database.context.impl.DatabaseContextImpl;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManagerImpl;
 import io.toxa108.blitzar.storage.database.manager.user.UserManager;
