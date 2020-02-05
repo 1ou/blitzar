@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema;
 
-public interface RowsToBytes {
+public interface RowToBytes {
     /**
      * Transform rows to bytes
      *
