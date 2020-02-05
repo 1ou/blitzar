@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
-import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeReader;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskBTreeReader;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
@@ -13,7 +13,7 @@ import io.toxa108.blitzar.storage.io.impl.DiskReaderIoImpl;
 import java.io.File;
 import java.io.IOException;
 
-public class DiskTreeReaderImpl implements DiskTreeReader {
+public class DiskBTreeReaderImpl implements DiskBTreeReader {
     /**
      * Disk writer
      */
@@ -22,17 +22,17 @@ public class DiskTreeReaderImpl implements DiskTreeReader {
     /**
      * Table metadata
      */
-    private final TableTreeMetadata tableTreeMetadata;
+    private final TableBTreeMetadata tableBTreeMetadata;
 
     private final int pNonLeaf;
     private final int pLeaf;
 
-    public DiskTreeReaderImpl(final File file,
-                              final TableTreeMetadata tableTreeMetadata) throws IOException {
+    public DiskBTreeReaderImpl(final File file,
+                               final TableBTreeMetadata tableBTreeMetadata) throws IOException {
         this.diskReader = new DiskReaderIoImpl(file);
-        this.tableTreeMetadata = tableTreeMetadata;
-        this.pLeaf = tableTreeMetadata.estimatedSizeOfElementsInLeafNode();
-        this.pNonLeaf = tableTreeMetadata.estimatedSizeOfElementsInNonLeafNode();
+        this.tableBTreeMetadata = tableBTreeMetadata;
+        this.pLeaf = tableBTreeMetadata.entriesInLeafNodeNumber();
+        this.pNonLeaf = tableBTreeMetadata.entriesInNonLeafNodeNumber();
     }
 
 
@@ -44,16 +44,16 @@ public class DiskTreeReaderImpl implements DiskTreeReader {
 
     @Override
     public TreeNode read(final int pos) throws IOException {
-        Field primaryIndexField = tableTreeMetadata.primaryIndexField();
+        Field primaryIndexField = tableBTreeMetadata.primaryIndexField();
 
-        byte[] bytes = diskReader.read(pos, tableTreeMetadata.databaseConfiguration().diskPageSize());
+        byte[] bytes = diskReader.read(pos, tableBTreeMetadata.databaseConfiguration().diskPageSize());
         boolean isLeaf = bytes[0] == 1;
         byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
         System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
         int amountOfEntries = BytesManipulator.bytesToInt(amountOfEntriesBytes);
 
         if (amountOfEntries == 0) {
-            return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][tableTreeMetadata.dataSize()], true, 0, -1);
+            return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][tableBTreeMetadata.dataSize()], true, 0, -1);
         }
 
         if (!isLeaf) {
@@ -66,7 +66,7 @@ public class DiskTreeReaderImpl implements DiskTreeReader {
 
             for (int i = 0; i < amountOfEntries; ++i) {
                 System.arraycopy(
-                        bytes, tableTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
+                        bytes, tableBTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
                 int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
                 System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
@@ -101,7 +101,7 @@ public class DiskTreeReaderImpl implements DiskTreeReader {
         } else {
             Key[] keys = new Key[this.pLeaf];
 
-            byte[][] values = new byte[this.pLeaf][tableTreeMetadata.dataSize()];
+            byte[][] values = new byte[this.pLeaf][tableBTreeMetadata.dataSize()];
             int next = -1;
 
             byte[] entryPosBytes = new byte[Integer.BYTES];
@@ -110,7 +110,7 @@ public class DiskTreeReaderImpl implements DiskTreeReader {
 
             for (int i = 0; i < amountOfEntries; ++i) {
                 System.arraycopy(
-                        bytes, tableTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
+                        bytes, tableBTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
                 int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
                 System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);

@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.io.DiskReader;
@@ -12,16 +12,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-public class TableTreeMetadataImpl implements TableTreeMetadata {
+public class TableBTreeMetadataImpl implements TableBTreeMetadata {
     private final DatabaseConfiguration databaseConfiguration;
     private final Scheme scheme;
     private final DiskReader diskReader;
     private final int pLeaf;
     private final int pNonLeaf;
 
-    public TableTreeMetadataImpl(final File file,
-                                 final DatabaseConfiguration databaseConfiguration,
-                                 final Scheme scheme) throws IOException {
+    public TableBTreeMetadataImpl(final File file,
+                                  final DatabaseConfiguration databaseConfiguration,
+                                  final Scheme scheme) throws IOException {
         this.databaseConfiguration = databaseConfiguration;
         this.scheme = scheme;
         this.diskReader = new DiskReaderIoImpl(file);
@@ -89,7 +89,7 @@ public class TableTreeMetadataImpl implements TableTreeMetadata {
      * @return number of elements
      */
     @Override
-    public int estimatedSizeOfElementsInLeafNode() {
+    public int entriesInLeafNodeNumber() {
         return pLeaf;
     }
 
@@ -100,7 +100,7 @@ public class TableTreeMetadataImpl implements TableTreeMetadata {
      * @return number of elements
      */
     @Override
-    public int estimatedSizeOfElementsInNonLeafNode() {
+    public int entriesInNonLeafNodeNumber() {
         return pNonLeaf;
     }
 

@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Tooo fucking big
  */
-public interface TableTreeMetadata {
+public interface TableBTreeMetadata {
 
     /**
      * Return database configuration
@@ -32,17 +32,44 @@ public interface TableTreeMetadata {
      * Free space position
      *
      * @return position
+     * @throws IOException disk io exception
      */
     int freeSpacePos() throws IOException;
 
+    /**
+     * Size of non variable records
+     *
+     * @return size
+     */
     int dataNonVariableRecordSize();
 
+    /**
+     * Return primary index non variable size
+     *
+     * @return primary index non variable size
+     */
     int primaryIndexNonVariableRecordSize();
 
-    int estimatedSizeOfElementsInLeafNode();
+    /**
+     * Return max number of entries are able to put in leaf node
+     *
+     * @return max number of entries are able to put in leaf node
+     */
+    int entriesInLeafNodeNumber();
 
-    int estimatedSizeOfElementsInNonLeafNode();
+    /**
+     * Return max number of entries are able to put in non leaf node
+     *
+     * @return max number of entries are able to put in non leaf node
+     */
+    int entriesInNonLeafNodeNumber();
 
+    /**
+     * Return number of used blocks
+     *
+     * @return number of used blocks
+     * @throws IOException disk io issue
+     */
     int numberOfUsedBlocks() throws IOException;
 
     /**
@@ -58,7 +85,6 @@ public interface TableTreeMetadata {
      * @return primary index size
      */
     int primaryIndexSize();
-
 
     /**
      * Record size (exclude primary index)
@@ -81,5 +107,4 @@ public interface TableTreeMetadata {
      * @return true or false
      */
     boolean containIndex(String indexName);
-
 }

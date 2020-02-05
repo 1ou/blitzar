@@ -4,7 +4,7 @@ import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.TreeNode;
 
 import java.io.IOException;
 
-public interface DiskTreeReader {
+public interface DiskBTreeReader {
     /**
      * Read node from disk
      *

@@ -56,9 +56,9 @@ public class DiskTreeManagerTest {
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
-        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskTreeWriter diskTreeWriter = new DiskTreeWriterImpl(file, tableTreeMetadata);
-        final DiskTreeReader diskTreeReader = new DiskTreeReaderImpl(file, tableTreeMetadata);
+        final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
+        final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
 
         final int n = 48;
         final Key[] keys = new Key[n];
@@ -73,8 +73,8 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize();
         final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        diskTreeWriter.write(pos, treeNode);
-        final TreeNode treeNode1 = diskTreeReader.read(pos);
+        diskBTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskBTreeReader.read(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
@@ -94,9 +94,9 @@ public class DiskTreeManagerTest {
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
-        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskTreeWriter diskTreeWriter = new DiskTreeWriterImpl(file, tableTreeMetadata);
-        final DiskTreeReader diskTreeReader = new DiskTreeReaderImpl(file, tableTreeMetadata);
+        final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
+        final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
 
         int n = 62;
         Key[] keys = new Key[n];
@@ -111,8 +111,8 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize();
         final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        diskTreeWriter.write(pos, treeNode);
-        final TreeNode treeNode1 = diskTreeReader.read(pos);
+        diskBTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskBTreeReader.read(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
@@ -136,9 +136,9 @@ public class DiskTreeManagerTest {
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
-        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskTreeWriter diskTreeWriter = new DiskTreeWriterImpl(file, tableTreeMetadata);
-        final DiskTreeReader diskTreeReader = new DiskTreeReaderImpl(file, tableTreeMetadata);
+        final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
+        final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
 
         final int n = 14;
         Key[] keys = new Key[n];
@@ -162,8 +162,8 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize() + 1;
         final TreeNode treeNode = new TreeNode(pos, keys, bytes, true, n, -1);
-        diskTreeWriter.write(pos, treeNode);
-        final TreeNode treeNode1 = diskTreeReader.read(pos);
+        diskBTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskBTreeReader.read(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
