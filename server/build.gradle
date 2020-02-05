@@ -10,6 +10,8 @@ repositories {
     mavenCentral()
 }
 
+mainClassName = "io.toxa108.blitzar.server.ServerApplication"
+
 sourceSets {
     main {
         java {

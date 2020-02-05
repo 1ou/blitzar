@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClassName = "io.toxa108.storage.BlitzarDatabase"
+    mainClassName = "io.toxa108.blitzar.storage.BlitzarDatabase"
 }
 
 java {

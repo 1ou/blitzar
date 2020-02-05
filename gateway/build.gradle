@@ -1,10 +1,13 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 version 'unspecified'
 
 sourceCompatibility = 1.8
+
+mainClassName = "io.toxa108.blitzar.gatewayGatewayApplication"
 
 repositories {
     mavenCentral()
