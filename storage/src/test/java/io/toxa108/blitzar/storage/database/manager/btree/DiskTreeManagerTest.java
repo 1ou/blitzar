@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.database.manager.btree;
 
 import io.toxa108.blitzar.storage.database.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.DatabaseConfigurationImpl;
-import io.toxa108.blitzar.storage.database.manager.LockManagerImpl;
+import io.toxa108.blitzar.storage.database.manager.btree.impl.*;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -43,29 +43,26 @@ public class DiskTreeManagerTest {
     }
     @Test
     public void save_and_load_non_leaf_node_when_success() throws IOException {
-        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
-        Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[100]);
+        final Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        final Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[100]);
 
-        Scheme scheme = new SchemeImpl(
+        final Scheme scheme = new SchemeImpl(
                 Set.of(fieldId, fieldName),
                 Set.of(
                         new IndexImpl(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
-        File file = Files.createTempFile("t2", "12").toFile();
+        final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
-        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
-                file,
-                databaseConfiguration,
-                scheme,
-                new LockManagerImpl()
-        );
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
+        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskTreeWriter diskTreeWriter = new DiskTreeWriterImpl(file, tableTreeMetadata);
+        final DiskTreeReader diskTreeReader = new DiskTreeReaderImpl(file, tableTreeMetadata);
 
-        int n = 48;
-        Key[] keys = new Key[n];
-        int[] p = new int[n + 1];
+        final int n = 48;
+        final Key[] keys = new Key[n];
+        final int[] p = new int[n + 1];
         for (int i = 0; i < n; ++i) {
             keys[i] = new KeyImpl(new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL,
@@ -74,36 +71,32 @@ public class DiskTreeManagerTest {
         }
         p[n] = -1;
 
-        int pos = databaseConfiguration.metadataSize();
-        TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        diskTreeManager.saveNode(pos, treeNode);
-        TreeNode treeNode1 =
-                diskTreeManager.loadNode(pos);
+        final int pos = databaseConfiguration.metadataSize();
+        final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
+        diskTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskTreeReader.read(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void save_and_load_non_leaf_node_when_error() throws IOException {
-        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
-        Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[100]);
+        final Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        final Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[100]);
 
-        Scheme scheme = new SchemeImpl(
+        final Scheme scheme = new SchemeImpl(
                 Set.of(fieldId, fieldName),
                 Set.of(
                         new IndexImpl(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
-        File file = Files.createTempFile("t2", "12").toFile();
+        final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
-        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
-                file,
-                databaseConfiguration,
-                scheme,
-                new LockManagerImpl()
-        );
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
+        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskTreeWriter diskTreeWriter = new DiskTreeWriterImpl(file, tableTreeMetadata);
+        final DiskTreeReader diskTreeReader = new DiskTreeReaderImpl(file, tableTreeMetadata);
 
         int n = 62;
         Key[] keys = new Key[n];
@@ -116,89 +109,83 @@ public class DiskTreeManagerTest {
         }
         p[n] = -1;
 
-        int pos = databaseConfiguration.metadataSize();
-        TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        diskTreeManager.saveNode(pos, treeNode);
-        TreeNode treeNode1 =
-                diskTreeManager.loadNode(pos);
+        final int pos = databaseConfiguration.metadataSize();
+        final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
+        diskTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskTreeReader.read(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
 
     @Test
     public void save_and_load_leaf_node_when_success() throws IOException {
-        int nameLen = 100;
-        int catLen = 2;
+        final int nameLen = 100;
+        final int catLen = 2;
 
-        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
-        Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[nameLen]);
-        Field fieldCategory = new FieldImpl("category", FieldType.SHORT, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[catLen]);
+        final Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        final Field fieldName = new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[nameLen]);
+        final Field fieldCategory = new FieldImpl("category", FieldType.SHORT, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[catLen]);
 
-        Scheme scheme = new SchemeImpl(
+        final Scheme scheme = new SchemeImpl(
                 Set.of(fieldId, fieldName, fieldCategory),
                 Set.of(
                         new IndexImpl(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
-        File file = Files.createTempFile("q1", "12").toFile();
+        final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
-        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
-                file,
-                databaseConfiguration,
-                scheme,
-                new LockManagerImpl()
-        );
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskTreeWriter diskTreeWriter = new DiskTreeWriterImpl(file, tableTreeMetadata);
+        final DiskTreeReader diskTreeReader = new DiskTreeReaderImpl(file, tableTreeMetadata);
 
-        int n = 14;
+        final int n = 14;
         Key[] keys = new Key[n];
 
-        byte[][] bytes = new byte[n][scheme.recordSize()];
+        final byte[][] bytes = new byte[n][scheme.recordSize()];
         for (int i = 0; i < n; ++i) {
             keys[i] = new KeyImpl(new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL,
                     Unique.UNIQUE, BytesManipulator.longToBytes(i + 1)));
 
-            String name = "example" + (i + 1) + "%";
-            byte[] valueBytes = new byte[nameLen + catLen];
+            final String name = "example" + (i + 1) + "%";
+            final byte[] valueBytes = new byte[nameLen + catLen];
             System.arraycopy(name.getBytes(), 0, valueBytes, 0, name.length());
 
-            short cat = (short) (i + 10);
-            byte[] catBytes = BytesManipulator.shortToBytes(cat);
+            final short cat = (short) (i + 10);
+            final byte[] catBytes = BytesManipulator.shortToBytes(cat);
 
             System.arraycopy(catBytes, 0, valueBytes, nameLen, catLen);
             bytes[i] = valueBytes;
         }
 
-        int pos = databaseConfiguration.metadataSize() + 1;
-        TreeNode treeNode = new TreeNode(pos, keys, bytes, true, n, -1);
-        diskTreeManager.saveNode(pos, treeNode);
-        TreeNode treeNode1 =
-                diskTreeManager.loadNode(pos);
+        final int pos = databaseConfiguration.metadataSize() + 1;
+        final TreeNode treeNode = new TreeNode(pos, keys, bytes, true, n, -1);
+        diskTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskTreeReader.read(pos);
 
         Assert.assertEquals(treeNode, treeNode1);
     }
 
     @Test
     public void add_row_when_success() throws IOException {
-        int nameLen = 100;
-        int catLen = 2;
+        final int nameLen = 100;
 
-        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        final Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
 
         String name = "exampleeeeeee" + "%";
-        byte[] nameBytes = new byte[nameLen];
+        final byte[] nameBytes = new byte[nameLen];
         System.arraycopy(name.getBytes(), 0, nameBytes, 0, name.length());
 
-        Field fieldName = new FieldImpl(
+        final Field fieldName = new FieldImpl(
                 "name",
                 FieldType.VARCHAR,
                 Nullable.NOT_NULL,
                 Unique.NOT_UNIQUE,
                 nameBytes
         );
-        Field fieldCategory = new FieldImpl(
+        final Field fieldCategory = new FieldImpl(
                 "category",
                 FieldType.SHORT,
                 Nullable.NOT_NULL,
@@ -206,43 +193,42 @@ public class DiskTreeManagerTest {
                 BytesManipulator.shortToBytes((short) 99)
         );
 
-        Scheme scheme = new SchemeImpl(
+        final Scheme scheme = new SchemeImpl(
                 Set.of(fieldId, fieldName, fieldCategory),
                 Set.of(
                         new IndexImpl(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
-        File file = Files.createTempFile("q1", "12").toFile();
+        final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
-        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        final DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme,
-                new LockManagerImpl()
+                scheme
         );
 
-        Key key = new KeyImpl(fieldId);
-        Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
+        final Key key = new KeyImpl(fieldId);
+        final Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
 
         diskTreeManager.addRow(row);
     }
 
     @Test
     public void add_rows_when_success_case_1() throws IOException {
-        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
-        Scheme scheme = new SchemeImpl(
+        final Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        final Scheme scheme = new SchemeImpl(
                 Set.of(fieldId),
                 Set.of(
                         new IndexImpl(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
-        File file = Files.createTempFile("q1", "12").toFile();
+        final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
 
-        DatabaseConfiguration databaseConfiguration = new DatabaseConfiguration() {
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfiguration() {
             @Override
             public int metadataSize() {
                 return 1024;
@@ -254,28 +240,27 @@ public class DiskTreeManagerTest {
             }
         };
 
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
+        final DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme,
-                new LockManagerImpl()
+                scheme
         );
 
-        long[] keys = {5, 8, 1, 7, 3};
+        final long[] keys = {5, 8, 1, 7, 3};
         for (long k : keys) {
-            fieldId = new FieldImpl(
+            Field newFieldId = new FieldImpl(
                     "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(k));
 
-            Key key = new KeyImpl(fieldId);
-            Row row = new RowImpl(key, Set.of(fieldId));
+            Key key = new KeyImpl(newFieldId);
+            Row row = new RowImpl(key, Set.of(newFieldId));
             diskTreeManager.addRow(row);
         }
     }
 
     @Test
     public void add_rows_when_success_case_2() throws IOException {
-        int nameLen = 100;
-        int catLen = 2;
+        final int nameLen = 100;
+        final int catLen = 2;
 
         Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
         Field fieldName = new FieldImpl(
@@ -293,28 +278,27 @@ public class DiskTreeManagerTest {
                 new byte[catLen]
         );
 
-        Scheme scheme = new SchemeImpl(
+        final Scheme scheme = new SchemeImpl(
                 Set.of(fieldId, fieldName, fieldCategory),
                 Set.of(
                         new IndexImpl(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
-        File file = Files.createTempFile("q1", "12").toFile();
+        final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
-        DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
+        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        final DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
-                scheme,
-                new LockManagerImpl()
+                scheme
         );
 
         for (int i = 0; i < 1000; ++i) {
             fieldId = new FieldImpl("id", FieldType.LONG,
                     Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i + 1));
 
-            String name = "justname" + (i + 1) + "%";
+            final String name = "justname" + (i + 1) + "%";
             byte[] nameBytes = new byte[nameLen];
             System.arraycopy(name.getBytes(), 0, nameBytes, 0, name.length());
 
@@ -333,17 +317,17 @@ public class DiskTreeManagerTest {
                     BytesManipulator.shortToBytes((short) (i + 1))
             );
 
-            Key key = new KeyImpl(fieldId);
-            Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
+            final Key key = new KeyImpl(fieldId);
+            final Row row = new RowImpl(key, Set.of(fieldId, fieldName, fieldCategory));
             diskTreeManager.addRow(row);
         }
 
         for (int i = 0; i < 1000; ++i) {
             fieldId = new FieldImpl("id", FieldType.LONG,
                     Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i + 1));
-            Key key = new KeyImpl(fieldId);
-            List<Row> rows = diskTreeManager.search(key);
-            String compareStr = "justname" + (i + 1) + "%";
+            final Key key = new KeyImpl(fieldId);
+            final List<Row> rows = diskTreeManager.search(key);
+            final String compareStr = "justname" + (i + 1) + "%";
             Assert.assertEquals(rows.get(0).key(), key);
             Assert.assertEquals(compareStr, new String(rows.get(0).fieldByName("name").value()).substring(0, compareStr.length()));
         }

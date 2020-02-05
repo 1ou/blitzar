@@ -22,7 +22,6 @@ public interface LockManager {
      */
     void unshared(int x);
 
-
     /**
      * Unlock exclusive
      *

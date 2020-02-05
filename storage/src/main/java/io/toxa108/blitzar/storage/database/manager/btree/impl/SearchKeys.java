@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.database.manager.btree;
+package io.toxa108.blitzar.storage.database.manager.btree.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Key;
 

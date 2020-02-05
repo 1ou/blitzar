@@ -1,4 +1,4 @@
-package io.toxa108.blitzar.storage.database.manager.btree;
+package io.toxa108.blitzar.storage.database.manager.btree.impl;
 
 
 import io.toxa108.blitzar.storage.database.schema.Key;
@@ -6,7 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Key;
 import java.util.Arrays;
 import java.util.Objects;
 
-class TreeNode {
+public class TreeNode {
     /**
      * Keys
      */
@@ -42,7 +42,7 @@ class TreeNode {
      */
     int pos;
 
-    TreeNode(final int q, final int dataLen) {
+    public TreeNode(final int q, final int dataLen) {
         this.keys = new Key[q];
         this.p = new int[q + 1];
         this.leaf = true;
@@ -55,12 +55,12 @@ class TreeNode {
         }
     }
 
-    TreeNode(final int pos,
-             final Key[] keys,
-             final int[] p,
-             final boolean isLeaf,
-             final int q,
-             final int nextPos) {
+    public TreeNode(final int pos,
+                    final Key[] keys,
+                    final int[] p,
+                    final boolean isLeaf,
+                    final int q,
+                    final int nextPos) {
         this.keys = keys;
         this.p = p;
         this.leaf = isLeaf;
@@ -70,12 +70,12 @@ class TreeNode {
         this.pos = pos;
     }
 
-    TreeNode(final int pos,
-             final Key[] keys,
-             final byte[][] values,
-             final boolean isLeaf,
-             final int q,
-             final int nextPos) {
+    public TreeNode(final int pos,
+                    final Key[] keys,
+                    final byte[][] values,
+                    final boolean isLeaf,
+                    final int q,
+                    final int nextPos) {
         this.keys = keys;
         this.values = values;
         this.leaf = isLeaf;
