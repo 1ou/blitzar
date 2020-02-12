@@ -41,13 +41,6 @@ public interface Field {
     Unique unique();
 
     /**
-     * Transfer metadata info to bytes array
-     *
-     * @return array of metadata bytes
-     */
-    byte[] metadata();
-
-    /**
      * Size to store on disk
      *
      * @return size to store on disk

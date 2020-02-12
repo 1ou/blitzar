@@ -8,6 +8,7 @@ import io.toxa108.blitzar.storage.database.schema.impl.BzIndex;
 import io.toxa108.blitzar.storage.database.schema.impl.BzScheme;
 import io.toxa108.blitzar.storage.database.schema.impl.BzTable;
 import io.toxa108.blitzar.storage.database.schema.transform.impl.BytesAsField;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.FieldMetaAsBytes;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -137,7 +138,7 @@ public class FileManagerImpl implements FileManager {
         posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
 
         for (Field field : scheme.fields()) {
-            byte[] bytes = field.metadata();
+            byte[] bytes = new FieldMetaAsBytes(field).transform();
             tmpSeek += Integer.BYTES;
             diskWriter.write(tmpSeek, BytesManipulator.intToBytes(posOfFields - startOfIndexes));
             diskWriter.write(posOfFields, bytes);
