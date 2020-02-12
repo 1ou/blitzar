@@ -1,4 +1,5 @@
 # blitzar
+[![Build Status](https://travis-ci.org/toxa108/blitzar)](https://travis-ci.org/toxa108/blitzar)
 
 The Blitzar is a timeseries database with sql syntax. 
 The data storing in the b+tree data structure on the disk. 
