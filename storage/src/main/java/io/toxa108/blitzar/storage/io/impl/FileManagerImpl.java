@@ -3,7 +3,11 @@ package io.toxa108.blitzar.storage.io.impl;
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.row.RowManagerImpl;
 import io.toxa108.blitzar.storage.database.schema.*;
-import io.toxa108.blitzar.storage.database.schema.impl.*;
+import io.toxa108.blitzar.storage.database.schema.impl.BzDatabase;
+import io.toxa108.blitzar.storage.database.schema.impl.BzIndex;
+import io.toxa108.blitzar.storage.database.schema.impl.BzScheme;
+import io.toxa108.blitzar.storage.database.schema.impl.BzTable;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.BytesAsField;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.DiskWriter;
 import io.toxa108.blitzar.storage.io.FileManager;
@@ -176,7 +180,7 @@ public class FileManagerImpl implements FileManager {
                     diskReader.read(startOfFields + seekOfField, Integer.BYTES));
 
             byte[] bytes = diskReader.read(startOfFields + seekOfField, fieldSize + Integer.BYTES);
-            Field field = new BzField(bytes);
+            Field field = new BytesAsField(bytes).transform();
             fields.add(field);
         }
 

@@ -22,43 +22,13 @@ public class BzField implements Field {
         this.fieldType = fieldType;
         this.nullable = nullable;
         this.unique = unique;
+        this.value = value;
 
         if (fieldType == FieldType.VARCHAR) {
             this.valueSize = value.length;
         } else {
             this.valueSize = fieldType.size();
         }
-        this.value = value;
-    }
-
-    /**
-     * Ctor
-     * @param bytes bytes
-     */
-    public BzField(final byte[] bytes) {
-        this.valueSize = 0;
-        value = new byte[0];
-
-        byte[] sizeBytes = new byte[Integer.BYTES];
-        byte[] fieldTypeBytes = new byte[Short.BYTES];
-        byte[] nullableBytes = new byte[Short.BYTES];
-        byte[] uniqueBytes = new byte[Short.BYTES];
-
-        System.arraycopy(bytes, 0, sizeBytes, 0, Integer.BYTES);
-        System.arraycopy(bytes, Integer.BYTES, fieldTypeBytes, 0, Short.BYTES);
-        System.arraycopy(bytes, Integer.BYTES + Short.BYTES, nullableBytes, 0, Short.BYTES);
-        System.arraycopy(bytes, Integer.BYTES + Short.BYTES + Short.BYTES, uniqueBytes, 0, Short.BYTES);
-
-        int size = BytesManipulator.bytesToInt(sizeBytes);
-        fieldType = FieldType.fromId(BytesManipulator.bytesToShort(fieldTypeBytes));
-        nullable = Nullable.fromId(BytesManipulator.bytesToShort(nullableBytes));
-        unique = Unique.fromId(BytesManipulator.bytesToShort(uniqueBytes));
-
-        int fieldNameSize = size - Short.BYTES - Short.BYTES - Short.BYTES;
-        byte[] fieldNameBytes = new byte[fieldNameSize];
-        System.arraycopy(bytes, Integer.BYTES + Short.BYTES + Short.BYTES + Short.BYTES, fieldNameBytes, 0, fieldNameSize);
-
-        name = new String(fieldNameBytes).replaceAll("%", "");
     }
 
     /**
