@@ -2,19 +2,21 @@ package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseContext;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
+import io.toxa108.blitzar.storage.query.OptimizeQuery;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.impl.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
-public class QueryProcessorImpl implements QueryProcessor {
+/**
+ * Query processor
+ */
+public class BzQueryProcessor implements QueryProcessor {
     public final DatabaseManager databaseManager;
     public final DatabaseContext databaseContext;
-    private Pattern patternQuery = Pattern.compile("^[a-zA-Z0-9_; ]*$");
+    private final OptimizeQuery optimizeQuery;
     private final Semaphore semaphore;
 
     /**
@@ -23,12 +25,13 @@ public class QueryProcessorImpl implements QueryProcessor {
      */
     private final ConcurrentHashMap<String, String> usersActiveDatabases;
 
-    public QueryProcessorImpl(final DatabaseManager databaseManager,
-                              final DatabaseContext databaseContext) {
+    public BzQueryProcessor(final DatabaseManager databaseManager,
+                            final DatabaseContext databaseContext) {
         this.databaseManager = databaseManager;
         this.databaseContext = databaseContext;
         this.usersActiveDatabases = new ConcurrentHashMap<>();
         this.semaphore = new Semaphore(50, true);
+        this.optimizeQuery = new BzOptimizeQuery();
     }
 
     @Override
@@ -44,7 +47,7 @@ public class QueryProcessorImpl implements QueryProcessor {
             );
         }
 
-        String query = optimizeQuery(request);
+        String query = optimizeQuery.optimize(new String(request));
         final char endOfQuerySign = ';';
         final String splitQuerySign = " ";
         final String errorKeyword = "error";
@@ -98,28 +101,5 @@ public class QueryProcessorImpl implements QueryProcessor {
 
         semaphore.release();
         return errorKeyword.getBytes();
-    }
-
-    String optimizeQuery(final byte[] request) {
-        final String query = new String(request).toLowerCase();
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        for (int i = 0; i < query.length(); ++i) {
-            final char c = query.charAt(i);
-            try {
-                if (!patternQuery.matcher(Character.toString(c)).matches()) {
-                    stringBuilder.append(" ")
-                            .append(c)
-                            .append(" ");
-                } else {
-                    stringBuilder.append(c);
-                }
-            } catch (PatternSyntaxException exception) {
-                stringBuilder.append(" ")
-                        .append(c)
-                        .append(" ");
-            }
-        }
-        return stringBuilder.toString().replaceAll(" {2,}", " ");
     }
 }

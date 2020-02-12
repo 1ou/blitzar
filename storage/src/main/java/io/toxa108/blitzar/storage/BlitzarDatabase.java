@@ -1,8 +1,8 @@
 package io.toxa108.blitzar.storage;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.context.DatabaseContext;
+import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
 import io.toxa108.blitzar.storage.database.context.impl.DatabaseContextImpl;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.manager.DatabaseManagerImpl;
@@ -13,9 +13,9 @@ import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
+import io.toxa108.blitzar.storage.query.impl.BzQueryProcessor;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQueryResolverImpl;
 import io.toxa108.blitzar.storage.query.impl.DataManipulationQueryResolverImpl;
-import io.toxa108.blitzar.storage.query.impl.QueryProcessorImpl;
 
 import java.io.IOException;
 
@@ -57,7 +57,7 @@ public class BlitzarDatabase {
                 new DataManipulationQueryResolverImpl(databaseContext);
 
         this.databaseManager = new DatabaseManagerImpl(userManager, dataDefinitionQueryResolver, dataManipulationQueryResolver);
-        this.queryProcessor = new QueryProcessorImpl(databaseManager, databaseContext);
+        this.queryProcessor = new BzQueryProcessor(databaseManager, databaseContext);
     }
 
     public DatabaseManager databaseManager() {
