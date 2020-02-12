@@ -7,17 +7,18 @@ import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class FileManagerImplTest {
     DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
 
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
         fileManager.clear();
@@ -39,6 +40,6 @@ public class FileManagerImplTest {
 
         Table table = database.createTable("table", scheme);
         Table loadedTable = fileManager.loadTable(database.name(), table.name());
-        Assert.assertEquals(scheme, loadedTable.scheme());
+        assertEquals(scheme, loadedTable.scheme());
     }
 }

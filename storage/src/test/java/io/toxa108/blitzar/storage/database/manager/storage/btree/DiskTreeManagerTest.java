@@ -8,14 +8,16 @@ import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DiskTreeManagerTest {
 
@@ -76,10 +78,10 @@ public class DiskTreeManagerTest {
         diskBTreeWriter.write(pos, treeNode);
         final TreeNode treeNode1 = diskBTreeReader.read(pos);
 
-        Assert.assertEquals(treeNode, treeNode1);
+        assertEquals(treeNode, treeNode1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void save_and_load_non_leaf_node_when_error() throws IOException {
         final Field fieldId = new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
         final Field fieldName = new BzField("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[100]);
@@ -96,7 +98,6 @@ public class DiskTreeManagerTest {
         final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
         final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
-        final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
 
         int n = 62;
         Key[] keys = new Key[n];
@@ -111,10 +112,7 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize();
         final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        diskBTreeWriter.write(pos, treeNode);
-        final TreeNode treeNode1 = diskBTreeReader.read(pos);
-
-        Assert.assertEquals(treeNode, treeNode1);
+        assertThrows(IllegalArgumentException.class, () -> diskBTreeWriter.write(pos, treeNode));
     }
 
     @Test
@@ -165,7 +163,7 @@ public class DiskTreeManagerTest {
         diskBTreeWriter.write(pos, treeNode);
         final TreeNode treeNode1 = diskBTreeReader.read(pos);
 
-        Assert.assertEquals(treeNode, treeNode1);
+        assertEquals(treeNode, treeNode1);
     }
 
     @Test
@@ -328,8 +326,8 @@ public class DiskTreeManagerTest {
             final Key key = new BzKey(fieldId);
             final List<Row> rows = diskTreeManager.search(key);
             final String compareStr = "justname" + (i + 1) + "%";
-            Assert.assertEquals(rows.get(0).key(), key);
-            Assert.assertEquals(compareStr, new String(rows.get(0).fieldByName("name").value()).substring(0, compareStr.length()));
+            assertEquals(rows.get(0).key(), key);
+            assertEquals(compareStr, new String(rows.get(0).fieldByName("name").value()).substring(0, compareStr.length()));
         }
     }
 }

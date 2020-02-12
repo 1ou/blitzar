@@ -45,7 +45,7 @@ public interface Field {
      *
      * @return array of metadata bytes
      */
-    byte[] metadataToBytes();
+    byte[] metadata();
 
     /**
      * Size to store on disk

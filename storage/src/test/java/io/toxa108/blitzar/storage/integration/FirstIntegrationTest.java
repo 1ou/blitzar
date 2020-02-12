@@ -5,15 +5,16 @@ import io.toxa108.blitzar.storage.database.manager.user.User;
 import io.toxa108.blitzar.storage.database.manager.user.UserImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FirstIntegrationTest {
     private final BlitzarDatabase blitzarDatabase = new BlitzarDatabase("/tmp/blitzar");
     private User user;
 
-    @Before
+    @BeforeEach
     public void init() {
         blitzarDatabase.clear();
         user = blitzarDatabase.databaseManager().userManager().createUser("toxa", "123321");
@@ -28,7 +29,7 @@ public class FirstIntegrationTest {
 
         String ddlDatabaseResult =
                 new String(blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes()));
-        Assert.assertEquals("success", ddlDatabaseResult);
+        assertEquals("success", ddlDatabaseResult);
 
 
         userContext = new UserContextImpl(
@@ -40,7 +41,7 @@ public class FirstIntegrationTest {
                         "create table example ( time long not null primary key , value long not null );".getBytes())
                 );
 
-        Assert.assertEquals("success", ddlTableResult);
+        assertEquals("success", ddlTableResult);
 
         String insertTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
@@ -48,7 +49,7 @@ public class FirstIntegrationTest {
                         "insert into example ( time , value ) values ( 30000 , 200 );".getBytes())
                 );
 
-        Assert.assertEquals("success", insertTableResult);
+        assertEquals("success", insertTableResult);
 
         insertTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
@@ -56,7 +57,7 @@ public class FirstIntegrationTest {
                         "insert into example ( time , value ) values ( 30001 , 201 );".getBytes())
                 );
 
-        Assert.assertEquals("success", insertTableResult);
+        assertEquals("success", insertTableResult);
 
         String selectFromTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
@@ -64,7 +65,7 @@ public class FirstIntegrationTest {
                         "select * from example;".getBytes())
                 );
 
-        Assert.assertEquals("value 200\nvalue 201\n", selectFromTableResult);
+        assertEquals("value 200\nvalue 201\n", selectFromTableResult);
 
         String selectFromWhereTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
@@ -72,7 +73,7 @@ public class FirstIntegrationTest {
                         "select * from example where time = 30000;".getBytes())
                 );
 
-        Assert.assertEquals("value 200\n", selectFromWhereTableResult);
+        assertEquals("value 200\n", selectFromWhereTableResult);
 
         selectFromWhereTableResult =
                 new String(blitzarDatabase.queryProcessor().process(
@@ -80,6 +81,6 @@ public class FirstIntegrationTest {
                         "select * from example where value = 201;".getBytes())
                 );
 
-        Assert.assertEquals("value 201\n", selectFromWhereTableResult);
+        assertEquals("value 201\n", selectFromWhereTableResult);
     }
 }

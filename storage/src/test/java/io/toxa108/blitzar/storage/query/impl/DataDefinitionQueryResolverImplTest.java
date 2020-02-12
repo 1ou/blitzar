@@ -9,17 +9,16 @@ import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DataDefinitionQueryResolverImplTest {
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
         fileManager.clear();
@@ -71,7 +70,7 @@ public class DataDefinitionQueryResolverImplTest {
 
         ResultQuery resultQuery = dataDefinitionQueryResolver.createTable(dataDefinitionQueryCreateTable);
 
-        Assert.assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
+        assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
     }
 
     @Test
@@ -111,6 +110,6 @@ public class DataDefinitionQueryResolverImplTest {
                 .get(0)
                 .name()
         );
-        Assert.assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
+        assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
     }
 }

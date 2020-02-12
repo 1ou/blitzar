@@ -1,7 +1,8 @@
 package io.toxa108.blitzar.storage.database.manager;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ArrayManipulatorTest {
     @Test
@@ -12,7 +13,7 @@ public class ArrayManipulatorTest {
         for (int i = 0; i < 9; ++i) arr[i] = i;
 
         arrayManipulator.insertInArray(arr, 66, 4);
-        Assert.assertArrayEquals(new Integer[]{0, 1, 2, 3, 66, 4, 5, 6, 7, 8}, arr);
+        assertArrayEquals(new Integer[]{0, 1, 2, 3, 66, 4, 5, 6, 7, 8}, arr);
     }
 
     @Test
@@ -24,7 +25,7 @@ public class ArrayManipulatorTest {
 
         Integer[] res = new Integer[4];
         arrayManipulator.copyArray(arr, res, 4, 4);
-        Assert.assertArrayEquals(new Integer[]{4, 5, 6, 7}, res);
+        assertArrayEquals(new Integer[]{4, 5, 6, 7}, res);
     }
 
 }

@@ -7,7 +7,7 @@ import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 /**
  * Transform value from SQL query to the byte representation
  */
-public class StringToData implements ToBytes {
+public class StringAsFieldValue implements ToBytes {
     private final String data;
     private final FieldType fieldType;
 
@@ -17,12 +17,16 @@ public class StringToData implements ToBytes {
      * @param data      data
      * @param fieldType type of field
      */
-    public StringToData(final String data,
-                        final FieldType fieldType) {
+    public StringAsFieldValue(final String data,
+                              final FieldType fieldType) {
         this.data = data;
         this.fieldType = fieldType;
     }
 
+    /**
+     * Transform to bytes
+     * @return bytes
+     */
     @Override
     public byte[] transform() {
         byte[] value;

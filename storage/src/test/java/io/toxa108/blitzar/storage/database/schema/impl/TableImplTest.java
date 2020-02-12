@@ -7,15 +7,15 @@ import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Set;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TableImplTest {
     DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
@@ -24,7 +24,7 @@ public class TableImplTest {
     public TableImplTest() throws IOException {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         fileManager.clear();
     }

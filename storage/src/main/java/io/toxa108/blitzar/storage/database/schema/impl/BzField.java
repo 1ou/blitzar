@@ -31,6 +31,10 @@ public class BzField implements Field {
         this.value = value;
     }
 
+    /**
+     * Ctor
+     * @param bytes bytes
+     */
     public BzField(final byte[] bytes) {
         this.valueSize = 0;
         value = new byte[0];
@@ -57,6 +61,10 @@ public class BzField implements Field {
         name = new String(fieldNameBytes).replaceAll("%", "");
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String name() {
         return name;
@@ -83,7 +91,7 @@ public class BzField implements Field {
     }
 
     @Override
-    public byte[] metadataToBytes() {
+    public byte[] metadata() {
         int size = name.length() + 1
                 + Short.BYTES
                 + Short.BYTES

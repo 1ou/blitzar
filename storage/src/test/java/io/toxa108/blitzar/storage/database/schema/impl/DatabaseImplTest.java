@@ -4,13 +4,12 @@ import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImp
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DatabaseImplTest {
     private final FileManager fileManager = new FileManagerImpl("/tmp/blitzar",
@@ -19,7 +18,7 @@ public class DatabaseImplTest {
     public DatabaseImplTest() throws IOException {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         fileManager.clear();
     }
@@ -30,14 +29,14 @@ public class DatabaseImplTest {
         assertEquals("testdb", database.name());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void create_db_when_error_name_not_specified() throws IOException {
-        final Database database  = fileManager.initializeDatabase(null);
+        assertThrows(NullPointerException.class, () -> fileManager.initializeDatabase(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void create_db_when_error_in_name() throws IOException {
-        final Database database  = fileManager.initializeDatabase("test_%db");
+        assertThrows(IllegalArgumentException.class, () -> fileManager.initializeDatabase("test_%db"));
     }
 
     @Test

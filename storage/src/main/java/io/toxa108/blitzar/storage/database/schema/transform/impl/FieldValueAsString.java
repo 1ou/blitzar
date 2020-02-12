@@ -7,13 +7,17 @@ import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 /**
  * Transform filed to the human readable string representation
  */
-public class FieldToString implements ToString {
+public class FieldValueAsString implements ToString {
     private final Field field;
 
-    public FieldToString(final Field field) {
+    public FieldValueAsString(final Field field) {
         this.field = field;
     }
 
+    /**
+     * Transform filed value to string representation
+     * @return string value
+     */
     @Override
     public String transform() {
         String value;

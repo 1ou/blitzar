@@ -7,8 +7,8 @@ import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.BzField;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.RowToBytes;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.StringToData;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.RowsAsBytes;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.StringAsFieldValue;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
@@ -47,11 +47,11 @@ public class SelectFromTableCommand implements SqlCommand {
                             field.type(),
                             field.nullable(),
                             field.unique(),
-                            new StringToData(extractFieldValue(sql), field.type()).transform()
+                            new StringAsFieldValue(extractFieldValue(sql), field.type()).transform()
                     );
-                    return new RowToBytes(table.search(fieldWithValue)).transform();
+                    return new RowsAsBytes(table.search(fieldWithValue)).transform().getBytes();
                 } else {
-                    return new RowToBytes(table.search()).transform();
+                    return new RowsAsBytes(table.search()).transform().getBytes();
                 }
             }
         }

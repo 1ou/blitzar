@@ -8,7 +8,7 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.BzField;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.StringToData;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.StringAsFieldValue;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.DataManipulationQuery;
@@ -73,7 +73,7 @@ public class InsertToTableCommand implements SqlCommand {
                             finalFields.get(i).type(),
                             finalFields.get(i).nullable(),
                             finalFields.get(i).unique(),
-                            new StringToData(values.get(i), finalFields.get(i).type()).transform()
+                            new StringAsFieldValue(values.get(i), finalFields.get(i).type()).transform()
                     ));
                 }
 

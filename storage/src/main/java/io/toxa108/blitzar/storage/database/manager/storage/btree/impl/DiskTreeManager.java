@@ -15,7 +15,7 @@ import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.impl.BzField;
 import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
 import io.toxa108.blitzar.storage.database.schema.impl.BzRow;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.FieldToString;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.FieldValueAsString;
 
 import java.io.File;
 import java.io.IOException;
@@ -284,7 +284,7 @@ public class DiskTreeManager implements TableDataManager {
         }
         int i = searchKeys.searchKeyInNode(n.keys, n.q, key);
         if (i == -1) {
-            throw new NoSuchElementException("Element with key " + new FieldToString(key.field()).transform() + " is not found");
+            throw new NoSuchElementException("Element with key " + new FieldValueAsString(key.field()).transform() + " is not found");
         }
 
         byte[] data = n.values[i];

@@ -1,8 +1,8 @@
 package io.toxa108.blitzar.storage.io.impl;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytesManipulatorTest {
     @Test
@@ -20,6 +20,4 @@ public class BytesManipulatorTest {
         int k = BytesManipulator.bytesToShort(bytes);
         assertEquals(i, k);
     }
-
-
 }

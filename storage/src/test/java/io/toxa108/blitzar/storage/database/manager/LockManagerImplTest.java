@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.database.manager;
 
 import io.toxa108.blitzar.storage.database.manager.transaction.LockManager;
 import io.toxa108.blitzar.storage.database.manager.transaction.LockManagerImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;

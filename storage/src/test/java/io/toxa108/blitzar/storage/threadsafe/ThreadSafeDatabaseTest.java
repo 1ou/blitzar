@@ -5,13 +5,14 @@ import io.toxa108.blitzar.storage.database.manager.user.UserImpl;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThreadSafeDatabaseTest {
     private BlitzarDatabase blitzarDatabase;
@@ -65,6 +66,6 @@ public class ThreadSafeDatabaseTest {
                 userContext,
                 "select * from example;".getBytes()
         ));
-        Assert.assertEquals(threads, all.chars().filter(it -> it == '\n').count());
+        assertEquals(threads, all.chars().filter(it -> it == '\n').count());
     }
 }

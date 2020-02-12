@@ -133,7 +133,7 @@ public class FileManagerImpl implements FileManager {
         posOfFields += Integer.BYTES * scheme.fields().size() + Integer.BYTES;
 
         for (Field field : scheme.fields()) {
-            byte[] bytes = field.metadataToBytes();
+            byte[] bytes = field.metadata();
             tmpSeek += Integer.BYTES;
             diskWriter.write(tmpSeek, BytesManipulator.intToBytes(posOfFields - startOfIndexes));
             diskWriter.write(posOfFields, bytes);

@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.inmemory;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class InMemoryBPlusTreeRepositoryTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void search_in_middle_when_unique_error() {
         int q = 30;
 
@@ -24,7 +26,8 @@ public class InMemoryBPlusTreeRepositoryTest {
             keys.add(i);
         }
 
-        int r = inMemoryBPlusTreeRepository.search(keys, 10);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> inMemoryBPlusTreeRepository.search(keys, 10));
     }
 
     @Test
@@ -54,7 +57,7 @@ public class InMemoryBPlusTreeRepositoryTest {
         }
         Collections.sort(keys);
 
-        Assert.assertEquals(Integer.valueOf(11), inMemoryBPlusTreeRepository.root().keys.get(0));
+        assertEquals(Integer.valueOf(11), inMemoryBPlusTreeRepository.root().keys.get(0));
     }
 
     @Test
@@ -72,7 +75,7 @@ public class InMemoryBPlusTreeRepositoryTest {
         inMemoryBPlusTreeRepository.add(6, 100);
         Collections.sort(keys);
 
-        Assert.assertEquals(Integer.valueOf(5), inMemoryBPlusTreeRepository.root().keys.get(0));
+        assertEquals(Integer.valueOf(5), inMemoryBPlusTreeRepository.root().keys.get(0));
     }
 
     @Test
@@ -88,7 +91,7 @@ public class InMemoryBPlusTreeRepositoryTest {
         }
 
         Collections.sort(keys);
-        Assert.assertEquals(Integer.valueOf(127), inMemoryBPlusTreeRepository.root().keys.get(0));
+        assertEquals(Integer.valueOf(127), inMemoryBPlusTreeRepository.root().keys.get(0));
     }
 
 }
