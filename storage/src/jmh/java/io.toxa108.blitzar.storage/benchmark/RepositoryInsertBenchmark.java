@@ -13,7 +13,6 @@ import io.toxa108.blitzar.storage.inmemory.InMemoryHashMapRepository;
 import io.toxa108.blitzar.storage.inmemory.InMemoryTreeRepository;
 import io.toxa108.blitzar.storage.inmemory.Repository;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -84,11 +83,11 @@ public class RepositoryInsertBenchmark {
 
     @Benchmark
     public void test_bplus_tree_disk_insert(Blackhole blackhole) throws IOException {
-        Field fieldId = new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
-        Scheme scheme = new SchemeImpl(
+        Field fieldId = new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]);
+        Scheme scheme = new BzScheme(
                 Set.of(fieldId),
                 Set.of(
-                        new IndexImpl(Set.of("id"), IndexType.PRIMARY)
+                        new BzIndex(Set.of("id"), IndexType.PRIMARY)
                 )
         );
 
@@ -114,11 +113,11 @@ public class RepositoryInsertBenchmark {
         );
 
         for (int i = 1; i <= N; i++) {
-            fieldId = new FieldImpl(
+            fieldId = new BzField(
                     "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i));
 
-            Key key = new KeyImpl(fieldId);
-            Row row = new RowImpl(key, Set.of(fieldId));
+            Key key = new BzKey(fieldId);
+            Row row = new BzRow(key, Set.of(fieldId));
             diskTreeManager.addRow(row);
         }
     }

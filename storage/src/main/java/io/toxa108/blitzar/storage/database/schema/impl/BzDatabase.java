@@ -10,23 +10,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class DatabaseImpl implements Database {
+public class BzDatabase implements Database {
     private final List<Table> tables;
     private final String name;
     private final FileManager fileManager;
     private final State state;
 
-    public DatabaseImpl(final String name,
-                        final List<Table> tables,
-                        final FileManager fileManager) {
+    public BzDatabase(final String name,
+                      final List<Table> tables,
+                      final FileManager fileManager) {
         this.tables = tables;
         this.name = name;
         this.fileManager = fileManager;
         this.state = State.EXISTS;
     }
 
-    public DatabaseImpl(final String name,
-                        final FileManager fileManager) throws IOException {
+    public BzDatabase(final String name,
+                      final FileManager fileManager) throws IOException {
         this.name = name;
         this.fileManager = fileManager;
         this.tables = fileManager.loadTables(name);
@@ -74,7 +74,7 @@ public class DatabaseImpl implements Database {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DatabaseImpl database = (DatabaseImpl) o;
+        BzDatabase database = (BzDatabase) o;
         return Objects.equals(name, database.name);
     }
 

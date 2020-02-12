@@ -1,10 +1,10 @@
 package io.toxa108.blitzar.storage.database.schema.transform;
 
-public interface StringToData {
+public interface ToString {
     /**
      * Transform
      *
-     * @return bytes
+     * @return string
      */
-    byte[] transform();
+    String transform();
 }

@@ -1,16 +1,16 @@
 package io.toxa108.blitzar.storage.database.schema.transform.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Field;
-import io.toxa108.blitzar.storage.database.schema.transform.FieldToString;
+import io.toxa108.blitzar.storage.database.schema.transform.ToString;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 /**
  * Transform filed to the human readable string representation
  */
-public class FieldToStringImpl implements FieldToString {
+public class FieldToString implements ToString {
     private final Field field;
 
-    public FieldToStringImpl(final Field field) {
+    public FieldToString(final Field field) {
         this.field = field;
     }
 

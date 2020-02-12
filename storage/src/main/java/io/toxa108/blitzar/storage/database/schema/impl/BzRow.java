@@ -7,11 +7,11 @@ import io.toxa108.blitzar.storage.database.schema.Row;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RowImpl implements Row {
+public class BzRow implements Row {
     private final Key key;
     private final Set<Field> fields;
 
-    public RowImpl(final Key key, final Set<Field> fields) {
+    public BzRow(final Key key, final Set<Field> fields) {
         this.fields = fields;
         this.key = key;
     }

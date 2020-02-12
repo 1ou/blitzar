@@ -13,15 +13,15 @@ import java.util.Objects;
  * Table doesn't know anything about Database.
  * But knows about below layers (fields, indexes)
  */
-public class TableImpl implements Table {
+public class BzTable implements Table {
     private final String name;
     private final Scheme scheme;
     private final RowManager rowManager;
     private final State state;
 
-    public TableImpl(final String name,
-                     final Scheme scheme,
-                     final RowManager rowManager) {
+    public BzTable(final String name,
+                   final Scheme scheme,
+                   final RowManager rowManager) {
         this.rowManager = rowManager;
         this.name = name;
         this.state = State.EXISTS;
@@ -66,7 +66,7 @@ public class TableImpl implements Table {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TableImpl table = (TableImpl) o;
+        BzTable table = (BzTable) o;
         return Objects.equals(name, table.name);
     }
 

@@ -1,13 +1,13 @@
 package io.toxa108.blitzar.storage.database.schema.transform.impl;
 
 import io.toxa108.blitzar.storage.database.schema.impl.FieldType;
-import io.toxa108.blitzar.storage.database.schema.transform.StringToData;
+import io.toxa108.blitzar.storage.database.schema.transform.ToBytes;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 /**
  * Transform value from SQL query to the byte representation
  */
-public class StringToDataImpl implements StringToData {
+public class StringToData implements ToBytes {
     private final String data;
     private final FieldType fieldType;
 
@@ -17,8 +17,8 @@ public class StringToDataImpl implements StringToData {
      * @param data      data
      * @param fieldType type of field
      */
-    public StringToDataImpl(final String data,
-                            final FieldType fieldType) {
+    public StringToData(final String data,
+                        final FieldType fieldType) {
         this.data = data;
         this.fieldType = fieldType;
     }

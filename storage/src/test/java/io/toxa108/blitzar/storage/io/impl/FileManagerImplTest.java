@@ -27,13 +27,13 @@ public class FileManagerImplTest {
     public void save_table_metadata_to_the_table_file_when_success() throws IOException {
         FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
         Database database = fileManager.initializeDatabase("test");
-        Scheme scheme = new SchemeImpl(
-                Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[0]),
-                        new FieldImpl("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[10])
+        Scheme scheme = new BzScheme(
+                Set.of(new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[0]),
+                        new BzField("name", FieldType.VARCHAR, Nullable.NOT_NULL, Unique.NOT_UNIQUE, new byte[10])
                 ),
                 Set.of(
-                        new IndexImpl(Set.of("id"), IndexType.PRIMARY),
-                        new IndexImpl(Set.of("id", "name"), IndexType.SECONDARY)
+                        new BzIndex(Set.of("id"), IndexType.PRIMARY),
+                        new BzIndex(Set.of("id", "name"), IndexType.SECONDARY)
                 )
         );
 

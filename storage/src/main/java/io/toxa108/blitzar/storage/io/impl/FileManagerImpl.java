@@ -52,7 +52,7 @@ public class FileManagerImpl implements FileManager {
         }
 
         File file = createDirectory(baseFolder, name);
-        return new DatabaseImpl(file.getName(), this);
+        return new BzDatabase(file.getName(), this);
     }
 
     /**
@@ -78,7 +78,7 @@ public class FileManagerImpl implements FileManager {
 
         File file = createFile(baseFolder + "/" + databaseName, tableName, this.tableExtension);
         this.saveTableScheme(file, scheme);
-        return new TableImpl(
+        return new BzTable(
                 file.getName().split("\\.")[0],
                 scheme,
                 new RowManagerImpl(file, scheme, databaseConfiguration)
@@ -158,7 +158,7 @@ public class FileManagerImpl implements FileManager {
                     diskReader.read(startOfIndexes + seekOfIndex, Integer.BYTES));
 
             byte[] bytes = diskReader.read(startOfIndexes + seekOfIndex, indexSize + Integer.BYTES);
-            Index index = new IndexImpl(bytes);
+            Index index = new BzIndex(bytes);
             indexes.add(index);
         }
 
@@ -176,11 +176,11 @@ public class FileManagerImpl implements FileManager {
                     diskReader.read(startOfFields + seekOfField, Integer.BYTES));
 
             byte[] bytes = diskReader.read(startOfFields + seekOfField, fieldSize + Integer.BYTES);
-            Field field = new FieldImpl(bytes);
+            Field field = new BzField(bytes);
             fields.add(field);
         }
 
-        return new SchemeImpl(fields, indexes);
+        return new BzScheme(fields, indexes);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class FileManagerImpl implements FileManager {
             for (File file : files) {
 
                 Scheme scheme = this.loadTableScheme(file);
-                tables.add(new TableImpl(
+                tables.add(new BzTable(
                         file.getName().split("\\.")[0],
                         scheme,
                         new RowManagerImpl(file, scheme, databaseConfiguration)
@@ -215,7 +215,7 @@ public class FileManagerImpl implements FileManager {
                 if (file.getName().split("\\.")[0].equals(tableName)) {
                     Scheme scheme = this.loadTableScheme(file);
                     tables.add(
-                            new TableImpl(
+                            new BzTable(
                                     file.getName().split("\\.")[0],
                                     scheme,
                                     new RowManagerImpl(file, scheme, databaseConfiguration)

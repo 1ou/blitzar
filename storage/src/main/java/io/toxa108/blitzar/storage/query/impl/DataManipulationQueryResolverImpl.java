@@ -4,8 +4,8 @@ import io.toxa108.blitzar.storage.database.context.DatabaseContext;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Table;
-import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
+import io.toxa108.blitzar.storage.database.schema.impl.BzRow;
 import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 
@@ -31,8 +31,8 @@ public class DataManipulationQueryResolverImpl implements DataManipulationQueryR
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException(""));
 
-        final Key key = new KeyImpl(queryIndexField);
-        table.addRow(new RowImpl(key, query.fields()));
+        final Key key = new BzKey(queryIndexField);
+        table.addRow(new BzRow(key, query.fields()));
 
         return new EmptySuccessResultQuery();
     }

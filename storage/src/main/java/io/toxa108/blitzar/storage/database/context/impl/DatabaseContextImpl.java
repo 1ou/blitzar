@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.database.context.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseContext;
 import io.toxa108.blitzar.storage.database.schema.Database;
-import io.toxa108.blitzar.storage.database.schema.impl.DatabaseImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.BzDatabase;
 import io.toxa108.blitzar.storage.io.FileManager;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class DatabaseContextImpl implements DatabaseContext {
 
         Set<Database> set = new HashSet<>();
         for (String it : fileManager.databases()) {
-            DatabaseImpl database = new DatabaseImpl(it, fileManager);
+            BzDatabase database = new BzDatabase(it, fileManager);
             set.add(database);
         }
         this.databases = set;

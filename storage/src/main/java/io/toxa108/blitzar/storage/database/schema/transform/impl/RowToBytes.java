@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.database.schema.transform.impl;
 
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
-import io.toxa108.blitzar.storage.database.schema.transform.RowToBytes;
+import io.toxa108.blitzar.storage.database.schema.transform.ToBytes;
 
 import java.util.List;
 import java.util.function.Function;
@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 /**
  * Transform rows to the bytes representation
  */
-public class RowToBytesImpl implements RowToBytes {
+public class RowToBytes implements ToBytes {
     /**
      * Rows
      */
     final List<Row> rows;
 
-    public RowToBytesImpl(final List<Row> rows) {
+    public RowToBytes(final List<Row> rows) {
         this.rows = rows;
     }
 
@@ -36,7 +36,7 @@ public class RowToBytesImpl implements RowToBytes {
     }
 
     private Function<? super Field, ? extends String> map = (field) -> {
-        String data = new FieldToStringImpl(field).transform();
+        String data = new FieldToString(field).transform();
         return String.format("%s %s", field.name(), data);
     };
 }

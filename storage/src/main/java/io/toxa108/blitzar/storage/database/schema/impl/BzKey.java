@@ -6,10 +6,10 @@ import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 import java.util.Objects;
 
-public class KeyImpl implements Key {
+public class BzKey implements Key {
     private final Field field;
 
-    public KeyImpl(final Field field) {
+    public BzKey(final Field field) {
         this.field = field;
     }
 
@@ -46,7 +46,7 @@ public class KeyImpl implements Key {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        KeyImpl key = (KeyImpl) o;
+        BzKey key = (BzKey) o;
         return Objects.equals(field, key.field);
     }
 

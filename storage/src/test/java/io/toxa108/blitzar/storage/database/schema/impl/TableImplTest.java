@@ -34,11 +34,11 @@ public class TableImplTest {
         File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
 
-        Scheme scheme = new SchemeImpl(Set.of(
-                new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
-                Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)));
+        Scheme scheme = new BzScheme(Set.of(
+                new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES])),
+                Set.of(new BzIndex(Set.of("id"), IndexType.PRIMARY)));
 
-        final Table table = new TableImpl(
+        final Table table = new BzTable(
                 "table",
                 scheme,
                 new RowManagerImpl(file, scheme, new DatabaseConfigurationImpl(1))

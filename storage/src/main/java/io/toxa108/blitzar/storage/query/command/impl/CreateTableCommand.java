@@ -84,11 +84,11 @@ public class CreateTableCommand implements SqlCommand {
                 unique = Unique.UNIQUE;
             }
             if (s.contains("key")) {
-                Index index = new IndexImpl(Set.of(parts[0]), IndexType.PRIMARY);
+                Index index = new BzIndex(Set.of(parts[0]), IndexType.PRIMARY);
                 indexes.add(index);
             }
 
-            final Field field = new FieldImpl(parts[0], type, nullable, unique, new byte[type.size()]);
+            final Field field = new BzField(parts[0], type, nullable, unique, new byte[type.size()]);
             fields.add(field);
         }
         final DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(

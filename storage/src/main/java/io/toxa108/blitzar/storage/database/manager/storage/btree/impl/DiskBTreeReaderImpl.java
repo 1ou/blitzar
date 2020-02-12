@@ -4,8 +4,8 @@ import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskBTreeReader
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
-import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.BzField;
+import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.DiskReaderIoImpl;
@@ -76,7 +76,7 @@ public class DiskBTreeReaderImpl implements DiskBTreeReader {
                 p[i] = BytesManipulator.bytesToInt(tmpByteBuffer);
                 byte[] currentIndexBytes = new byte[sizeOfCurrentIndex];
                 System.arraycopy(bytes, posOfIndex + Integer.BYTES * 2, currentIndexBytes, 0, sizeOfCurrentIndex);
-                keys[i] = new KeyImpl(new FieldImpl(
+                keys[i] = new BzKey(new BzField(
                         primaryIndexField.name(),
                         primaryIndexField.type(),
                         primaryIndexField.nullable(),
@@ -125,7 +125,7 @@ public class DiskBTreeReaderImpl implements DiskBTreeReader {
                 System.arraycopy(bytes, posOfIndex + 2 * Integer.BYTES + sizeOfCurrentIndex,
                         currentDataBytes, 0, sizeOfCurrentData);
 
-                keys[i] = new KeyImpl(new FieldImpl(
+                keys[i] = new BzKey(new BzField(
                         primaryIndexField.name(),
                         primaryIndexField.type(),
                         primaryIndexField.nullable(),

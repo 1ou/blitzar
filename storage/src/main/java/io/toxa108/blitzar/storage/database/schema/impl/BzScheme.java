@@ -9,11 +9,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SchemeImpl implements Scheme {
+public class BzScheme implements Scheme {
     private final Set<Field> fields;
     private final Set<Index> indexes;
 
-    public SchemeImpl(final Set<Field> fields, final Set<Index> indexes) {
+    public BzScheme(final Set<Field> fields, final Set<Index> indexes) {
         if (indexes.stream().filter(it -> it.type() == IndexType.PRIMARY).count() > 1) {
             throw new IllegalArgumentException("Table must include only one PRIMARY index");
         }
@@ -126,7 +126,7 @@ public class SchemeImpl implements Scheme {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        SchemeImpl scheme = (SchemeImpl) o;
+        BzScheme scheme = (BzScheme) o;
         return Objects.equals(fields, scheme.fields) &&
                 Objects.equals(indexes, scheme.indexes);
     }

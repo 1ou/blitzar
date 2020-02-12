@@ -61,10 +61,10 @@ public class DataDefinitionQueryResolverImplTest {
 
         assertEquals(databaseName, fileManager.databases().get(0));
 
-        Set<Field> fields = Set.of(new FieldImpl(
+        Set<Field> fields = Set.of(new BzField(
                 "id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[Long.BYTES]));
 
-        Set<Index> indexes = Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY));
+        Set<Index> indexes = Set.of(new BzIndex(Set.of("id"), IndexType.PRIMARY));
 
         DataDefinitionQuery dataDefinitionQueryCreateTable = new DataDefinitionQuery(
                 databaseName, tableName, fields, indexes, DataDefinitionQuery.Type.CREATE_TABLE);
@@ -97,8 +97,8 @@ public class DataDefinitionQueryResolverImplTest {
         DataDefinitionQuery dataDefinitionQueryCreateTable = new DataDefinitionQuery(
                 databaseName,
                 tableName,
-                Set.of(new FieldImpl("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[8])),
-                Set.of(new IndexImpl(Set.of("id"), IndexType.PRIMARY)),
+                Set.of(new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[8])),
+                Set.of(new BzIndex(Set.of("id"), IndexType.PRIMARY)),
                 DataDefinitionQuery.Type.CREATE_TABLE
         );
 

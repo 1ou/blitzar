@@ -6,9 +6,9 @@ import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Table;
-import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.RowToBytesImpl;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.StringToDataImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.BzField;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.RowToBytes;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.StringToData;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.ErrorResultQuery;
@@ -42,16 +42,16 @@ public class SelectFromTableCommand implements SqlCommand {
 
                 if (Stream.of(sql).anyMatch(it -> it.equalsIgnoreCase(WHERE.name()))) {
                     final Field field = table.scheme().fieldByName(extractFieldName(sql));
-                    final Field fieldWithValue = new FieldImpl(
+                    final Field fieldWithValue = new BzField(
                             field.name(),
                             field.type(),
                             field.nullable(),
                             field.unique(),
-                            new StringToDataImpl(extractFieldValue(sql), field.type()).transform()
+                            new StringToData(extractFieldValue(sql), field.type()).transform()
                     );
-                    return new RowToBytesImpl(table.search(fieldWithValue)).transform();
+                    return new RowToBytes(table.search(fieldWithValue)).transform();
                 } else {
-                    return new RowToBytesImpl(table.search()).transform();
+                    return new RowToBytes(table.search()).transform();
                 }
             }
         }

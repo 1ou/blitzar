@@ -5,7 +5,7 @@ import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 
 import java.util.Objects;
 
-public class FieldImpl implements Field {
+public class BzField implements Field {
     private final String name;
     private final FieldType fieldType;
     private final Nullable nullable;
@@ -13,11 +13,11 @@ public class FieldImpl implements Field {
     private final byte[] value;
     private final int valueSize;
 
-    public FieldImpl(final String name,
-                     final FieldType fieldType,
-                     final Nullable nullable,
-                     final Unique unique,
-                     final byte[] value) {
+    public BzField(final String name,
+                   final FieldType fieldType,
+                   final Nullable nullable,
+                   final Unique unique,
+                   final byte[] value) {
         this.name = name;
         this.fieldType = fieldType;
         this.nullable = nullable;
@@ -31,7 +31,7 @@ public class FieldImpl implements Field {
         this.value = value;
     }
 
-    public FieldImpl(final byte[] bytes) {
+    public BzField(final byte[] bytes) {
         this.valueSize = 0;
         value = new byte[0];
 
@@ -124,7 +124,7 @@ public class FieldImpl implements Field {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FieldImpl field = (FieldImpl) o;
+        BzField field = (BzField) o;
         return Objects.equals(name, field.name);
     }
 

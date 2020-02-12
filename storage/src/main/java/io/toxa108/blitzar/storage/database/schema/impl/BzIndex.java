@@ -8,28 +8,28 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class IndexImpl implements Index {
+public class BzIndex implements Index {
     private final Set<String> fields;
     private final IndexType type;
 
-    public IndexImpl(final byte[] bytes) {
-        byte[] sizeBytes = new byte[Integer.BYTES];
-        byte[] indexTypeBytes = new byte[Short.BYTES];
+    public BzIndex(final byte[] bytes) {
+        final byte[] sizeBytes = new byte[Integer.BYTES];
+        final byte[] indexTypeBytes = new byte[Short.BYTES];
         System.arraycopy(bytes, 0, sizeBytes, 0, Integer.BYTES);
         System.arraycopy(bytes, Integer.BYTES, indexTypeBytes, 0, Short.BYTES);
 
-        int size = BytesManipulator.bytesToInt(sizeBytes);
-        type = IndexType.fromId(BytesManipulator.bytesToShort(indexTypeBytes));
+        final int size = BytesManipulator.bytesToInt(sizeBytes);
+        this.type = IndexType.fromId(BytesManipulator.bytesToShort(indexTypeBytes));
 
-        int fieldsMetadataSize = size - Short.BYTES;
-        byte[] fieldsBytes = new byte[fieldsMetadataSize];
+        final int fieldsMetadataSize = size - Short.BYTES;
+        final byte[] fieldsBytes = new byte[fieldsMetadataSize];
         System.arraycopy(bytes, Integer.BYTES + Short.BYTES, fieldsBytes, 0, fieldsMetadataSize);
 
-        fields = Stream.of(new String(fieldsBytes).split("%"))
+        this.fields = Stream.of(new String(fieldsBytes).split("%"))
                 .collect(Collectors.toSet());
     }
 
-    public IndexImpl(final Set<String> fields, final IndexType type) {
+    public BzIndex(final Set<String> fields, final IndexType type) {
         this.fields = fields;
         this.type = type;
     }
@@ -46,15 +46,15 @@ public class IndexImpl implements Index {
 
     @Override
     public byte[] toBytes() {
-        int size = Short.BYTES +
+        final int size = Short.BYTES +
                 fields.stream()
                         .map(it -> it.length() + 1)
                         .reduce(Integer::sum)
                         .orElse(0);
 
-        byte[] sizeBytes = BytesManipulator.intToBytes(size);
-        byte[] typeBytes = BytesManipulator.shortToBytes(type.id());
-        byte[] fieldsBytes = fields.stream()
+        final byte[] sizeBytes = BytesManipulator.intToBytes(size);
+        final byte[] typeBytes = BytesManipulator.shortToBytes(type.id());
+        final byte[] fieldsBytes = fields.stream()
                 .map(it -> (it + "%").getBytes())
                 .reduce((a, b) -> {
                     byte[] c = new byte[a.length + b.length];
@@ -63,7 +63,7 @@ public class IndexImpl implements Index {
                     return c;
                 }).orElse(new byte[0]);
 
-        byte[] resultBytes = new byte[sizeBytes.length + typeBytes.length + fieldsBytes.length];
+        final byte[] resultBytes = new byte[sizeBytes.length + typeBytes.length + fieldsBytes.length];
         System.arraycopy(sizeBytes, 0, resultBytes, 0, sizeBytes.length);
         System.arraycopy(typeBytes, 0, resultBytes, sizeBytes.length, typeBytes.length);
         System.arraycopy(fieldsBytes, 0, resultBytes, sizeBytes.length + typeBytes.length, fieldsBytes.length);
@@ -78,7 +78,7 @@ public class IndexImpl implements Index {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        IndexImpl index = (IndexImpl) o;
+        BzIndex index = (BzIndex) o;
         return Objects.equals(fields, index.fields);
     }
 

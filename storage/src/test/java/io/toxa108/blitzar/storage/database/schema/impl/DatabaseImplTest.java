@@ -42,7 +42,7 @@ public class DatabaseImplTest {
 
     @Test
     public void create_db_when_success() throws IOException {
-        final Database database = new DatabaseImpl("testdb", fileManager);
+        final Database database = new BzDatabase("testdb", fileManager);
         assertNotNull(database);
     }
 }

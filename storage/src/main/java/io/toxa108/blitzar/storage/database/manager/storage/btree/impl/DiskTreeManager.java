@@ -12,10 +12,10 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
-import io.toxa108.blitzar.storage.database.schema.impl.FieldImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.KeyImpl;
-import io.toxa108.blitzar.storage.database.schema.impl.RowImpl;
-import io.toxa108.blitzar.storage.database.schema.transform.impl.FieldToStringImpl;
+import io.toxa108.blitzar.storage.database.schema.impl.BzField;
+import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
+import io.toxa108.blitzar.storage.database.schema.impl.BzRow;
+import io.toxa108.blitzar.storage.database.schema.transform.impl.FieldToString;
 
 import java.io.File;
 import java.io.IOException;
@@ -221,7 +221,7 @@ public class DiskTreeManager implements TableDataManager {
     @Override
     public List<Row> search(final Field field) throws IOException {
         if (tableMetadata.containIndex(field.name())) {
-            return search(new KeyImpl(field));
+            return search(new BzKey(field));
         }
 
         List<Row> foundedRows = new ArrayList<>();
@@ -241,7 +241,7 @@ public class DiskTreeManager implements TableDataManager {
                             int s = seek.getAndAdd(it.diskSize());
                             byte[] bytes = new byte[it.diskSize()];
                             System.arraycopy(data, s, bytes, 0, it.diskSize());
-                            return new FieldImpl(
+                            return new BzField(
                                     it.name(),
                                     it.type(),
                                     it.nullable(),
@@ -253,7 +253,7 @@ public class DiskTreeManager implements TableDataManager {
 
                 if (fields.stream().anyMatch(
                         it -> it.name().equals(field.name()) && Arrays.equals(it.value(), field.value()))) {
-                    foundedRows.add(new RowImpl(
+                    foundedRows.add(new BzRow(
                             n.keys[i],
                             fields
                     ));
@@ -284,7 +284,7 @@ public class DiskTreeManager implements TableDataManager {
         }
         int i = searchKeys.searchKeyInNode(n.keys, n.q, key);
         if (i == -1) {
-            throw new NoSuchElementException("Element with key " + new FieldToStringImpl(key.field()).transform() + " is not found");
+            throw new NoSuchElementException("Element with key " + new FieldToString(key.field()).transform() + " is not found");
         }
 
         byte[] data = n.values[i];
@@ -295,7 +295,7 @@ public class DiskTreeManager implements TableDataManager {
                     int s = seek.getAndAdd(it.diskSize());
                     byte[] bytes = new byte[it.diskSize()];
                     System.arraycopy(data, s, bytes, 0, it.diskSize());
-                    return new FieldImpl(
+                    return new BzField(
                             it.name(),
                             it.type(),
                             it.nullable(),
@@ -304,7 +304,7 @@ public class DiskTreeManager implements TableDataManager {
                     );
                 })
                 .collect(Collectors.toSet());
-        return List.of(new RowImpl(
+        return List.of(new BzRow(
                 n.keys[i],
                 fields
         ));
@@ -329,7 +329,7 @@ public class DiskTreeManager implements TableDataManager {
                             int s = seek.getAndAdd(it.diskSize());
                             byte[] bytes = new byte[it.diskSize()];
                             System.arraycopy(data, s, bytes, 0, it.diskSize());
-                            return new FieldImpl(
+                            return new BzField(
                                     it.name(),
                                     it.type(),
                                     it.nullable(),
@@ -338,7 +338,7 @@ public class DiskTreeManager implements TableDataManager {
                             );
                         })
                         .collect(Collectors.toSet());
-                foundedRows.add(new RowImpl(
+                foundedRows.add(new BzRow(
                         n.keys[i],
                         fields
                 ));
