@@ -1,12 +1,12 @@
 package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseContext;
-import io.toxa108.blitzar.storage.database.context.impl.DatabaseContextImpl;
+import io.toxa108.blitzar.storage.database.context.impl.BzDatabaseContext;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
-import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
+import io.toxa108.blitzar.storage.io.impl.TestBzFileManager;
 import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,19 +17,19 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DataDefinitionQueryResolverImplTest {
+public class BzDataDefinitionQueryResolverTest {
     @BeforeEach
     public void before() throws IOException {
-        FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
+        FileManager fileManager = new TestBzFileManager("/tmp/blitzar");
         fileManager.clear();
     }
 
     @Test
     public void create_database_when_success() throws IOException {
-        FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
-        DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
+        FileManager fileManager = new TestBzFileManager("/tmp/blitzar");
+        DatabaseContext databaseContext = new BzDatabaseContext(fileManager);
         DataDefinitionQueryResolver dataDefinitionQueryResolver =
-                new DataDefinitionQueryResolverImpl(databaseContext);
+                new BzDataDefinitionQueryResolver(databaseContext);
 
         DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
                 "databasee", DataDefinitionQuery.Type.CREATE_DATABASE);
@@ -45,10 +45,10 @@ public class DataDefinitionQueryResolverImplTest {
         String databaseName = "databasee";
         String tableName = "table";
 
-        FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
-        DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
+        FileManager fileManager = new TestBzFileManager("/tmp/blitzar");
+        DatabaseContext databaseContext = new BzDatabaseContext(fileManager);
         DataDefinitionQueryResolver dataDefinitionQueryResolver =
-                new DataDefinitionQueryResolverImpl(databaseContext);
+                new BzDataDefinitionQueryResolver(databaseContext);
 
         DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
                 databaseName, DataDefinitionQuery.Type.CREATE_DATABASE);
@@ -78,10 +78,10 @@ public class DataDefinitionQueryResolverImplTest {
         String databaseName = "databasee";
         String tableName = "table";
 
-        FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar");
-        DatabaseContext databaseContext = new DatabaseContextImpl(fileManager);
+        FileManager fileManager = new TestBzFileManager("/tmp/blitzar");
+        DatabaseContext databaseContext = new BzDatabaseContext(fileManager);
         DataDefinitionQueryResolver dataDefinitionQueryResolver =
-                new DataDefinitionQueryResolverImpl(databaseContext);
+                new BzDataDefinitionQueryResolver(databaseContext);
 
         DataDefinitionQuery dataDefinitionQuery = new DataDefinitionQuery(
                 databaseName, DataDefinitionQuery.Type.CREATE_DATABASE);

@@ -1,9 +1,9 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.context.impl.BzDatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.io.FileManager;
-import io.toxa108.blitzar.storage.io.impl.FileManagerImpl;
+import io.toxa108.blitzar.storage.io.impl.BzFileManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +12,8 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DatabaseImplTest {
-    private final FileManager fileManager = new FileManagerImpl("/tmp/blitzar",
-            new DatabaseConfigurationImpl(16));
+    private final FileManager fileManager = new BzFileManager("/tmp/blitzar",
+            new BzDatabaseConfiguration(16));
 
     public DatabaseImplTest() throws IOException {
     }

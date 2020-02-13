@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.threadsafe;
 
 import io.toxa108.blitzar.storage.BlitzarDatabase;
-import io.toxa108.blitzar.storage.database.manager.user.UserImpl;
+import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
@@ -22,7 +22,7 @@ public class ThreadSafeDatabaseTest {
         blitzarDatabase = new BlitzarDatabase("/tmp/blitzar");
         blitzarDatabase.clear();
         userContext = new UserContextImpl(
-                new UserImpl(
+                new BzUser(
                         "admin",
                         "123"
                 )

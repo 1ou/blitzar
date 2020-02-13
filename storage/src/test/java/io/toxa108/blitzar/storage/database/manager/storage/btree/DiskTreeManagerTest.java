@@ -1,13 +1,13 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.context.impl.BzDatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.*;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
 import io.toxa108.blitzar.storage.io.FileManager;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.TestFileManagerImpl;
+import io.toxa108.blitzar.storage.io.impl.TestBzFileManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -23,8 +23,8 @@ public class DiskTreeManagerTest {
 
     @Test
     public void add_element_when_success() throws IOException {
-        FileManager fileManager = new TestFileManagerImpl(
-                "/tmp/blitzar", new DatabaseConfigurationImpl(16));
+        FileManager fileManager = new TestBzFileManager(
+                "/tmp/blitzar", new BzDatabaseConfiguration(16));
         Database database = fileManager.initializeDatabase("test");
 
         Field fieldId = new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[0]);
@@ -57,7 +57,7 @@ public class DiskTreeManagerTest {
 
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
-        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
+        final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
         final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
         final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
@@ -95,7 +95,7 @@ public class DiskTreeManagerTest {
 
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
-        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(1);
+        final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
         final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
 
@@ -133,7 +133,7 @@ public class DiskTreeManagerTest {
 
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
-        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
         final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
         final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
@@ -200,7 +200,7 @@ public class DiskTreeManagerTest {
 
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
-        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
         final DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,
@@ -285,7 +285,7 @@ public class DiskTreeManagerTest {
 
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
-        final DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(2);
+        final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
         final DiskTreeManager diskTreeManager = new DiskTreeManager(
                 file,
                 databaseConfiguration,

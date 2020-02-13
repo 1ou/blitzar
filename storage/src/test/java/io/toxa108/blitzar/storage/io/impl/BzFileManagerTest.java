@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.context.impl.BzDatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
@@ -15,18 +15,18 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FileManagerImplTest {
-    DatabaseConfiguration databaseConfiguration = new DatabaseConfigurationImpl(16);
+public class BzFileManagerTest {
+    DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(16);
 
     @BeforeEach
     public void before() throws IOException {
-        FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
+        FileManager fileManager = new TestBzFileManager("/tmp/blitzar", databaseConfiguration);
         fileManager.clear();
     }
 
     @Test
     public void save_table_metadata_to_the_table_file_when_success() throws IOException {
-        FileManager fileManager = new TestFileManagerImpl("/tmp/blitzar", databaseConfiguration);
+        FileManager fileManager = new TestBzFileManager("/tmp/blitzar", databaseConfiguration);
         Database database = fileManager.initializeDatabase("test");
         Scheme scheme = new BzScheme(
                 Set.of(new BzField("id", FieldType.LONG, Nullable.NOT_NULL, Unique.UNIQUE, new byte[0]),

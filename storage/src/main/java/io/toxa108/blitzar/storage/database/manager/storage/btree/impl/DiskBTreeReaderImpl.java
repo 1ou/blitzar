@@ -8,7 +8,7 @@ import io.toxa108.blitzar.storage.database.schema.impl.BzField;
 import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.DiskReaderIoImpl;
+import io.toxa108.blitzar.storage.io.impl.DiskReaderIo;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class DiskBTreeReaderImpl implements DiskBTreeReader {
 
     public DiskBTreeReaderImpl(final File file,
                                final TableBTreeMetadata tableBTreeMetadata) throws IOException {
-        this.diskReader = new DiskReaderIoImpl(file);
+        this.diskReader = new DiskReaderIo(file);
         this.tableBTreeMetadata = tableBTreeMetadata;
         this.pLeaf = tableBTreeMetadata.entriesInLeafNodeNumber();
         this.pNonLeaf = tableBTreeMetadata.entriesInNonLeafNodeNumber();

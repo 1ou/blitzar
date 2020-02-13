@@ -21,15 +21,15 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class FileManagerImpl implements FileManager {
+public class BzFileManager implements FileManager {
     protected final String baseFolder;
     private final String nameRegex = "^[a-zA-Z0-9_]*$";
     private final String tableExtension = "ddd";
     private final int m = 1024;
     private final DatabaseConfiguration databaseConfiguration;
 
-    public FileManagerImpl(final String baseFolder,
-                           final DatabaseConfiguration databaseConfiguration
+    public BzFileManager(final String baseFolder,
+                         final DatabaseConfiguration databaseConfiguration
     ) throws IOException {
         if (!new File(baseFolder).exists()) {
             Files.createDirectory(Path.of(baseFolder));
@@ -115,7 +115,7 @@ public class FileManagerImpl implements FileManager {
                                  final Scheme scheme) throws IOException {
         RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
         accessFile.setLength(databaseConfiguration.diskPageSize() * 20);
-        DiskWriter diskWriter = new DiskWriterIoImpl(file);
+        DiskWriter diskWriter = new BzDiskWriterIo(file);
 
         int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
         int startOfIndexes = posOfIndexes;
@@ -147,7 +147,7 @@ public class FileManagerImpl implements FileManager {
     }
 
     private Scheme loadTableScheme(final File file) throws IOException {
-        DiskReader diskReader = new DiskReaderIoImpl(file);
+        DiskReader diskReader = new DiskReaderIo(file);
         Set<Index> indexes = new HashSet<>();
 
         int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;

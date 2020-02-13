@@ -1,9 +1,9 @@
 package io.toxa108.blitzar.storage.query.command.impl;
 
-import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Index;
 import io.toxa108.blitzar.storage.database.schema.impl.*;
+import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.DataDefinitionQuery;
@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Set;
 
 public class CreateTableCommand implements SqlCommand {
-    private final DatabaseManager databaseManager;
+    private final DataDefinitionQueryResolver dataDefinitionQueryResolver;
 
-    public CreateTableCommand(final DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
+    public CreateTableCommand(final DataDefinitionQueryResolver dataDefinitionQueryResolver) {
+        this.dataDefinitionQueryResolver = dataDefinitionQueryResolver;
     }
 
     @Override
@@ -99,6 +99,6 @@ public class CreateTableCommand implements SqlCommand {
                 DataDefinitionQuery.Type.CREATE_TABLE
         );
 
-        return databaseManager.resolveDataDefinitionQuery(dataDefinitionQuery).toBytes();
+        return dataDefinitionQueryResolver.createTable(dataDefinitionQuery).toBytes();
     }
 }

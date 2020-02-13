@@ -6,7 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.DiskReaderIoImpl;
+import io.toxa108.blitzar.storage.io.impl.DiskReaderIo;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class TableBTreeMetadataImpl implements TableBTreeMetadata {
                                   final Scheme scheme) throws IOException {
         this.databaseConfiguration = databaseConfiguration;
         this.scheme = scheme;
-        this.diskReader = new DiskReaderIoImpl(file);
+        this.diskReader = new DiskReaderIo(file);
         this.pLeaf = pLeafCalculate();
         this.pNonLeaf = pNonLeafCalculate();
     }

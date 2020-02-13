@@ -1,20 +1,20 @@
 package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.context.impl.DatabaseConfigurationImpl;
+import io.toxa108.blitzar.storage.database.context.impl.BzDatabaseConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class TestFileManagerImpl extends FileManagerImpl {
-    public TestFileManagerImpl(String baseFolder, DatabaseConfiguration databaseConfiguration) throws IOException {
+public class TestBzFileManager extends BzFileManager {
+    public TestBzFileManager(String baseFolder, DatabaseConfiguration databaseConfiguration) throws IOException {
         super(baseFolder, databaseConfiguration);
     }
 
-    public TestFileManagerImpl(String baseFolder) throws IOException {
-        super(baseFolder, new DatabaseConfigurationImpl(16));
+    public TestBzFileManager(String baseFolder) throws IOException {
+        super(baseFolder, new BzDatabaseConfiguration(16));
     }
 
     @Override

@@ -5,7 +5,7 @@ import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
 /**
  * The configuration of the database
  */
-public class DatabaseConfigurationImpl implements DatabaseConfiguration {
+public class BzDatabaseConfiguration implements DatabaseConfiguration {
     /**
      * Metadata size in bytes
      */
@@ -16,7 +16,7 @@ public class DatabaseConfigurationImpl implements DatabaseConfiguration {
      */
     private final int diskPageSize;
 
-    public DatabaseConfigurationImpl(final int diskPageSize) {
+    public BzDatabaseConfiguration(final int diskPageSize) {
         this.metadataSize = 1024 * diskPageSize;
         this.diskPageSize = 1024 * diskPageSize;
     }

@@ -1,7 +1,6 @@
 package io.toxa108.blitzar.storage.query.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseContext;
-import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.query.OptimizeQuery;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.UserContext;
@@ -14,7 +13,6 @@ import java.util.concurrent.Semaphore;
  * Query processor
  */
 public class BzQueryProcessor implements QueryProcessor {
-    public final DatabaseManager databaseManager;
     public final DatabaseContext databaseContext;
     private final OptimizeQuery optimizeQuery;
     private final Semaphore semaphore;
@@ -25,9 +23,7 @@ public class BzQueryProcessor implements QueryProcessor {
      */
     private final ConcurrentHashMap<String, String> usersActiveDatabases;
 
-    public BzQueryProcessor(final DatabaseManager databaseManager,
-                            final DatabaseContext databaseContext) {
-        this.databaseManager = databaseManager;
+    public BzQueryProcessor(final DatabaseContext databaseContext) {
         this.databaseContext = databaseContext;
         this.usersActiveDatabases = new ConcurrentHashMap<>();
         this.semaphore = new Semaphore(50, true);
@@ -70,17 +66,17 @@ public class BzQueryProcessor implements QueryProcessor {
             case CREATE:
                 switch (SqlReservedWords.valueOf(parts[1].toUpperCase())) {
                     case TABLE:
-                        return new CreateTableCommand(databaseManager).execute(userContext, parts);
+                        return new CreateTableCommand(new BzDataDefinitionQueryResolver(databaseContext)).execute(userContext, parts);
                     case DATABASE:
-                        return new CreateDatabaseCommand(databaseManager).execute(userContext, parts);
+                        return new CreateDatabaseCommand(new BzDataDefinitionQueryResolver(databaseContext)).execute(userContext, parts);
                     default:
                         return errorKeyword.getBytes();
                 }
             case INSERT:
-                return new InsertToTableCommand(databaseContext, databaseManager)
+                return new InsertToTableCommand(databaseContext, new BzDataManipulationQueryResolver(databaseContext))
                         .execute(userContext, parts);
             case SELECT:
-                return new SelectFromTableCommand(databaseContext, databaseManager)
+                return new SelectFromTableCommand(databaseContext, new BzDataManipulationQueryResolver(databaseContext))
                         .execute(userContext, parts);
             case SHOW:
                 switch (SqlReservedWords.valueOf(parts[1].toUpperCase())) {

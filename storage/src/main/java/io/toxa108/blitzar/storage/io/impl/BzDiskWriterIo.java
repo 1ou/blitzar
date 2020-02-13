@@ -11,13 +11,13 @@ import java.nio.channels.FileChannel;
 /**
  * Disk writer shouldn't know about all high level logic. It works only with bytes and files.
  */
-public class DiskWriterIoImpl implements DiskWriter {
+public class BzDiskWriterIo implements DiskWriter {
     private final File file;
     private final RandomAccessFile randomAccessFile;
 //    private final FileOutputStream fileOutputStream;
     private final FileChannel fileChannel;
 
-    public DiskWriterIoImpl(final File file) throws IOException {
+    public BzDiskWriterIo(final File file) throws IOException {
         this.file = file;
         this.randomAccessFile = new RandomAccessFile(file, "rw");
         this.fileChannel = randomAccessFile.getChannel();

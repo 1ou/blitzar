@@ -10,11 +10,11 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class DatabaseContextImpl implements DatabaseContext {
+public class BzDatabaseContext implements DatabaseContext {
     private final Set<Database> databases;
     private final FileManager fileManager;
 
-    public DatabaseContextImpl(final FileManager fileManager) throws IOException {
+    public BzDatabaseContext(final FileManager fileManager) throws IOException {
         this.fileManager = fileManager;
 
         Set<Database> set = new HashSet<>();

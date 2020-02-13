@@ -1,14 +1,13 @@
 package io.toxa108.blitzar.storage.query.command.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseContext;
-import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
-import io.toxa108.blitzar.storage.database.manager.DatabaseManager;
 import io.toxa108.blitzar.storage.database.schema.Database;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
 import io.toxa108.blitzar.storage.database.schema.Table;
 import io.toxa108.blitzar.storage.database.schema.impl.BzField;
 import io.toxa108.blitzar.storage.database.schema.transform.impl.StringAsFieldValue;
+import io.toxa108.blitzar.storage.query.DataManipulationQueryResolver;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.command.SqlCommand;
 import io.toxa108.blitzar.storage.query.impl.DataManipulationQuery;
@@ -19,14 +18,12 @@ import java.util.stream.Collectors;
 
 public class InsertToTableCommand implements SqlCommand {
     private final DatabaseContext databaseContext;
-    private final DatabaseManager databaseManager;
-    private final ArrayManipulator arrayManipulator;
+    private final DataManipulationQueryResolver dataManipulationQueryResolver;
 
     public InsertToTableCommand(final DatabaseContext databaseContext,
-                                final DatabaseManager databaseManager) {
+                                final DataManipulationQueryResolver dataManipulationQueryResolver) {
         this.databaseContext = databaseContext;
-        this.databaseManager = databaseManager;
-        this.arrayManipulator = new ArrayManipulator();
+        this.dataManipulationQueryResolver = dataManipulationQueryResolver;
     }
 
     @Override
@@ -84,7 +81,7 @@ public class InsertToTableCommand implements SqlCommand {
                         fields
                 );
 
-                return databaseManager.resolveDataManipulationQuery(dataManipulationQuery).toBytes();
+                return dataManipulationQueryResolver.insert(dataManipulationQuery).toBytes();
             }
         }
         return new ErrorResultQuery().toBytes();

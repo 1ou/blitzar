@@ -11,10 +11,10 @@ import io.toxa108.blitzar.storage.query.ResultQuery;
 
 import java.util.NoSuchElementException;
 
-public class DataManipulationQueryResolverImpl implements DataManipulationQueryResolver {
+public class BzDataManipulationQueryResolver implements DataManipulationQueryResolver {
     private final DatabaseContext context;
 
-    public DataManipulationQueryResolverImpl(final DatabaseContext context) {
+    public BzDataManipulationQueryResolver(final DatabaseContext context) {
         this.context = context;
     }
 

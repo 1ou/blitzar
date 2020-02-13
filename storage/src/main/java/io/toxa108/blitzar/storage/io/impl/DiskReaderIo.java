@@ -12,14 +12,14 @@ import java.nio.channels.FileChannel;
 /**
  * Disk writer shouldn't know about all high level logic. It works only with bytes and files.
  */
-public class DiskReaderIoImpl implements DiskReader {
+public class DiskReaderIo implements DiskReader {
     private final File file;
     private final RandomAccessFile randomAccessFile;
     private final FileInputStream fileInputStream;
     private final FileChannel fileChannel;
     private final ByteBuffer byteBuffer;
 
-    public DiskReaderIoImpl(final File file) throws IOException {
+    public DiskReaderIo(final File file) throws IOException {
         this.file = file;
         this.randomAccessFile = new RandomAccessFile(file, "r");
         this.fileInputStream = new FileInputStream(randomAccessFile.getFD());

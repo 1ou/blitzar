@@ -9,17 +9,17 @@ import io.toxa108.blitzar.storage.query.ResultQuery;
 import java.io.IOException;
 import java.util.Optional;
 
-public class DataDefinitionQueryResolverImpl implements DataDefinitionQueryResolver {
+public class BzDataDefinitionQueryResolver implements DataDefinitionQueryResolver {
     private final DatabaseContext databaseContext;
 
-    public DataDefinitionQueryResolverImpl(final DatabaseContext databaseContext) {
+    public BzDataDefinitionQueryResolver(final DatabaseContext databaseContext) {
         this.databaseContext = databaseContext;
     }
 
     @Override
     public ResultQuery createDatabase(final DataDefinitionQuery query) {
         try {
-            Database database = databaseContext.createDatabase(query.databaseName());
+            databaseContext.createDatabase(query.databaseName());
             return new EmptySuccessResultQuery();
         } catch (IOException e) {
             e.printStackTrace();
