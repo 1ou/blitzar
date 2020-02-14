@@ -4,7 +4,8 @@ import io.toxa108.blitzar.storage.database.context.DatabaseContext;
 import io.toxa108.blitzar.storage.query.OptimizeQuery;
 import io.toxa108.blitzar.storage.query.QueryProcessor;
 import io.toxa108.blitzar.storage.query.UserContext;
-import io.toxa108.blitzar.storage.query.command.impl.*;
+import io.toxa108.blitzar.storage.query.command.SqlCommand;
+import io.toxa108.blitzar.storage.query.command.impl.BzSqlCommandFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -60,42 +61,10 @@ public class BzQueryProcessor implements QueryProcessor {
             throw new IllegalArgumentException();
         }
 
-        final SqlReservedWords command = SqlReservedWords.valueOf(parts[0].toUpperCase());
-
-        switch (command) {
-            case CREATE:
-                switch (SqlReservedWords.valueOf(parts[1].toUpperCase())) {
-                    case TABLE:
-                        return new CreateTableCommand(new BzDataDefinitionQueryResolver(databaseContext)).execute(userContext, parts);
-                    case DATABASE:
-                        return new CreateDatabaseCommand(new BzDataDefinitionQueryResolver(databaseContext)).execute(userContext, parts);
-                    default:
-                        return errorKeyword.getBytes();
-                }
-            case INSERT:
-                return new InsertToTableCommand(databaseContext, new BzDataManipulationQueryResolver(databaseContext))
-                        .execute(userContext, parts);
-            case SELECT:
-                return new SelectFromTableCommand(databaseContext, new BzDataManipulationQueryResolver(databaseContext))
-                        .execute(userContext, parts);
-            case SHOW:
-                switch (SqlReservedWords.valueOf(parts[1].toUpperCase())) {
-                    case DATABASES:
-                        return new ShowDatabasesCommand(databaseContext).execute(userContext, parts);
-                    case TABLES:
-                        return new ShowTablesCommand(databaseContext).execute(userContext, parts);
-                    default:
-                        return errorKeyword.getBytes();
-                }
-            case USE:
-                usersActiveDatabases.put(userContext.user().login(), parts[1]);
-                break;
-            case DELETE:
-            default:
-                break;
-        }
+        SqlCommand sqlCommand = new BzSqlCommandFactory(databaseContext, usersActiveDatabases).initializeCommand(parts);
+        byte[] sqlQueryResultBytes = sqlCommand.execute(userContext, parts);
 
         semaphore.release();
-        return errorKeyword.getBytes();
+        return sqlQueryResultBytes;
     }
 }

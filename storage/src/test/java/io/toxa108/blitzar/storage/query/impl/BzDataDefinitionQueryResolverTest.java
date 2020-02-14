@@ -11,6 +11,7 @@ import io.toxa108.blitzar.storage.query.DataDefinitionQueryResolver;
 import io.toxa108.blitzar.storage.query.ResultQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.Set;
@@ -25,7 +26,7 @@ public class BzDataDefinitionQueryResolverTest {
     }
 
     @Test
-    public void create_database_when_success() throws IOException {
+    public void create_database_Ok() throws IOException {
         FileManager fileManager = new TestBzFileManager("/tmp/blitzar");
         DatabaseContext databaseContext = new BzDatabaseContext(fileManager);
         DataDefinitionQueryResolver dataDefinitionQueryResolver =
@@ -41,7 +42,7 @@ public class BzDataDefinitionQueryResolverTest {
     }
 
     @Test
-    public void create_database_and_empty_table_when_success() throws IOException {
+    public void create_database_and_empty_table_Ok() throws IOException {
         String databaseName = "databasee";
         String tableName = "table";
 
@@ -74,7 +75,7 @@ public class BzDataDefinitionQueryResolverTest {
     }
 
     @Test
-    public void create_database_and_table_with_scheme_when_success() throws IOException {
+    public void create_database_and_table_with_scheme_Ok() throws IOException {
         String databaseName = "databasee";
         String tableName = "table";
 
@@ -111,5 +112,13 @@ public class BzDataDefinitionQueryResolverTest {
                 .name()
         );
         assertEquals(EmptySuccessResultQuery.class, resultQuery.getClass());
+    }
+
+    @Test
+    public void test_Ok() {
+        DatabaseContext databaseContext = Mockito.mock(DatabaseContext.class);
+        BzDataDefinitionQueryResolver bzDataDefinitionQueryResolver = new BzDataDefinitionQueryResolver(
+                databaseContext
+        );
     }
 }
