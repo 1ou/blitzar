@@ -26,7 +26,7 @@ public class ServerApplication {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         database = new BlitzarDatabase("/tmp/blitzarprod");
-        database.databaseManager().userManager().createUser("admin", "123");
+        database.userManager().createUser("admin", "123");
 
         port = args.length > 0 ? Integer.parseInt(args[0]) : 9009;
         Server server = NettyServerBuilder.forPort(port)
@@ -59,7 +59,7 @@ public class ServerApplication {
                     password = ob.readLine();
                     userContext = Optional.of(
                             new UserContextImpl(
-                                    database.databaseManager().userManager().authorize(login, password)
+                                    database.userManager().authorize(login, password)
                             )
                     );
                 } catch (IOException ignored) {
