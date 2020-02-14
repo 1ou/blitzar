@@ -5,9 +5,9 @@ import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.storage.Tables;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeReader;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeWriter;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
-import io.toxa108.blitzar.storage.database.manager.transaction.TableLocks;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
 import io.toxa108.blitzar.storage.database.manager.transaction.BzTableTableLocks;
+import io.toxa108.blitzar.storage.database.manager.transaction.TableLocks;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
@@ -31,7 +31,7 @@ public class BzTreeTables implements Tables {
     private int numberOfUsedBlocks = 0;
     private final SearchKeys searchKeys;
     private final TableLocks tableLocks;
-    private final TableBTreeMetadata tableMetadata;
+    private final TableTreeMetadata tableMetadata;
     private final DiskTreeReader diskTreeReader;
     private final DiskTreeWriter diskTreeWriter;
 
@@ -42,7 +42,7 @@ public class BzTreeTables implements Tables {
             this.arrayManipulator = new ArrayManipulator();
             this.searchKeys = new SearchKeys();
             this.tableLocks = new BzTableTableLocks();
-            this.tableMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
+            this.tableMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
             this.diskTreeReader = new BzDiskTreeReader(file, tableMetadata);
             this.diskTreeWriter = new BzDiskTreeWriter(file, tableMetadata);
         } catch (IOException e) {

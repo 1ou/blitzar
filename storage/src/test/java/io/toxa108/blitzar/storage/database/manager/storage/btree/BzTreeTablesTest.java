@@ -58,9 +58,9 @@ public class BzTreeTablesTest {
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
-        final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableBTreeMetadata);
-        final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableBTreeMetadata);
+        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableTreeMetadata);
+        final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableTreeMetadata);
 
         final int n = 48;
         final Key[] keys = new Key[n];
@@ -96,8 +96,8 @@ public class BzTreeTablesTest {
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
-        final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableBTreeMetadata);
+        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableTreeMetadata);
 
         int n = 62;
         Key[] keys = new Key[n];
@@ -134,9 +134,9 @@ public class BzTreeTablesTest {
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
-        final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableBTreeMetadata);
-        final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableBTreeMetadata);
+        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableTreeMetadata);
+        final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableTreeMetadata);
 
         final int n = 14;
         Key[] keys = new Key[n];

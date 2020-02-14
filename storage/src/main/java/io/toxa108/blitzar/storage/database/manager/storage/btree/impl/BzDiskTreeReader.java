@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
 import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeReader;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.impl.BzField;
@@ -22,17 +22,17 @@ public class BzDiskTreeReader implements DiskTreeReader {
     /**
      * Table metadata
      */
-    private final TableBTreeMetadata tableBTreeMetadata;
+    private final TableTreeMetadata tableTreeMetadata;
 
     private final int pNonLeaf;
     private final int pLeaf;
 
     public BzDiskTreeReader(final File file,
-                            final TableBTreeMetadata tableBTreeMetadata) throws IOException {
+                            final TableTreeMetadata tableTreeMetadata) throws IOException {
         this.diskReader = new DiskReaderIo(file);
-        this.tableBTreeMetadata = tableBTreeMetadata;
-        this.pLeaf = tableBTreeMetadata.entriesInLeafNodeNumber();
-        this.pNonLeaf = tableBTreeMetadata.entriesInNonLeafNodeNumber();
+        this.tableTreeMetadata = tableTreeMetadata;
+        this.pLeaf = tableTreeMetadata.entriesInLeafNodeNumber();
+        this.pNonLeaf = tableTreeMetadata.entriesInNonLeafNodeNumber();
     }
 
 
@@ -44,16 +44,16 @@ public class BzDiskTreeReader implements DiskTreeReader {
 
     @Override
     public TreeNode read(final int pos) throws IOException {
-        Field primaryIndexField = tableBTreeMetadata.primaryIndexField();
+        Field primaryIndexField = tableTreeMetadata.primaryIndexField();
 
-        byte[] bytes = diskReader.read(pos, tableBTreeMetadata.databaseConfiguration().diskPageSize());
+        byte[] bytes = diskReader.read(pos, tableTreeMetadata.databaseConfiguration().diskPageSize());
         boolean isLeaf = bytes[0] == 1;
         byte[] amountOfEntriesBytes = new byte[Integer.BYTES];
         System.arraycopy(bytes, Byte.BYTES, amountOfEntriesBytes, 0, Integer.BYTES);
         int amountOfEntries = BytesManipulator.bytesToInt(amountOfEntriesBytes);
 
         if (amountOfEntries == 0) {
-            return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][tableBTreeMetadata.dataSize()], true, 0, -1);
+            return new TreeNode(pos, new Key[pLeaf], new byte[pLeaf][tableTreeMetadata.dataSize()], true, 0, -1);
         }
 
         if (!isLeaf) {
@@ -66,7 +66,7 @@ public class BzDiskTreeReader implements DiskTreeReader {
 
             for (int i = 0; i < amountOfEntries; ++i) {
                 System.arraycopy(
-                        bytes, tableBTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
+                        bytes, tableTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
                 int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
                 System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);
@@ -101,7 +101,7 @@ public class BzDiskTreeReader implements DiskTreeReader {
         } else {
             Key[] keys = new Key[this.pLeaf];
 
-            byte[][] values = new byte[this.pLeaf][tableBTreeMetadata.dataSize()];
+            byte[][] values = new byte[this.pLeaf][tableTreeMetadata.dataSize()];
             int next = -1;
 
             byte[] entryPosBytes = new byte[Integer.BYTES];
@@ -110,7 +110,7 @@ public class BzDiskTreeReader implements DiskTreeReader {
 
             for (int i = 0; i < amountOfEntries; ++i) {
                 System.arraycopy(
-                        bytes, tableBTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
+                        bytes, tableTreeMetadata.reservedSpaceInNode() + Integer.BYTES * i, entryPosBytes, 0, Integer.BYTES);
 
                 int posOfIndex = BytesManipulator.bytesToInt(entryPosBytes) - pos;
                 System.arraycopy(bytes, posOfIndex, tmpByteBuffer, 0, Integer.BYTES);

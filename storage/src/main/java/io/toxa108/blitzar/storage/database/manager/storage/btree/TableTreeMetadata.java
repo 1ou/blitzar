@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Tooo fucking big
  */
-public interface TableBTreeMetadata {
+public interface TableTreeMetadata {
 
     /**
      * Return database configuration
