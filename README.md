@@ -66,13 +66,22 @@ The efficiency of the library wasn't the goal of blitzar that's why there are no
 - [x]  Storing tables
 - [x]  Server
 - [x]  Service discovery
-- [ ]  Process sql queries (in progress)
-- [ ]  Locking - thread safe version of database (in progress)
-- [ ]  Bloom filter (in progress)
+- [x]  Process sql queries
 
-### Release: 1.0.0
+### Release: 0.0.2
+
+- [ ]  Thread safe version of database
+- [ ]  Bloom filter
+- [ ]  Double Buffering
+- [ ]  code coverage = 90% 
+
+### Release: 0.0.3
 
 - [ ]  Database transactions
 - [ ]  Batch insert
 - [ ]  Benchmarks
+
+### Release: 1.0.0
+
 - [ ]  Distributed version
+
