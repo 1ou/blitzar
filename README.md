@@ -73,7 +73,7 @@ The efficiency of the library wasn't the goal of blitzar that's why there are no
 - [ ]  Thread safe version of database
 - [ ]  Bloom filter
 - [ ]  Double Buffering
-- [ ]  code coverage = 90% 
+- [ ]  code coverage > 90% 
 
 ### Release: 0.0.3
 
