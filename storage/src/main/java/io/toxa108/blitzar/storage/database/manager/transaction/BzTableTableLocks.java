@@ -1,7 +1,5 @@
 package io.toxa108.blitzar.storage.database.manager.transaction;
 
-import io.toxa108.blitzar.storage.database.manager.transaction.LockManager;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -11,7 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * An exclusive (X) lock permits the transaction that holds the lock to update or delete a row.
  *
  */
-public class LockManagerImpl implements LockManager {
+public class BzTableTableLocks implements TableLocks {
     private final ConcurrentHashMap<String, ReentrantReadWriteLock> map =
             new ConcurrentHashMap<>(1024);
 

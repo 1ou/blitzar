@@ -10,7 +10,7 @@ import io.grpc.protobuf.services.ProtoReflectionService;
 import io.toxa108.blitzar.storage.BlitzarDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.AccessDeniedException;
 import io.toxa108.blitzar.storage.query.UserContext;
-import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
+import io.toxa108.blitzar.storage.query.impl.BzUserContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class ServerApplication {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         database = new BlitzarDatabase("/tmp/blitzarprod");
-        database.userManager().createUser("admin", "123");
+        database.userManager().create("admin", "123");
 
         port = args.length > 0 ? Integer.parseInt(args[0]) : 9009;
         Server server = NettyServerBuilder.forPort(port)
@@ -58,7 +58,7 @@ public class ServerApplication {
                     login = ob.readLine();
                     password = ob.readLine();
                     userContext = Optional.of(
-                            new UserContextImpl(
+                            new BzUserContext(
                                     database.userManager().authorize(login, password)
                             )
                     );

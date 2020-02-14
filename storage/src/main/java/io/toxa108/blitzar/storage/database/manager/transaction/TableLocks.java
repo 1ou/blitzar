@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager.transaction;
 
-public interface LockManager {
+public interface TableLocks {
     /**
      * Shared lock file position
      *

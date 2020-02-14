@@ -4,7 +4,7 @@ import io.toxa108.blitzar.storage.BlitzarDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.database.manager.user.User;
 import io.toxa108.blitzar.storage.query.UserContext;
-import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
+import io.toxa108.blitzar.storage.query.impl.BzUserContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ public class FirstIntegrationTest {
     @BeforeEach
     public void init() {
         blitzarDatabase.clear();
-        user = blitzarDatabase.userManager().createUser("toxa", "123321");
+        user = blitzarDatabase.userManager().create("toxa", "123321");
     }
 
     /**
@@ -25,14 +25,14 @@ public class FirstIntegrationTest {
      */
     @Test
     public void test() {
-        UserContext userContext = new UserContextImpl(new BzUser("toxa", "123321"));
+        UserContext userContext = new BzUserContext(new BzUser("toxa", "123321"));
 
         String ddlDatabaseResult =
                 new String(blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes()));
         assertEquals("success", ddlDatabaseResult);
 
 
-        userContext = new UserContextImpl(
+        userContext = new BzUserContext(
                 "test", new BzUser("toxa", "123321"));
 
         String ddlTableResult =

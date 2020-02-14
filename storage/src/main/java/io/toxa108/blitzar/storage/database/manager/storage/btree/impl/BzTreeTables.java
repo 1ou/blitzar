@@ -2,12 +2,12 @@ package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
-import io.toxa108.blitzar.storage.database.manager.storage.TableDataManager;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskBTreeReader;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskBTreeWriter;
+import io.toxa108.blitzar.storage.database.manager.storage.Tables;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeReader;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeWriter;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
-import io.toxa108.blitzar.storage.database.manager.transaction.LockManager;
-import io.toxa108.blitzar.storage.database.manager.transaction.LockManagerImpl;
+import io.toxa108.blitzar.storage.database.manager.transaction.TableLocks;
+import io.toxa108.blitzar.storage.database.manager.transaction.BzTableTableLocks;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
@@ -26,25 +26,25 @@ import java.util.stream.Collectors;
 /**
  * Threadsafe b-plus-tree on disk realization
  */
-public class DiskTreeManager implements TableDataManager {
+public class BzTreeTables implements Tables {
     private final ArrayManipulator arrayManipulator;
     private int numberOfUsedBlocks = 0;
     private final SearchKeys searchKeys;
-    private final LockManager lockManager;
+    private final TableLocks tableLocks;
     private final TableBTreeMetadata tableMetadata;
-    private final DiskBTreeReader diskBTreeReader;
-    private final DiskBTreeWriter diskBTreeWriter;
+    private final DiskTreeReader diskTreeReader;
+    private final DiskTreeWriter diskTreeWriter;
 
-    public DiskTreeManager(final File file,
-                           final DatabaseConfiguration databaseConfiguration,
-                           final Scheme scheme) {
+    public BzTreeTables(final File file,
+                        final DatabaseConfiguration databaseConfiguration,
+                        final Scheme scheme) {
         try {
             this.arrayManipulator = new ArrayManipulator();
             this.searchKeys = new SearchKeys();
-            this.lockManager = new LockManagerImpl();
+            this.tableLocks = new BzTableTableLocks();
             this.tableMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-            this.diskBTreeReader = new DiskBTreeReaderImpl(file, tableMetadata);
-            this.diskBTreeWriter = new DiskBTreeWriterImpl(file, tableMetadata);
+            this.diskTreeReader = new BzDiskTreeReader(file, tableMetadata);
+            this.diskTreeWriter = new BzDiskTreeWriter(file, tableMetadata);
         } catch (IOException e) {
             throw new IllegalArgumentException("Runtime error can't configure disk tree manager");
         }
@@ -55,7 +55,7 @@ public class DiskTreeManager implements TableDataManager {
         final int pLeaf = tableMetadata.entriesInLeafNodeNumber();
         final int pNonLeaf = tableMetadata.entriesInNonLeafNodeNumber();
 
-        TreeNode n = diskBTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
+        TreeNode n = diskTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
         Key key = row.key();
 
         final Stack<TreeNode> stack = new Stack<>();
@@ -64,12 +64,12 @@ public class DiskTreeManager implements TableDataManager {
             stack.push(n);
             final int q = n.q;
             if (key.compareTo(n.keys[0]) < 0) {
-                n = diskBTreeReader.read(n.p[0]);
+                n = diskTreeReader.read(n.p[0]);
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
-                n = diskBTreeReader.read(n.p[q]);
+                n = diskTreeReader.read(n.p[q]);
             } else {
                 int fn = searchKeys.search(n.keys, n.q, key);
-                n = diskBTreeReader.read(n.p[fn]);
+                n = diskTreeReader.read(n.p[fn]);
             }
         }
 
@@ -90,7 +90,7 @@ public class DiskTreeManager implements TableDataManager {
             if (n.q < pLeaf - 1) {
                 if (n.q == 0) {
                     numberOfUsedBlocks = 1;
-                    diskBTreeWriter.updateMetadata(numberOfUsedBlocks);
+                    diskTreeWriter.updateMetadata(numberOfUsedBlocks);
                 }
 
                 arrayManipulator.insertInArray(n.keys, key, properlyPosition);
@@ -101,7 +101,7 @@ public class DiskTreeManager implements TableDataManager {
                         rowDataToBytes(row),
                         properlyPosition
                 );
-                diskBTreeWriter.write(n.pos, n);
+                diskTreeWriter.write(n.pos, n);
             }
             /*
                 Split leaf before insert
@@ -140,11 +140,11 @@ public class DiskTreeManager implements TableDataManager {
                 n.pos = newPosLeft;
                 newNode.pos = newPosRight;
 
-                diskBTreeWriter.write(newPosLeft, n);
-                diskBTreeWriter.write(newPosRight, newNode);
+                diskTreeWriter.write(newPosLeft, n);
+                diskTreeWriter.write(newPosRight, newNode);
 
                 numberOfUsedBlocks += 2;
-                diskBTreeWriter.updateMetadata(numberOfUsedBlocks);
+                diskTreeWriter.updateMetadata(numberOfUsedBlocks);
 
                 boolean finished = false;
                 while (!finished) {
@@ -155,9 +155,9 @@ public class DiskTreeManager implements TableDataManager {
                         topNode.p[1] = newNode.pos;
                         topNode.leaf = false;
                         topNode.q = 1;
-                        diskBTreeWriter.write(tmpPosition, topNode);
+                        diskTreeWriter.write(tmpPosition, topNode);
                         numberOfUsedBlocks += 1;
-                        diskBTreeWriter.updateMetadata(numberOfUsedBlocks);
+                        diskTreeWriter.updateMetadata(numberOfUsedBlocks);
                         finished = true;
                     } else {
                         n = stack.pop();
@@ -170,8 +170,8 @@ public class DiskTreeManager implements TableDataManager {
                             arrayManipulator.insertInArray(n.keys, key, properlyPosition);
                             arrayManipulator.insertInArray(n.p, newNode.pos, properlyPosition + 1);
                             n.q++;
-                            diskBTreeWriter.write(n.pos, n);
-                            diskBTreeWriter.updateMetadata(numberOfUsedBlocks);
+                            diskTreeWriter.write(n.pos, n);
+                            diskTreeWriter.updateMetadata(numberOfUsedBlocks);
                             finished = true;
                         } else {
                             tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
@@ -205,10 +205,10 @@ public class DiskTreeManager implements TableDataManager {
                             n.pos = newPosLeft;
                             newNode.pos = newPosRight;
 
-                            diskBTreeWriter.write(newPosLeft, n);
-                            diskBTreeWriter.write(newPosRight, newNode);
+                            diskTreeWriter.write(newPosLeft, n);
+                            diskTreeWriter.write(newPosRight, newNode);
                             numberOfUsedBlocks += 2;
-                            diskBTreeWriter.updateMetadata(numberOfUsedBlocks);
+                            diskTreeWriter.updateMetadata(numberOfUsedBlocks);
 
                             key = tmp.keys[j - 1];
                         }
@@ -225,10 +225,10 @@ public class DiskTreeManager implements TableDataManager {
         }
 
         List<Row> foundedRows = new ArrayList<>();
-        TreeNode n = diskBTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
+        TreeNode n = diskTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
 
         while (!n.leaf) {
-            n = diskBTreeReader.read(n.p[0]);
+            n = diskTreeReader.read(n.p[0]);
         }
 
         while (true) {
@@ -263,23 +263,23 @@ public class DiskTreeManager implements TableDataManager {
             if (n.nextPos == -1) {
                 break;
             }
-            n = diskBTreeReader.read(n.nextPos);
+            n = diskTreeReader.read(n.nextPos);
         }
         return foundedRows;
     }
 
     public List<Row> search(final Key key) throws IOException {
-        TreeNode n = diskBTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
+        TreeNode n = diskTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
 
         while (!n.leaf) {
             int q = n.q;
             if (key.compareTo(n.keys[0]) < 0) {
-                n = diskBTreeReader.read(n.p[0]);
+                n = diskTreeReader.read(n.p[0]);
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
-                n = diskBTreeReader.read(n.p[q]);
+                n = diskTreeReader.read(n.p[q]);
             } else {
                 int fn = searchKeys.searchTraverseWay(n.keys, n.q, key);
-                n = diskBTreeReader.read(n.p[fn]);
+                n = diskTreeReader.read(n.p[fn]);
             }
         }
         int i = searchKeys.searchKeyInNode(n.keys, n.q, key);
@@ -313,10 +313,10 @@ public class DiskTreeManager implements TableDataManager {
     @Override
     public List<Row> search() throws IOException {
         List<Row> foundedRows = new ArrayList<>();
-        TreeNode n = diskBTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
+        TreeNode n = diskTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
 
         while (!n.leaf) {
-            n = diskBTreeReader.read(n.p[0]);
+            n = diskTreeReader.read(n.p[0]);
         }
 
         while (true) {
@@ -347,7 +347,7 @@ public class DiskTreeManager implements TableDataManager {
             if (n.nextPos == -1) {
                 break;
             }
-            n = diskBTreeReader.read(n.nextPos);
+            n = diskTreeReader.read(n.nextPos);
         }
 
         return foundedRows;

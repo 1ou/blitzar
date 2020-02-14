@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
-import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskBTreeWriter;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeWriter;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
 import io.toxa108.blitzar.storage.io.DiskWriter;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
@@ -9,7 +9,7 @@ import io.toxa108.blitzar.storage.io.impl.BzDiskWriterIo;
 import java.io.File;
 import java.io.IOException;
 
-public class DiskBTreeWriterImpl implements DiskBTreeWriter {
+public class BzDiskTreeWriter implements DiskTreeWriter {
     /**
      * Disk writer
      */
@@ -20,8 +20,8 @@ public class DiskBTreeWriterImpl implements DiskBTreeWriter {
      */
     private final TableBTreeMetadata tableBTreeMetadata;
 
-    public DiskBTreeWriterImpl(final File file,
-                               final TableBTreeMetadata tableBTreeMetadata) throws IOException {
+    public BzDiskTreeWriter(final File file,
+                            final TableBTreeMetadata tableBTreeMetadata) throws IOException {
         this.diskWriter = new BzDiskWriterIo(file);
         this.tableBTreeMetadata = tableBTreeMetadata;
     }

@@ -6,7 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Row;
 import java.io.IOException;
 import java.util.List;
 
-public interface TableDataManager {
+public interface Tables {
     /**
      * Add row
      *

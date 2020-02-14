@@ -4,7 +4,7 @@ import io.toxa108.blitzar.storage.BlitzarDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
-import io.toxa108.blitzar.storage.query.impl.UserContextImpl;
+import io.toxa108.blitzar.storage.query.impl.BzUserContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class ThreadSafeDatabaseTest {
     public ThreadSafeDatabaseTest() {
         blitzarDatabase = new BlitzarDatabase("/tmp/blitzar");
         blitzarDatabase.clear();
-        userContext = new UserContextImpl(
+        userContext = new BzUserContext(
                 new BzUser(
                         "admin",
                         "123"

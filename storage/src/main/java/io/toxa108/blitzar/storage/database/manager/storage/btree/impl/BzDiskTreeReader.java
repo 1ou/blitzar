@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
-import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskBTreeReader;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeReader;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableBTreeMetadata;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
@@ -13,7 +13,7 @@ import io.toxa108.blitzar.storage.io.impl.DiskReaderIo;
 import java.io.File;
 import java.io.IOException;
 
-public class DiskBTreeReaderImpl implements DiskBTreeReader {
+public class BzDiskTreeReader implements DiskTreeReader {
     /**
      * Disk writer
      */
@@ -27,8 +27,8 @@ public class DiskBTreeReaderImpl implements DiskBTreeReader {
     private final int pNonLeaf;
     private final int pLeaf;
 
-    public DiskBTreeReaderImpl(final File file,
-                               final TableBTreeMetadata tableBTreeMetadata) throws IOException {
+    public BzDiskTreeReader(final File file,
+                            final TableBTreeMetadata tableBTreeMetadata) throws IOException {
         this.diskReader = new DiskReaderIo(file);
         this.tableBTreeMetadata = tableBTreeMetadata;
         this.pLeaf = tableBTreeMetadata.entriesInLeafNodeNumber();

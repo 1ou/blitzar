@@ -2,7 +2,7 @@ package io.toxa108.blitzar.storage.benchmark;
 
 import io.toxa108.blitzar.storage.BlitzarDatabase;
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.DiskTreeManager;
+import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.BzTreeTables;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Key;
 import io.toxa108.blitzar.storage.database.schema.Row;
@@ -106,7 +106,7 @@ public class RepositoryInsertBenchmark {
             }
         };
 
-        DiskTreeManager diskTreeManager = new DiskTreeManager(
+        BzTreeTables bzTreeTables = new BzTreeTables(
                 file,
                 databaseConfiguration,
                 scheme
@@ -118,7 +118,7 @@ public class RepositoryInsertBenchmark {
 
             Key key = new BzKey(fieldId);
             Row row = new BzRow(key, Set.of(fieldId));
-            diskTreeManager.addRow(row);
+            bzTreeTables.addRow(row);
         }
     }
 }

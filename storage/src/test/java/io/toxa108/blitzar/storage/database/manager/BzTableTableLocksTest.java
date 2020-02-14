@@ -1,22 +1,22 @@
 package io.toxa108.blitzar.storage.database.manager;
 
-import io.toxa108.blitzar.storage.database.manager.transaction.LockManager;
-import io.toxa108.blitzar.storage.database.manager.transaction.LockManagerImpl;
+import io.toxa108.blitzar.storage.database.manager.transaction.TableLocks;
+import io.toxa108.blitzar.storage.database.manager.transaction.BzTableTableLocks;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
-public class LockManagerImplTest {
+public class BzTableTableLocksTest {
 
-    private final LockManager lockManager = new LockManagerImpl();
+    private final TableLocks tableLocks = new BzTableTableLocks();
 
     @Test
     public void test_exclusive_lock() {
         Runnable writeProcess = () -> {
             System.out.println("R1 START");
-            lockManager.exclusive(10);
+            tableLocks.exclusive(10);
             sleep(500);
             System.out.println("R1 END");
         };
@@ -24,7 +24,7 @@ public class LockManagerImplTest {
         Collection<Future<String>> futuresReaders = new ArrayList<>(10);
         Runnable r2 = () -> {
             System.out.println("R2 START");
-            lockManager.exclusive(10);
+            tableLocks.exclusive(10);
             System.out.println("R2 END");
         };
 

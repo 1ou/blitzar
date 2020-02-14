@@ -4,7 +4,7 @@ import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.TreeNode;
 
 import java.io.IOException;
 
-public interface DiskBTreeWriter {
+public interface DiskTreeWriter {
     /**
      * Write tree node to the disk
      *

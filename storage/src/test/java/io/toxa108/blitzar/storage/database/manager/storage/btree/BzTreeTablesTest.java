@@ -19,7 +19,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DiskTreeManagerTest {
+public class BzTreeTablesTest {
 
     @Test
     public void add_element_when_success() throws IOException {
@@ -59,8 +59,8 @@ public class DiskTreeManagerTest {
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
-        final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
+        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableBTreeMetadata);
+        final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableBTreeMetadata);
 
         final int n = 48;
         final Key[] keys = new Key[n];
@@ -75,8 +75,8 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize();
         final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        diskBTreeWriter.write(pos, treeNode);
-        final TreeNode treeNode1 = diskBTreeReader.read(pos);
+        diskTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskTreeReader.read(pos);
 
         assertEquals(treeNode, treeNode1);
     }
@@ -97,7 +97,7 @@ public class DiskTreeManagerTest {
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
+        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableBTreeMetadata);
 
         int n = 62;
         Key[] keys = new Key[n];
@@ -112,7 +112,7 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize();
         final TreeNode treeNode = new TreeNode(pos, keys, p, false, n, -1);
-        assertThrows(IllegalArgumentException.class, () -> diskBTreeWriter.write(pos, treeNode));
+        assertThrows(IllegalArgumentException.class, () -> diskTreeWriter.write(pos, treeNode));
     }
 
     @Test
@@ -135,8 +135,8 @@ public class DiskTreeManagerTest {
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
         final TableBTreeMetadata tableBTreeMetadata = new TableBTreeMetadataImpl(file, databaseConfiguration, scheme);
-        final DiskBTreeWriter diskBTreeWriter = new DiskBTreeWriterImpl(file, tableBTreeMetadata);
-        final DiskBTreeReader diskBTreeReader = new DiskBTreeReaderImpl(file, tableBTreeMetadata);
+        final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableBTreeMetadata);
+        final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableBTreeMetadata);
 
         final int n = 14;
         Key[] keys = new Key[n];
@@ -160,8 +160,8 @@ public class DiskTreeManagerTest {
 
         final int pos = databaseConfiguration.metadataSize() + 1;
         final TreeNode treeNode = new TreeNode(pos, keys, bytes, true, n, -1);
-        diskBTreeWriter.write(pos, treeNode);
-        final TreeNode treeNode1 = diskBTreeReader.read(pos);
+        diskTreeWriter.write(pos, treeNode);
+        final TreeNode treeNode1 = diskTreeReader.read(pos);
 
         assertEquals(treeNode, treeNode1);
     }
@@ -201,7 +201,7 @@ public class DiskTreeManagerTest {
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
-        final DiskTreeManager diskTreeManager = new DiskTreeManager(
+        final BzTreeTables bzTreeTables = new BzTreeTables(
                 file,
                 databaseConfiguration,
                 scheme
@@ -210,7 +210,7 @@ public class DiskTreeManagerTest {
         final Key key = new BzKey(fieldId);
         final Row row = new BzRow(key, Set.of(fieldId, fieldName, fieldCategory));
 
-        diskTreeManager.addRow(row);
+        bzTreeTables.addRow(row);
     }
 
     @Test
@@ -238,7 +238,7 @@ public class DiskTreeManagerTest {
             }
         };
 
-        final DiskTreeManager diskTreeManager = new DiskTreeManager(
+        final BzTreeTables bzTreeTables = new BzTreeTables(
                 file,
                 databaseConfiguration,
                 scheme
@@ -251,7 +251,7 @@ public class DiskTreeManagerTest {
 
             Key key = new BzKey(newFieldId);
             Row row = new BzRow(key, Set.of(newFieldId));
-            diskTreeManager.addRow(row);
+            bzTreeTables.addRow(row);
         }
     }
 
@@ -286,7 +286,7 @@ public class DiskTreeManagerTest {
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
-        final DiskTreeManager diskTreeManager = new DiskTreeManager(
+        final BzTreeTables bzTreeTables = new BzTreeTables(
                 file,
                 databaseConfiguration,
                 scheme
@@ -317,14 +317,14 @@ public class DiskTreeManagerTest {
 
             final Key key = new BzKey(fieldId);
             final Row row = new BzRow(key, Set.of(fieldId, fieldName, fieldCategory));
-            diskTreeManager.addRow(row);
+            bzTreeTables.addRow(row);
         }
 
         for (int i = 0; i < 1000; ++i) {
             fieldId = new BzField("id", FieldType.LONG,
                     Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i + 1));
             final Key key = new BzKey(fieldId);
-            final List<Row> rows = diskTreeManager.search(key);
+            final List<Row> rows = bzTreeTables.search(key);
             final String compareStr = "justname" + (i + 1) + "%";
             assertEquals(rows.get(0).key(), key);
             assertEquals(compareStr, new String(rows.get(0).fieldByName("name").value()).substring(0, compareStr.length()));

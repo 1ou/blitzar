@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.database.schema.impl;
 
-import io.toxa108.blitzar.storage.database.manager.row.RowManager;
+import io.toxa108.blitzar.storage.database.manager.row.Rows;
 import io.toxa108.blitzar.storage.database.schema.Field;
 import io.toxa108.blitzar.storage.database.schema.Row;
 import io.toxa108.blitzar.storage.database.schema.Scheme;
@@ -16,13 +16,13 @@ import java.util.Objects;
 public class BzTable implements Table {
     private final String name;
     private final Scheme scheme;
-    private final RowManager rowManager;
+    private final Rows rows;
     private final State state;
 
     public BzTable(final String name,
                    final Scheme scheme,
-                   final RowManager rowManager) {
-        this.rowManager = rowManager;
+                   final Rows rows) {
+        this.rows = rows;
         this.name = name;
         this.state = State.EXISTS;
         this.scheme = scheme;
@@ -45,17 +45,17 @@ public class BzTable implements Table {
 
     @Override
     public void addRow(final Row row) {
-        rowManager.add(row);
+        rows.add(row);
     }
 
     @Override
     public List<Row> search() {
-        return rowManager.search();
+        return rows.search();
     }
 
     @Override
     public List<Row> search(Field field) {
-        return rowManager.search(field);
+        return rows.search(field);
     }
 
     @Override

@@ -37,7 +37,7 @@ public class BzQueryProcessor implements QueryProcessor {
 
         String contextDatabaseName = usersActiveDatabases.get(userContext.user().login());
         if (contextDatabaseName != null) {
-            userContext = new UserContextImpl(
+            userContext = new BzUserContext(
                     contextDatabaseName,
                     userContext.user()
             );

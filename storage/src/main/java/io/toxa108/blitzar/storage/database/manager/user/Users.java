@@ -1,13 +1,13 @@
 package io.toxa108.blitzar.storage.database.manager.user;
 
-public interface UserManager {
+public interface Users {
     /**
      * Create user
      * @param login login
      * @param password password
      * @return user
      */
-    User createUser(String login, String password);
+    User create(String login, String password);
 
     /**
      * Authorize user

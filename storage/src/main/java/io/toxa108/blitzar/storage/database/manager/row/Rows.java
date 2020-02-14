@@ -5,7 +5,7 @@ import io.toxa108.blitzar.storage.database.schema.Row;
 
 import java.util.List;
 
-public interface RowManager {
+public interface Rows {
     /**
      * Add new row
      *

@@ -8,6 +8,11 @@ import java.util.regex.PatternSyntaxException;
 public class BzOptimizeQuery implements OptimizeQuery {
     private final Pattern patternQuery = Pattern.compile("^[a-zA-Z0-9_; ]*$");
 
+    /**
+     * Optimize sql query
+     * @param query sql query
+     * @return optimized sql query
+     */
     @Override
     public String optimize(String query) {
         final String loweredQuery = query.toLowerCase();

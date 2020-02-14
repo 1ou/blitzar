@@ -1,7 +1,7 @@
 package io.toxa108.blitzar.storage.io.impl;
 
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
-import io.toxa108.blitzar.storage.database.manager.row.RowManagerImpl;
+import io.toxa108.blitzar.storage.database.manager.row.BzRows;
 import io.toxa108.blitzar.storage.database.schema.*;
 import io.toxa108.blitzar.storage.database.schema.impl.BzDatabase;
 import io.toxa108.blitzar.storage.database.schema.impl.BzIndex;
@@ -86,7 +86,7 @@ public class BzFileManager implements FileManager {
         return new BzTable(
                 file.getName().split("\\.")[0],
                 scheme,
-                new RowManagerImpl(file, scheme, databaseConfiguration)
+                new BzRows(file, scheme, databaseConfiguration)
         );
     }
 
@@ -201,7 +201,7 @@ public class BzFileManager implements FileManager {
                 tables.add(new BzTable(
                         file.getName().split("\\.")[0],
                         scheme,
-                        new RowManagerImpl(file, scheme, databaseConfiguration)
+                        new BzRows(file, scheme, databaseConfiguration)
                 ));
             }
             return tables;
@@ -223,7 +223,7 @@ public class BzFileManager implements FileManager {
                             new BzTable(
                                     file.getName().split("\\.")[0],
                                     scheme,
-                                    new RowManagerImpl(file, scheme, databaseConfiguration)
+                                    new BzRows(file, scheme, databaseConfiguration)
                             )
                     );
                 }
