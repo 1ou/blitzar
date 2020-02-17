@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.integration;
 
-import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.BzDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.database.manager.user.User;
 import io.toxa108.blitzar.storage.query.UserContext;
@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FirstIntegrationTest {
-    private final BlitzarDatabase blitzarDatabase = new BlitzarDatabase("/tmp/blitzar");
+    private final BzDatabase bzDatabase = new BzDatabase("/tmp/blitzar");
     private User user;
 
     @BeforeEach
     public void init() {
-        blitzarDatabase.clear();
-        user = blitzarDatabase.userManager().create("toxa", "123321");
+        bzDatabase.clear();
+        user = bzDatabase.userManager().create("toxa", "123321");
     }
 
     /**
@@ -28,7 +28,7 @@ public class FirstIntegrationTest {
         UserContext userContext = new BzUserContext(new BzUser("toxa", "123321"));
 
         String ddlDatabaseResult =
-                new String(blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes()));
+                new String(bzDatabase.queryProcessor().process(userContext, "create database test;".getBytes()));
         assertEquals("success", ddlDatabaseResult);
 
 
@@ -36,7 +36,7 @@ public class FirstIntegrationTest {
                 "test", new BzUser("toxa", "123321"));
 
         String ddlTableResult =
-                new String(blitzarDatabase.queryProcessor().process(
+                new String(bzDatabase.queryProcessor().process(
                         userContext,
                         "create table example ( time long not null primary key , value long not null );".getBytes())
                 );
@@ -44,7 +44,7 @@ public class FirstIntegrationTest {
         assertEquals("success", ddlTableResult);
 
         String insertTableResult =
-                new String(blitzarDatabase.queryProcessor().process(
+                new String(bzDatabase.queryProcessor().process(
                         userContext,
                         "insert into example ( time , value ) values ( 30000 , 200 );".getBytes())
                 );
@@ -52,7 +52,7 @@ public class FirstIntegrationTest {
         assertEquals("success", insertTableResult);
 
         insertTableResult =
-                new String(blitzarDatabase.queryProcessor().process(
+                new String(bzDatabase.queryProcessor().process(
                         userContext,
                         "insert into example ( time , value ) values ( 30001 , 201 );".getBytes())
                 );
@@ -60,7 +60,7 @@ public class FirstIntegrationTest {
         assertEquals("success", insertTableResult);
 
         String selectFromTableResult =
-                new String(blitzarDatabase.queryProcessor().process(
+                new String(bzDatabase.queryProcessor().process(
                         userContext,
                         "select * from example;".getBytes())
                 );
@@ -68,7 +68,7 @@ public class FirstIntegrationTest {
         assertEquals("value 200\nvalue 201\n", selectFromTableResult);
 
         String selectFromWhereTableResult =
-                new String(blitzarDatabase.queryProcessor().process(
+                new String(bzDatabase.queryProcessor().process(
                         userContext,
                         "select * from example where time = 30000;".getBytes())
                 );
@@ -76,7 +76,7 @@ public class FirstIntegrationTest {
         assertEquals("value 200\n", selectFromWhereTableResult);
 
         selectFromWhereTableResult =
-                new String(blitzarDatabase.queryProcessor().process(
+                new String(bzDatabase.queryProcessor().process(
                         userContext,
                         "select * from example where value = 201;".getBytes())
                 );

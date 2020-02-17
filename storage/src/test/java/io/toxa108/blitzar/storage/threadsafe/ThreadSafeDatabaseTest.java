@@ -1,10 +1,10 @@
 package io.toxa108.blitzar.storage.threadsafe;
 
-import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.BzDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.query.UserContext;
-import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 import io.toxa108.blitzar.storage.query.impl.BzUserContext;
+import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,21 +15,21 @@ import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThreadSafeDatabaseTest {
-    private BlitzarDatabase blitzarDatabase;
+    private BzDatabase bzDatabase;
     private UserContext userContext;
 
     public ThreadSafeDatabaseTest() {
-        blitzarDatabase = new BlitzarDatabase("/tmp/blitzar");
-        blitzarDatabase.clear();
+        bzDatabase = new BzDatabase("/tmp/blitzar");
+        bzDatabase.clear();
         userContext = new BzUserContext(
                 new BzUser(
                         "admin",
                         "123"
                 )
         );
-        blitzarDatabase.queryProcessor().process(userContext, "create database test;".getBytes());
-        blitzarDatabase.queryProcessor().process(userContext, "use test;".getBytes());
-        blitzarDatabase.queryProcessor().process(userContext, "create table example (time long not null primary key, value long not null);".getBytes());
+        bzDatabase.queryProcessor().process(userContext, "create database test;".getBytes());
+        bzDatabase.queryProcessor().process(userContext, "use test;".getBytes());
+        bzDatabase.queryProcessor().process(userContext, "create table example (time long not null primary key, value long not null);".getBytes());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class ThreadSafeDatabaseTest {
                         "insert into example (time, value) values (%s, %s);", nanoTime, nanoTime);
                 System.out.println("Thread: " + Thread.currentThread().getName() + "Query: " + query);
 
-                String result = new String(blitzarDatabase.queryProcessor().process(userContext, query.getBytes()));
+                String result = new String(bzDatabase.queryProcessor().process(userContext, query.getBytes()));
                 System.out.println("Thread: " + Thread.currentThread().getName() + "Result: " + result);
 
                 countDownLatch.countDown();
@@ -62,7 +62,7 @@ public class ThreadSafeDatabaseTest {
         }
 
         countDownLatch.await();
-        String all = new String(blitzarDatabase.queryProcessor().process(
+        String all = new String(bzDatabase.queryProcessor().process(
                 userContext,
                 "select * from example;".getBytes()
         ));

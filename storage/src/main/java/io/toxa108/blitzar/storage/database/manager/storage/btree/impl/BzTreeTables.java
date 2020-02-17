@@ -46,7 +46,7 @@ public class BzTreeTables implements Tables {
             this.diskTreeReader = new BzDiskTreeReader(file, tableMetadata);
             this.diskTreeWriter = new BzDiskTreeWriter(file, tableMetadata);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Runtime error can't configure disk tree manager");
+            throw new IllegalArgumentException("Runtime error. The blitzar is not configured.");
         }
     }
 
@@ -315,7 +315,7 @@ public class BzTreeTables implements Tables {
 
     @Override
     public List<Row> search() throws IOException {
-        List<Row> foundedRows = new ArrayList<>();
+        final List<Row> foundedRows = new ArrayList<>();
         TreeNode n = diskTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
 
         while (!n.leaf) {
@@ -325,8 +325,8 @@ public class BzTreeTables implements Tables {
         while (true) {
             for (int i = 0; i < n.q; ++i) {
                 byte[] data = n.values[i];
-                AtomicInteger seek = new AtomicInteger();
-                Set<Field> fields = tableMetadata.dataFields()
+                final AtomicInteger seek = new AtomicInteger();
+                final Set<Field> fields = tableMetadata.dataFields()
                         .stream()
                         .map(it -> {
                             int s = seek.getAndAdd(it.diskSize());

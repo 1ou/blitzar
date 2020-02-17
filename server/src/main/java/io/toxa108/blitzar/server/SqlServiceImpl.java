@@ -3,13 +3,13 @@ package io.toxa108.blitzar.server;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import io.toxa108.blitzar.service.proto.*;
-import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.BzDatabase;
 
 public class SqlServiceImpl extends SqlServiceGrpc.SqlServiceImplBase {
-    private final BlitzarDatabase database;
+    private final BzDatabase database;
 
-    public SqlServiceImpl(final BlitzarDatabase blitzarDatabase) {
-        this.database = blitzarDatabase;
+    public SqlServiceImpl(final BzDatabase bzDatabase) {
+        this.database = bzDatabase;
     }
 
     @Override

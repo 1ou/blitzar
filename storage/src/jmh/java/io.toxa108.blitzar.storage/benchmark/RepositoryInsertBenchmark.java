@@ -1,6 +1,6 @@
 package io.toxa108.blitzar.storage.benchmark;
 
-import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.BzDatabase;
 import io.toxa108.blitzar.storage.database.context.DatabaseConfiguration;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.impl.BzTreeTables;
 import io.toxa108.blitzar.storage.database.schema.Field;
@@ -36,7 +36,7 @@ public class RepositoryInsertBenchmark {
     private Repository<Long, Long> inMemoryTreeRepository;
     private Repository<Long, Long> inMemoryHashMapRepository;
     private Repository<Long, Long> inMemoryBPlusTreeRepository;
-    private BlitzarDatabase blitzarDatabase;
+    private BzDatabase bzDatabase;
 
     @Param({"100", "10000"})
     private int N;

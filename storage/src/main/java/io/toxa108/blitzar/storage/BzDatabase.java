@@ -16,13 +16,13 @@ import java.io.IOException;
 /**
  * Timeseries database
  */
-public class BlitzarDatabase {
+public class BzDatabase {
     private final Users users;
     private final QueryProcessor queryProcessor;
     private final FileManager fileManager;
     private final DatabaseContext databaseContext;
 
-    public BlitzarDatabase(@Nullable final String path) {
+    public BzDatabase(@Nullable final String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException();
         }

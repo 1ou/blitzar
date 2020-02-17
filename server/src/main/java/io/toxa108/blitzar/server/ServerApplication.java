@@ -7,7 +7,7 @@ import com.orbitz.consul.model.agent.Registration;
 import io.grpc.Server;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.protobuf.services.ProtoReflectionService;
-import io.toxa108.blitzar.storage.BlitzarDatabase;
+import io.toxa108.blitzar.storage.BzDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.AccessDeniedException;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.BzUserContext;
@@ -21,11 +21,11 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 public class ServerApplication {
-    private static BlitzarDatabase database;
+    private static BzDatabase database;
     private static Integer port;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        database = new BlitzarDatabase("/tmp/blitzarprod");
+        database = new BzDatabase("/tmp/blitzarprod");
         database.userManager().create("admin", "123");
 
         port = args.length > 0 ? Integer.parseInt(args[0]) : 9009;
