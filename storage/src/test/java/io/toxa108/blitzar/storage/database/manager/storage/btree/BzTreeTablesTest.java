@@ -58,7 +58,7 @@ public class BzTreeTablesTest {
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
-        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final TableTreeMetadata tableTreeMetadata = new BzTableTreeMetadata(file, databaseConfiguration, scheme);
         final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableTreeMetadata);
         final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableTreeMetadata);
 
@@ -96,7 +96,7 @@ public class BzTreeTablesTest {
         final File file = Files.createTempFile("t2", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(1);
-        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final TableTreeMetadata tableTreeMetadata = new BzTableTreeMetadata(file, databaseConfiguration, scheme);
         final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableTreeMetadata);
 
         int n = 62;
@@ -134,7 +134,7 @@ public class BzTreeTablesTest {
         final File file = Files.createTempFile("q1", "12").toFile();
         file.deleteOnExit();
         final DatabaseConfiguration databaseConfiguration = new BzDatabaseConfiguration(2);
-        final TableTreeMetadata tableTreeMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+        final TableTreeMetadata tableTreeMetadata = new BzTableTreeMetadata(file, databaseConfiguration, scheme);
         final DiskTreeWriter diskTreeWriter = new BzDiskTreeWriter(file, tableTreeMetadata);
         final DiskTreeReader diskTreeReader = new BzDiskTreeReader(file, tableTreeMetadata);
 
@@ -297,7 +297,7 @@ public class BzTreeTablesTest {
                     Nullable.NOT_NULL, Unique.UNIQUE, BytesManipulator.longToBytes(i + 1));
 
             final String name = "justname" + (i + 1) + "%";
-            byte[] nameBytes = new byte[nameLen];
+            final byte[] nameBytes = new byte[nameLen];
             System.arraycopy(name.getBytes(), 0, nameBytes, 0, name.length());
 
             fieldName = new BzField(

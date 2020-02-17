@@ -6,7 +6,7 @@ import io.toxa108.blitzar.storage.database.schema.Index;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class DataDefinitionQuery extends AbstractQuery {
+public class DataDefinitionQuery extends BzQuery {
     private final Type type;
     private final Set<Field> fields;
     private final Set<Index> indexes;

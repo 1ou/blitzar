@@ -3,13 +3,13 @@ package io.toxa108.blitzar.storage.query.impl;
 import io.toxa108.blitzar.storage.query.Query;
 import io.toxa108.blitzar.storage.query.QueryContext;
 
-public class AbstractQuery implements Query {
+public abstract class BzQuery implements Query {
     private final String databaseName;
     private final String tableName;
     private QueryContext queryContext;
 
-    public AbstractQuery(final String databaseName,
-                         final String tableName) {
+    public BzQuery(final String databaseName,
+                   final String tableName) {
         this.databaseName = databaseName;
         this.tableName = tableName;
     }

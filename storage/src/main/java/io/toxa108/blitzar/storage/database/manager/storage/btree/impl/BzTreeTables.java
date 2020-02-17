@@ -42,7 +42,7 @@ public class BzTreeTables implements Tables {
             this.arrayManipulator = new ArrayManipulator();
             this.searchKeys = new SearchKeys();
             this.tableLocks = new BzTableTableLocks();
-            this.tableMetadata = new TableTreeMetadataImpl(file, databaseConfiguration, scheme);
+            this.tableMetadata = new BzTableTreeMetadata(file, databaseConfiguration, scheme);
             this.diskTreeReader = new BzDiskTreeReader(file, tableMetadata);
             this.diskTreeWriter = new BzDiskTreeWriter(file, tableMetadata);
         } catch (IOException e) {
@@ -68,7 +68,10 @@ public class BzTreeTables implements Tables {
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
                 n = diskTreeReader.read(n.p[q]);
             } else {
-                int fn = searchKeys.search(n.keys, n.q, key);
+                final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
+                if (fn == -1) {
+                    throw new  IllegalArgumentException("Row is not inserted. Error.");
+                }
                 n = diskTreeReader.read(n.p[fn]);
             }
         }
@@ -282,7 +285,7 @@ public class BzTreeTables implements Tables {
                 n = diskTreeReader.read(n.p[fn]);
             }
         }
-        int i = searchKeys.searchKeyInNode(n.keys, n.q, key);
+        final int i = searchKeys.searchKeyInNode(n.keys, n.q, key);
         if (i == -1) {
             throw new NoSuchElementException("Element with key " + new FieldValueAsString(key.field()).transform() + " is not found");
         }

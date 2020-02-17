@@ -47,7 +47,6 @@ public class BzQueryProcessor implements QueryProcessor {
         String query = optimizeQuery.optimize(new String(request));
         final char endOfQuerySign = ';';
         final String splitQuerySign = " ";
-        final String errorKeyword = "error";
         final short minParts = 2;
 
         if (query.charAt(query.length() - 1) != endOfQuerySign) {
@@ -61,8 +60,8 @@ public class BzQueryProcessor implements QueryProcessor {
             throw new IllegalArgumentException();
         }
 
-        SqlCommand sqlCommand = new BzSqlCommandFactory(databaseContext, usersActiveDatabases).initializeCommand(parts);
-        byte[] sqlQueryResultBytes = sqlCommand.execute(userContext, parts);
+        final SqlCommand sqlCommand = new BzSqlCommandFactory(databaseContext, usersActiveDatabases).initializeCommand(parts);
+        final byte[] sqlQueryResultBytes = sqlCommand.execute(userContext, parts);
 
         semaphore.release();
         return sqlQueryResultBytes;

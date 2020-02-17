@@ -12,16 +12,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-public class TableTreeMetadataImpl implements TableTreeMetadata {
+public class BzTableTreeMetadata implements TableTreeMetadata {
     private final DatabaseConfiguration databaseConfiguration;
     private final Scheme scheme;
     private final DiskReader diskReader;
     private final int pLeaf;
     private final int pNonLeaf;
 
-    public TableTreeMetadataImpl(final File file,
-                                 final DatabaseConfiguration databaseConfiguration,
-                                 final Scheme scheme) throws IOException {
+    public BzTableTreeMetadata(final File file,
+                               final DatabaseConfiguration databaseConfiguration,
+                               final Scheme scheme) throws IOException {
         this.databaseConfiguration = databaseConfiguration;
         this.scheme = scheme;
         this.diskReader = new DiskReaderIo(file);
@@ -29,6 +29,11 @@ public class TableTreeMetadataImpl implements TableTreeMetadata {
         this.pNonLeaf = pNonLeafCalculate();
     }
 
+    /**
+     * Estimate number of entries per leaf node
+     *
+     * @return number of entries
+     */
     private int pLeafCalculate() {
         int reservedSpace = reservedSpaceInNode();
         int nodeSize = databaseConfiguration.diskPageSize();
@@ -41,6 +46,11 @@ public class TableTreeMetadataImpl implements TableTreeMetadata {
         return (int) bfr - 2; // saving space in the node for future entry updates
     }
 
+    /**
+     * Estimate number of entries per non leaf node
+     *
+     * @return number of entries
+     */
     private int pNonLeafCalculate() {
         int reservedSpace = reservedSpaceInNode()
                 + Integer.BYTES; // additional N child pointer
@@ -57,16 +67,33 @@ public class TableTreeMetadataImpl implements TableTreeMetadata {
         return databaseConfiguration;
     }
 
+    /**
+     * Return reserved space in node
+     * 1 byte - is node leaf or non leaf
+     * 4 byte - number of entries in leaf
+     *
+     * @return reserved space in bytes
+     */
     @Override
     public int reservedSpaceInNode() {
         return Byte.BYTES + Integer.BYTES;
     }
 
+    /**
+     * Return position to free space
+     *
+     * @return position to free space
+     * @throws IOException disk is error
+     */
     @Override
     public int freeSpacePos() throws IOException {
         return (numberOfUsedBlocks() + 1) * databaseConfiguration.diskPageSize() + databaseConfiguration.metadataSize();
     }
 
+    /**
+     * Data size for non variable record
+     * @return data size for non variable record
+     */
     @Override
     public int dataNonVariableRecordSize() {
         return scheme.dataSize()

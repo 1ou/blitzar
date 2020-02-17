@@ -21,7 +21,6 @@ public class BzSqlCommandFactory implements SqlCommandFactory {
 
     @Override
     public SqlCommand initializeCommand(final String[] parts) {
-        final String errorKeyword = "error";
         final SqlReservedWords command = SqlReservedWords.valueOf(parts[0].toUpperCase());
 
         switch (command) {

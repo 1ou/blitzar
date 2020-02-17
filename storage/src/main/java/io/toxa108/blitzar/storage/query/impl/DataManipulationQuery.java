@@ -4,7 +4,7 @@ import io.toxa108.blitzar.storage.database.schema.Field;
 
 import java.util.Set;
 
-public class DataManipulationQuery extends AbstractQuery {
+public class DataManipulationQuery extends BzQuery {
     public enum Type {
         /**
          * Insert
