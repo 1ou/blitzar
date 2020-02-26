@@ -51,173 +51,245 @@ public class BzTreeTables implements Tables {
     }
 
     @Override
-    public synchronized void addRow(final Row row) throws IOException {
+    public void addRow(final Row row) throws IOException {
         final int pLeaf = tableMetadata.entriesInLeafNodeNumber();
         final int pNonLeaf = tableMetadata.entriesInNonLeafNodeNumber();
+        final List<Integer> exclusiveLocks = new ArrayList<>();
+        final List<Integer> sharedLocks = new ArrayList<>();
+        try {
 
-        TreeNode n = diskTreeReader.read(tableMetadata.databaseConfiguration().metadataSize() + 1);
-        Key key = row.key();
+            final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
+            tableLocks.shared(beginPos);
+            sharedLocks.add(beginPos);
 
-        final Stack<TreeNode> stack = new Stack<>();
+            TreeNode n = diskTreeReader.read(beginPos);
+            Key key = row.key();
 
-        while (!n.leaf) {
-            stack.push(n);
-            final int q = n.q;
-            if (key.compareTo(n.keys[0]) < 0) {
-                n = diskTreeReader.read(n.p[0]);
-            } else if (key.compareTo(n.keys[q - 1]) > 0) {
-                n = diskTreeReader.read(n.p[q]);
-            } else {
-                final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                if (fn == -1) {
-                    throw new  IllegalArgumentException("Row is not inserted. Error.");
+            final Stack<TreeNode> stack = new Stack<>();
+
+            while (!n.leaf) {
+                stack.push(n);
+                final int q = n.q;
+                if (key.compareTo(n.keys[0]) < 0) {
+                    n = diskTreeReader.read(n.p[0]);
+                } else if (key.compareTo(n.keys[q - 1]) > 0) {
+                    n = diskTreeReader.read(n.p[q]);
+                } else {
+                    final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
+                    if (fn == -1) {
+                        throw new IllegalArgumentException("Row is not inserted. Error.");
+                    }
+                    n = diskTreeReader.read(n.p[fn]);
                 }
-                n = diskTreeReader.read(n.p[fn]);
+                tableLocks.shared(n.pos);
+                sharedLocks.add(n.pos);
             }
-        }
 
-        int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
+            int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
         /*
             If record with such key already exists
          */
-        if (properlyPosition == -1) {
-            throw new IllegalArgumentException(
-                    "key: " + key.field().name() + " was inserted into node [" +
-                            Arrays.stream(n.keys).map(it -> it.field().name())
-                                    .collect(Collectors.joining(", ")) + "]");
-        } else {
-            TreeNode newNode = new TreeNode(pLeaf, tableMetadata.dataSize());
+            if (properlyPosition == -1) {
+                throw new IllegalArgumentException(
+                        "key: " + key.field().name() + " was inserted into node [" +
+                                Arrays.stream(n.keys).map(it -> it.field().name())
+                                        .collect(Collectors.joining(", ")) + "]");
+            } else {
+                TreeNode newNode = new TreeNode(pLeaf, tableMetadata.dataSize());
             /*
                 If leaf is not full, insert new entry in leaf
              */
-            if (n.q < pLeaf - 1) {
-                if (n.q == 0) {
-                    numberOfUsedBlocks = 1;
-                    diskTreeWriter.updateMetadata(numberOfUsedBlocks);
-                }
+                if (n.q < pLeaf - 1) {
+                    sharedLocks.remove(Integer.valueOf(n.pos));
 
-                arrayManipulator.insertInArray(n.keys, key, properlyPosition);
-                arrayManipulator.insertInArray(n.p, -1, properlyPosition);
-                n.q++;
-                arrayManipulator.insertInArray(
-                        n.values,
-                        rowDataToBytes(row),
-                        properlyPosition
-                );
-                diskTreeWriter.write(n.pos, n);
-            }
+                    tableLocks.exclusive(n.pos);
+                    exclusiveLocks.add(n.pos);
+
+                    if (n.q == 0) {
+                        numberOfUsedBlocks = 1;
+                        diskTreeWriter.updateMetadata(numberOfUsedBlocks);
+                    }
+
+                    arrayManipulator.insertInArray(n.keys, key, properlyPosition);
+                    arrayManipulator.insertInArray(n.p, -1, properlyPosition);
+                    n.q++;
+                    arrayManipulator.insertInArray(
+                            n.values,
+                            rowDataToBytes(row),
+                            properlyPosition
+                    );
+
+                    diskTreeWriter.write(n.pos, n);
+
+                    tableLocks.unexclusive(n.pos);
+                    exclusiveLocks.remove(Integer.valueOf(n.pos));
+                }
             /*
                 Split leaf before insert
              */
-            else {
-                int tmpPosition = n.pos;
-                TreeNode tmp = new TreeNode(pLeaf + 1, tableMetadata.dataSize());
-                arrayManipulator.copyArray(n.keys, tmp.keys, n.q);
-                arrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
-                arrayManipulator.copyArray(n.values, tmp.values, n.q);
-                arrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
-                arrayManipulator.insertInArray(tmp.p, numberOfUsedBlocks, properlyPosition);
-                arrayManipulator.insertInArray(tmp.values, rowDataToBytes(row), properlyPosition);
-                tmp.q = n.q + 1;
+                else {
+                    int tmpPosition = n.pos;
+                    TreeNode tmp = new TreeNode(pLeaf + 1, tableMetadata.dataSize());
+                    arrayManipulator.copyArray(n.keys, tmp.keys, n.q);
+                    arrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
+                    arrayManipulator.copyArray(n.values, tmp.values, n.q);
+                    arrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
+                    arrayManipulator.insertInArray(tmp.p, numberOfUsedBlocks, properlyPosition);
+                    arrayManipulator.insertInArray(tmp.values, rowDataToBytes(row), properlyPosition);
+                    tmp.q = n.q + 1;
 
-                newNode.nextPos = n.nextPos;
-                int j = (pLeaf + 1) >>> 1;
+                    newNode.nextPos = n.nextPos;
+                    int j = (pLeaf + 1) >>> 1;
 
-                n.keys = new Key[pLeaf];
-                n.p = new int[pLeaf + 1];
-                arrayManipulator.copyArray(tmp.keys, n.keys, j);
-                arrayManipulator.copyArray(tmp.values, n.values, j);
-                arrayManipulator.copyArray(tmp.p, n.p, j);
-                n.q = j;
+                    n.keys = new Key[pLeaf];
+                    n.p = new int[pLeaf + 1];
+                    arrayManipulator.copyArray(tmp.keys, n.keys, j);
+                    arrayManipulator.copyArray(tmp.values, n.values, j);
+                    arrayManipulator.copyArray(tmp.p, n.p, j);
+                    n.q = j;
 
-                arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
-                arrayManipulator.copyArray(tmp.values, newNode.values, j, tmp.q - j);
-                arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
-                newNode.q = tmp.q - j;
-                key = tmp.keys[j - 1];
+                    arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
+                    arrayManipulator.copyArray(tmp.values, newNode.values, j, tmp.q - j);
+                    arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
+                    newNode.q = tmp.q - j;
+                    key = tmp.keys[j - 1];
 
-                int newPosLeft = tableMetadata.freeSpacePos();
-                int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
+                    int newPosLeft = tableMetadata.freeSpacePos();
+                    int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
 
-                n.nextPos = newPosRight;
-                n.pos = newPosLeft;
-                newNode.pos = newPosRight;
+                    n.nextPos = newPosRight;
+                    n.pos = newPosLeft;
+                    newNode.pos = newPosRight;
 
-                diskTreeWriter.write(newPosLeft, n);
-                diskTreeWriter.write(newPosRight, newNode);
+                    tableLocks.exclusive(newPosLeft);
+                    exclusiveLocks.add(newPosLeft);
+                    tableLocks.exclusive(newPosRight);
+                    exclusiveLocks.add(newPosRight);
 
-                numberOfUsedBlocks += 2;
-                diskTreeWriter.updateMetadata(numberOfUsedBlocks);
+                    diskTreeWriter.write(newPosLeft, n);
+                    diskTreeWriter.write(newPosRight, newNode);
+                    numberOfUsedBlocks += 2;
+                    diskTreeWriter.updateMetadata(numberOfUsedBlocks);
 
-                boolean finished = false;
-                while (!finished) {
-                    if (stack.isEmpty()) {
-                        TreeNode topNode = new TreeNode(pLeaf, tableMetadata.dataSize());
-                        topNode.keys[0] = key;
-                        topNode.p[0] = n.pos;
-                        topNode.p[1] = newNode.pos;
-                        topNode.leaf = false;
-                        topNode.q = 1;
-                        diskTreeWriter.write(tmpPosition, topNode);
-                        numberOfUsedBlocks += 1;
-                        diskTreeWriter.updateMetadata(numberOfUsedBlocks);
-                        finished = true;
-                    } else {
-                        n = stack.pop();
-                        /*
-                            If internal node n is not full
-                            parent node is not full - no split
-                         */
-                        if (n.q < pNonLeaf - 1) {
-                            properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                            arrayManipulator.insertInArray(n.keys, key, properlyPosition);
-                            arrayManipulator.insertInArray(n.p, newNode.pos, properlyPosition + 1);
-                            n.q++;
-                            diskTreeWriter.write(n.pos, n);
+                    tableLocks.unexclusive(newPosRight);
+                    exclusiveLocks.remove(Integer.valueOf(newPosRight));
+                    tableLocks.unexclusive(newPosLeft);
+                    exclusiveLocks.remove(Integer.valueOf(newPosLeft));
+
+                    boolean finished = false;
+                    while (!finished) {
+                        if (stack.isEmpty()) {
+                            TreeNode topNode = new TreeNode(pLeaf, tableMetadata.dataSize());
+                            topNode.keys[0] = key;
+                            topNode.p[0] = n.pos;
+                            topNode.p[1] = newNode.pos;
+                            topNode.leaf = false;
+                            topNode.q = 1;
+
+                            tableLocks.exclusive(tmpPosition);
+                            exclusiveLocks.add(tmpPosition);
+
+                            diskTreeWriter.write(tmpPosition, topNode);
+                            numberOfUsedBlocks += 1;
                             diskTreeWriter.updateMetadata(numberOfUsedBlocks);
+
+                            tableLocks.unexclusive(newPosRight);
+                            exclusiveLocks.remove(Integer.valueOf(newPosRight));
                             finished = true;
                         } else {
-                            tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
-                            arrayManipulator.copyArray(n.keys, tmp.keys, n.q);
-                            arrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
-                            tmp.q = n.q + 1;
+                            /*
+                             * We have to made all shared lock - exclusive
+                             */
+                            if (n.leaf) {
+                                sharedLocks.forEach(it -> {
+                                    sharedLocks.remove(it);
+                                    tableLocks.unshared(it);
 
-                            properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                            arrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
-                            arrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
+                                    exclusiveLocks.add(it);
+                                    tableLocks.exclusive(it);
+                                });
+                            }
+                            n = stack.pop();
+                            /*
+                                If internal node n is not full
+                                parent node is not full - no split
+                             */
+                            if (n.q < pNonLeaf - 1) {
+                                properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
+                                arrayManipulator.insertInArray(n.keys, key, properlyPosition);
+                                arrayManipulator.insertInArray(n.p, newNode.pos, properlyPosition + 1);
+                                n.q++;
 
-                            newNode = new TreeNode(pNonLeaf, tableMetadata.dataSize());
-                            j = (pNonLeaf + 1) >>> 1;
+                                tableLocks.exclusive(n.pos);
+                                exclusiveLocks.add(n.pos);
 
-                            n.keys = new Key[pNonLeaf];
-                            n.p = new int[pNonLeaf + 1];
-                            arrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
-                            arrayManipulator.copyArray(tmp.p, n.p, 0, j);
-                            n.q = j;
-                            n.leaf = false;
+                                diskTreeWriter.write(n.pos, n);
+                                diskTreeWriter.updateMetadata(numberOfUsedBlocks);
 
-                            arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
-                            arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
-                            newNode.q = tmp.q - j;
-                            newNode.leaf = false;
+                                tableLocks.unexclusive(n.pos);
+                                exclusiveLocks.remove(Integer.valueOf(n.pos));
 
-                            newPosLeft = tableMetadata.freeSpacePos();
-                            newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
+                                finished = true;
+                            } else {
+                                tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
+                                arrayManipulator.copyArray(n.keys, tmp.keys, n.q);
+                                arrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
+                                tmp.q = n.q + 1;
 
-                            tmpPosition = n.pos;
-                            n.pos = newPosLeft;
-                            newNode.pos = newPosRight;
+                                properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
+                                arrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
+                                arrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
 
-                            diskTreeWriter.write(newPosLeft, n);
-                            diskTreeWriter.write(newPosRight, newNode);
-                            numberOfUsedBlocks += 2;
-                            diskTreeWriter.updateMetadata(numberOfUsedBlocks);
+                                newNode = new TreeNode(pNonLeaf, tableMetadata.dataSize());
+                                j = (pNonLeaf + 1) >>> 1;
 
-                            key = tmp.keys[j - 1];
+                                n.keys = new Key[pNonLeaf];
+                                n.p = new int[pNonLeaf + 1];
+                                arrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
+                                arrayManipulator.copyArray(tmp.p, n.p, 0, j);
+                                n.q = j;
+                                n.leaf = false;
+
+                                arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
+                                arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
+                                newNode.q = tmp.q - j;
+                                newNode.leaf = false;
+
+                                newPosLeft = tableMetadata.freeSpacePos();
+                                newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
+
+                                tmpPosition = n.pos;
+                                n.pos = newPosLeft;
+                                newNode.pos = newPosRight;
+
+                                tableLocks.exclusive(newPosLeft);
+                                exclusiveLocks.add(newPosLeft);
+
+                                tableLocks.exclusive(newPosRight);
+                                exclusiveLocks.add(newPosRight);
+
+                                diskTreeWriter.write(newPosLeft, n);
+                                diskTreeWriter.write(newPosRight, newNode);
+                                numberOfUsedBlocks += 2;
+                                diskTreeWriter.updateMetadata(numberOfUsedBlocks);
+
+                                tableLocks.unexclusive(newPosRight);
+                                exclusiveLocks.remove(Integer.valueOf(newPosRight));
+
+                                tableLocks.unexclusive(newPosLeft);
+                                exclusiveLocks.remove(Integer.valueOf(newPosLeft));
+
+                                key = tmp.keys[j - 1];
+                            }
                         }
                     }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+              sharedLocks.forEach(tableLocks::unshared);
+              exclusiveLocks.forEach(tableLocks::unexclusive);
         }
     }
 
