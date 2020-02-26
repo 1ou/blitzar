@@ -100,6 +100,7 @@ public class BzTreeTables implements Tables {
                 If leaf is not full, insert new entry in leaf
              */
                 if (n.q < pLeaf - 1) {
+                    tableLocks.unshared(n.pos);
                     sharedLocks.remove(Integer.valueOf(n.pos));
 
                     tableLocks.exclusive(n.pos);

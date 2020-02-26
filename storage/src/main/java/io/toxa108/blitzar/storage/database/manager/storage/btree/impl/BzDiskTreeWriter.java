@@ -28,6 +28,8 @@ public class BzDiskTreeWriter implements DiskTreeWriter {
 
     @Override
     public void write(int pos, TreeNode node) throws IOException {
+        System.out.println(Thread.currentThread().getName() + " Write to: " + pos);
+
         if (!node.leaf) {
             int estimatedSize = tableTreeMetadata.entriesInNonLeafNodeNumber();
             checkNodeSize(node.q, estimatedSize);

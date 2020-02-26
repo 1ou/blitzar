@@ -44,6 +44,7 @@ public class BzDiskTreeReader implements DiskTreeReader {
 
     @Override
     public TreeNode read(final int pos) throws IOException {
+        System.out.println(Thread.currentThread().getName() + " Read from: " + pos);
         Field primaryIndexField = tableTreeMetadata.primaryIndexField();
 
         byte[] bytes = diskReader.read(pos, tableTreeMetadata.databaseConfiguration().diskPageSize());

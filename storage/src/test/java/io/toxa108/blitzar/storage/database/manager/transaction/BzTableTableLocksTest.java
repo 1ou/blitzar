@@ -93,6 +93,6 @@ class BzTableTableLocksTest {
         t2.join();
         final long finish = System.currentTimeMillis();
         final long diff = finish - start;
-        assertTrue(diff > 100);
+        assertTrue(diff > 200);
     }
 }

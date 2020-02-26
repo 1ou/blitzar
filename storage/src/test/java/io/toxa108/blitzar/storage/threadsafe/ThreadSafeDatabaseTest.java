@@ -34,7 +34,7 @@ public class ThreadSafeDatabaseTest {
 
     @Test
     public void fill_database_Ok() throws ExecutionException, InterruptedException {
-        final int threads = 1;
+        final int threads = 10;
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
         final List<String> keys = new CopyOnWriteArrayList<>();
