@@ -11,6 +11,8 @@ import io.toxa108.blitzar.storage.BzDatabase;
 import io.toxa108.blitzar.storage.database.manager.user.AccessDeniedException;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.BzUserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.concurrent.Executors;
 public class ServerApplication {
     private static BzDatabase database;
     private static Integer port;
+    private static final Logger log = LoggerFactory.getLogger(ServerApplication.class);
 
     public static void main(String[] args) throws IOException, InterruptedException {
         database = new BzDatabase("/tmp/blitzarprod");
@@ -46,12 +49,12 @@ public class ServerApplication {
 
     private static void dialog() {
         BufferedReader ob = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Time series database.");
+        log.info("Time series database.");
         Optional<UserContext> userContext = Optional.empty();
 
         while (true) {
             if (userContext.isEmpty()) {
-                System.out.println("Enter login & password:");
+                log.info("Enter login & password:");
 
                 String login, password;
                 try {
@@ -64,10 +67,10 @@ public class ServerApplication {
                     );
                 } catch (IOException ignored) {
                 } catch (AccessDeniedException e) {
-                    System.out.println("Wrong credentials. Try again.");
+                    log.info("Wrong credentials. Try again.");
                 }
             } else {
-                System.out.println("Enter a command:");
+                log.info("Enter a command:");
                 String command;
                 try {
                     command = ob.readLine();
@@ -78,8 +81,7 @@ public class ServerApplication {
                 if ("exit".equals(command)) {
                     break;
                 }
-                System.out.println();
-                System.out.println(new String(database.queryProcessor().process(
+                log.info(new String(database.queryProcessor().process(
                         userContext.get(), command.getBytes())));
             }
         }

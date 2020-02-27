@@ -50,41 +50,51 @@ public class BzTreeTables implements Tables {
         }
     }
 
+    private TreeNode traverseDown(final Stack<TreeNode> stack,
+                                  final List<Integer> sharedLocks,
+                                  final Key key
+    ) throws IOException {
+        final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
+        tableLocks.shared(beginPos);
+        sharedLocks.add(beginPos);
+
+        TreeNode n = diskTreeReader.read(beginPos);
+
+        while (!n.leaf) {
+            stack.push(n);
+            final int q = n.q;
+            if (key.compareTo(n.keys[0]) < 0) {
+                tableLocks.shared(n.p[0]);
+                sharedLocks.add(n.p[0]);
+                n = diskTreeReader.read(n.p[0]);
+            } else if (key.compareTo(n.keys[q - 1]) > 0) {
+                tableLocks.shared(n.p[q]);
+                sharedLocks.add(n.p[q]);
+                n = diskTreeReader.read(n.p[q]);
+            } else {
+                final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
+                if (fn == -1) {
+                    throw new IllegalArgumentException("Row is not inserted. Error.");
+                }
+                tableLocks.shared(n.p[fn]);
+                sharedLocks.add(n.p[fn]);
+                n = diskTreeReader.read(n.p[fn]);
+            }
+        }
+        return n;
+    }
+
     @Override
     public void addRow(final Row row) throws IOException {
         final int pLeaf = tableMetadata.entriesInLeafNodeNumber();
         final int pNonLeaf = tableMetadata.entriesInNonLeafNodeNumber();
         final List<Integer> exclusiveLocks = new ArrayList<>();
         final List<Integer> sharedLocks = new ArrayList<>();
+        final Stack<TreeNode> stack = new Stack<>();
+
         try {
-
-            final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
-            tableLocks.shared(beginPos);
-            sharedLocks.add(beginPos);
-
-            TreeNode n = diskTreeReader.read(beginPos);
             Key key = row.key();
-
-            final Stack<TreeNode> stack = new Stack<>();
-
-            while (!n.leaf) {
-                stack.push(n);
-                final int q = n.q;
-                if (key.compareTo(n.keys[0]) < 0) {
-                    n = diskTreeReader.read(n.p[0]);
-                } else if (key.compareTo(n.keys[q - 1]) > 0) {
-                    n = diskTreeReader.read(n.p[q]);
-                } else {
-                    final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                    if (fn == -1) {
-                        throw new IllegalArgumentException("Row is not inserted. Error.");
-                    }
-                    n = diskTreeReader.read(n.p[fn]);
-                }
-                tableLocks.shared(n.pos);
-                sharedLocks.add(n.pos);
-            }
-
+            TreeNode n = traverseDown(stack, sharedLocks, key);
             int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
         /*
             If record with such key already exists
@@ -95,16 +105,25 @@ public class BzTreeTables implements Tables {
                                 Arrays.stream(n.keys).map(it -> it.field().name())
                                         .collect(Collectors.joining(", ")) + "]");
             } else {
+                tableLocks.unshared(n.pos);
+                sharedLocks.remove(Integer.valueOf(n.pos));
+
+                if (tableLocks.isExclusive(n.pos)) {
+                    tableLocks.exclusive(n.pos);
+                    exclusiveLocks.add(n.pos);
+                    stack.clear();
+                    sharedLocks.clear();
+                    n = traverseDown(stack, sharedLocks, key);
+                } else {
+                    tableLocks.exclusive(n.pos);
+                    exclusiveLocks.add(n.pos);
+                }
+
                 TreeNode newNode = new TreeNode(pLeaf, tableMetadata.dataSize());
             /*
                 If leaf is not full, insert new entry in leaf
              */
                 if (n.q < pLeaf - 1) {
-                    tableLocks.unshared(n.pos);
-                    sharedLocks.remove(Integer.valueOf(n.pos));
-
-                    tableLocks.exclusive(n.pos);
-                    exclusiveLocks.add(n.pos);
 
                     if (n.q == 0) {
                         numberOfUsedBlocks = 1;
@@ -202,13 +221,14 @@ public class BzTreeTables implements Tables {
                              * We have to made all shared lock - exclusive
                              */
                             if (n.leaf) {
-                                sharedLocks.forEach(it -> {
-                                    sharedLocks.remove(it);
+                                for (Iterator<Integer> iterator = sharedLocks.iterator(); iterator.hasNext(); ) {
+                                    final Integer it = iterator.next();
                                     tableLocks.unshared(it);
 
                                     exclusiveLocks.add(it);
                                     tableLocks.exclusive(it);
-                                });
+                                    iterator.remove();
+                                }
                             }
                             n = stack.pop();
                             /*
@@ -289,8 +309,8 @@ public class BzTreeTables implements Tables {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-              sharedLocks.forEach(tableLocks::unshared);
-              exclusiveLocks.forEach(tableLocks::unexclusive);
+            sharedLocks.forEach(tableLocks::unshared);
+            exclusiveLocks.forEach(tableLocks::unexclusive);
         }
     }
 

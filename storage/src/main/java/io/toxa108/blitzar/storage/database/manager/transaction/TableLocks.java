@@ -4,14 +4,21 @@ public interface TableLocks {
     /**
      * Shared lock file position
      *
-     * @param x  position
+     * @param x position
      */
     void shared(int x);
 
     /**
+     * If exclusive lock
+     *
+     * @param x position
+     */
+    boolean isExclusive(int x);
+
+    /**
      * Exclusive lock file position
      *
-     * @param x  position
+     * @param x position
      */
     void exclusive(int x);
 

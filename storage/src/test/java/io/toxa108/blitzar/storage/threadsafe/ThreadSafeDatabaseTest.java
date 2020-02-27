@@ -5,7 +5,10 @@ import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.BzUserContext;
 import io.toxa108.blitzar.storage.query.impl.EmptySuccessResultQuery;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +18,7 @@ import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThreadSafeDatabaseTest {
+    private final Logger log = LoggerFactory.getLogger(ThreadSafeDatabaseTest.class);
     private BzDatabase bzDatabase;
     private UserContext userContext;
 
@@ -32,9 +36,9 @@ public class ThreadSafeDatabaseTest {
         bzDatabase.queryProcessor().process(userContext, "create table example (time long not null primary key, value long not null);".getBytes());
     }
 
-    @Test
-    public void fill_database_Ok() throws ExecutionException, InterruptedException {
-        final int threads = 10;
+    @ParameterizedTest
+    @ValueSource(ints = {1, 3, 5, 7, 10})
+    public void fill_database_Ok(int threads) throws ExecutionException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
         final List<String> keys = new CopyOnWriteArrayList<>();
@@ -46,10 +50,10 @@ public class ThreadSafeDatabaseTest {
                 keys.add(nanoTime);
                 final String query = String.format(
                         "insert into example (time, value) values (%s, %s);", nanoTime, nanoTime);
-                System.out.println("Thread: " + Thread.currentThread().getName() + "Query: " + query);
+                log.info("Thread: " + Thread.currentThread().getName() + "Query: " + query);
 
                 final String result = new String(bzDatabase.queryProcessor().process(userContext, query.getBytes()));
-                System.out.println("Thread: " + Thread.currentThread().getName() + "Result: " + result);
+                log.info("Thread: " + Thread.currentThread().getName() + "Result: " + result);
 
                 countDownLatch.countDown();
                 return result;
@@ -58,7 +62,7 @@ public class ThreadSafeDatabaseTest {
 
         for (Future<String> f : futures) {
             final String r = f.get();
-            System.out.println(new String(new EmptySuccessResultQuery().toBytes()) + " == " + r);
+            log.info(new String(new EmptySuccessResultQuery().toBytes()) + " == " + r);
         }
 
         countDownLatch.await();

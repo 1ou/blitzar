@@ -1,5 +1,8 @@
 package io.toxa108.blitzar.storage.database.manager.transaction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -9,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * An exclusive (X) lock permits the transaction that holds the lock to update or delete a row.
  */
 public class BzTableTableLocks implements TableLocks {
+    private final Logger log = LoggerFactory.getLogger(BzTableTableLocks.class);
 
     private static class SemaphoreReentrantReadWriteLock {
         private ReentrantLock readLock;
@@ -25,8 +29,8 @@ public class BzTableTableLocks implements TableLocks {
             new ConcurrentHashMap<>(1024);
 
     @Override
-    public void shared(int x) {
-        System.out.println(Thread.currentThread().getName() + " shared " + x);
+    public void shared(final int x) {
+        log.info("shared " + x);
         final SemaphoreReentrantReadWriteLock lock = map.computeIfAbsent(
                 String.valueOf(x),
                 k -> new SemaphoreReentrantReadWriteLock()
@@ -38,6 +42,15 @@ public class BzTableTableLocks implements TableLocks {
         lock.numberReadLocks.incrementAndGet();
     }
 
+    @Override
+    public boolean isExclusive(final int x) {
+        final SemaphoreReentrantReadWriteLock lock = map.computeIfAbsent(
+                String.valueOf(x),
+                k -> new SemaphoreReentrantReadWriteLock()
+        );
+        return lock.writeLock.isLocked();
+    }
+
     /**
      * https://stackoverflow.com/questions/464784/java-reentrantreadwritelocks-how-to-safely-acquire-write-lock
      * https://github.com/npgall/concurrent-locks
@@ -46,8 +59,8 @@ public class BzTableTableLocks implements TableLocks {
      * @param x  position
      */
     @Override
-    public synchronized void exclusive(int x) {
-        System.out.println(Thread.currentThread().getName() + "  exclusive " + x);
+    public void exclusive(final int x) {
+        log.info("exclusive " + x);
         final SemaphoreReentrantReadWriteLock lock = map.computeIfAbsent(
                 String.valueOf(x),
                 k -> new SemaphoreReentrantReadWriteLock()
@@ -56,8 +69,8 @@ public class BzTableTableLocks implements TableLocks {
     }
 
     @Override
-    public void unshared(int x) {
-        System.out.println(Thread.currentThread().getName() + " unshared " + x);
+    public void unshared(final int x) {
+        log.info("unshared " + x);
         final SemaphoreReentrantReadWriteLock lock = map.get(String.valueOf(x));
         if (lock != null) {
             /*
@@ -70,8 +83,8 @@ public class BzTableTableLocks implements TableLocks {
     }
 
     @Override
-    public void unexclusive(int x) {
-        System.out.println(Thread.currentThread().getName() + "  unexclusive " + x);
+    public void unexclusive(final int x) {
+        log.info("unexclusive " + x);
         SemaphoreReentrantReadWriteLock lock = map.get(String.valueOf(x));
         if (lock != null) {
             lock.writeLock.unlock();

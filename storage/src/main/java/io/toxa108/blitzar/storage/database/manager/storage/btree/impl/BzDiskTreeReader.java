@@ -9,11 +9,14 @@ import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
 import io.toxa108.blitzar.storage.io.DiskReader;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
 import io.toxa108.blitzar.storage.io.impl.DiskReaderIo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 
 public class BzDiskTreeReader implements DiskTreeReader {
+    private final Logger log = LoggerFactory.getLogger(BzDiskTreeReader.class);
     /**
      * Disk writer
      */
@@ -44,7 +47,7 @@ public class BzDiskTreeReader implements DiskTreeReader {
 
     @Override
     public TreeNode read(final int pos) throws IOException {
-        System.out.println(Thread.currentThread().getName() + " Read from: " + pos);
+        log.info("Read from: " + pos);
         Field primaryIndexField = tableTreeMetadata.primaryIndexField();
 
         byte[] bytes = diskReader.read(pos, tableTreeMetadata.databaseConfiguration().diskPageSize());
