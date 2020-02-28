@@ -40,7 +40,7 @@ That's why there is capability of creation only 1 index per table. Index is able
 Queries
 ------
 ```
-User can insert, select data with conditions like (>, <, =, <>). 
+User can insert, select data with conditions like (>, <, =, <>, >=, <=). 
 The join syntax is not available because there are no relations between tables. 
 For now there is ability only to insert data, the update and delete operations are not supported yet.
 
