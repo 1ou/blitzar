@@ -51,6 +51,16 @@ public class ArrayManipulator {
         }
     }
 
+    public void copyArray(byte[] source, byte[] destination, int len) {
+        if (source.length < len || destination.length < len) {
+            throw new IllegalArgumentException();
+        }
+
+        if (len >= 0) {
+            System.arraycopy(source, 0, destination, 0, len);
+        }
+    }
+
     public <T> void copyArray(T[] source, T[] destination, int pos, int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
@@ -62,6 +72,16 @@ public class ArrayManipulator {
     }
 
     public void copyArray(int[] source, int[] destination, int pos, int len) {
+        if (source.length < len || destination.length < len) {
+            throw new IllegalArgumentException();
+        }
+
+        if (len >= 0) {
+            System.arraycopy(source, pos, destination, 0, len);
+        }
+    }
+
+    public void copyArray(byte[] source, byte[] destination, int pos, int len) {
         if (source.length < len || destination.length < len) {
             throw new IllegalArgumentException();
         }

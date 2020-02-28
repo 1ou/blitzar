@@ -1,5 +1,6 @@
 package io.toxa108.blitzar.storage.database.manager.storage.btree.impl;
 
+import io.toxa108.blitzar.storage.database.manager.ArrayManipulator;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeWriter;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
 import io.toxa108.blitzar.storage.io.DiskWriter;
@@ -24,69 +25,79 @@ public class BzDiskTreeWriter implements DiskTreeWriter {
      */
     private final TableTreeMetadata tableTreeMetadata;
 
+    /**
+     * Array manipulator
+     */
+    private final ArrayManipulator arrayManipulator;
+
     public BzDiskTreeWriter(final File file,
                             final TableTreeMetadata tableTreeMetadata) throws IOException {
         this.diskWriter = new BzDiskWriterIo(file);
         this.tableTreeMetadata = tableTreeMetadata;
+        this.arrayManipulator = new ArrayManipulator();
     }
 
     @Override
-    public void write(int pos, TreeNode node) throws IOException {
+    public void write(final int pos, final TreeNode node) throws IOException {
         log.info("Write to: " + pos);
 
+        final byte[] nodeBytes = new byte[tableTreeMetadata.databaseConfiguration().diskPageSize()];
+        final int primaryIndexSize = tableTreeMetadata.primaryIndexSize();
+
         if (!node.leaf) {
-            int estimatedSize = tableTreeMetadata.entriesInNonLeafNodeNumber();
+            final int estimatedSize = tableTreeMetadata.entriesInNonLeafNodeNumber();
             checkNodeSize(node.q, estimatedSize);
 
-            int currPos = pos;
-            diskWriter.write(currPos, new byte[]{0});
-            currPos++;
-            diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
+            int currPos = 0;
+
+            arrayManipulator.insertInArray(nodeBytes, (byte) 0, 0);
+            System.arraycopy(BytesManipulator.intToBytes(node.q), 0, nodeBytes, ++currPos, Integer.BYTES);
 
             for (int i = 0; i < node.q; ++i) {
                 currPos += Integer.BYTES;
-                int posOfIndex = pos + tableTreeMetadata.reservedSpaceInNode()
+                final int posOfIndex = pos + tableTreeMetadata.reservedSpaceInNode()
                         + estimatedSize * Integer.BYTES + i * tableTreeMetadata.primaryIndexNonVariableRecordSize();
 
-                diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
-                diskWriter.write(posOfIndex, BytesManipulator.intToBytes(tableTreeMetadata.primaryIndexSize()));
-                diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(node.p[i]));
-                byte[] indexValue = node.keys[i].field().value();
-                diskWriter.write(posOfIndex + 2 * Integer.BYTES, indexValue);
+                System.arraycopy(BytesManipulator.intToBytes(posOfIndex), 0, nodeBytes, currPos, Integer.BYTES);
+                System.arraycopy(BytesManipulator.intToBytes(primaryIndexSize), 0, nodeBytes, posOfIndex - pos, Integer.BYTES);
+                System.arraycopy(BytesManipulator.intToBytes(node.p[i]), 0, nodeBytes, posOfIndex + Integer.BYTES - pos, Integer.BYTES);
+
+                final byte[] indexValue = node.keys[i].field().value();
+                System.arraycopy(indexValue, 0, nodeBytes, (posOfIndex + 2 * Integer.BYTES) - pos, indexValue.length);
 
                 if (i == node.q - 1) {
-                    diskWriter.write(
-                            posOfIndex + 2 * Integer.BYTES + indexValue.length,
-                            BytesManipulator.intToBytes(node.p[node.q]));
+                    System.arraycopy(BytesManipulator.intToBytes(node.p[node.q]), 0, nodeBytes, (posOfIndex + 2 * Integer.BYTES + indexValue.length) - pos, Integer.BYTES);
                 }
             }
         } else {
-            int estimatedSize = tableTreeMetadata.entriesInLeafNodeNumber();
+            final int estimatedSize = tableTreeMetadata.entriesInLeafNodeNumber();
+            final int dataSize = tableTreeMetadata.dataSize();
             checkNodeSize(node.q, estimatedSize);
 
-            int currPos = pos;
-            diskWriter.write(currPos, new byte[]{1});
-            currPos++;
-            diskWriter.write(currPos, BytesManipulator.intToBytes(node.q));
+            int currPos = 0;
+            arrayManipulator.insertInArray(nodeBytes, (byte) 1, 0);
+            System.arraycopy(BytesManipulator.intToBytes(node.q), 0, nodeBytes, ++currPos, Integer.BYTES);
 
             for (int i = 0; i < node.q; ++i) {
                 currPos += Integer.BYTES;
                 int posOfIndex = pos + tableTreeMetadata.reservedSpaceInNode()
                         + estimatedSize * Integer.BYTES + i * tableTreeMetadata.dataNonVariableRecordSize();
 
-                diskWriter.write(currPos, BytesManipulator.intToBytes(posOfIndex));
-                diskWriter.write(posOfIndex, BytesManipulator.intToBytes(tableTreeMetadata.primaryIndexSize()));
-                diskWriter.write(posOfIndex + Integer.BYTES, BytesManipulator.intToBytes(tableTreeMetadata.dataSize()));
+                System.arraycopy(BytesManipulator.intToBytes(posOfIndex), 0, nodeBytes, currPos, Integer.BYTES);
+                System.arraycopy(BytesManipulator.intToBytes(primaryIndexSize), 0, nodeBytes, posOfIndex - pos, Integer.BYTES);
+                System.arraycopy(BytesManipulator.intToBytes(dataSize), 0, nodeBytes, posOfIndex + Integer.BYTES - pos, Integer.BYTES);
 
-                diskWriter.write(posOfIndex + 2 * Integer.BYTES, node.keys[i].field().value());
-                diskWriter.write(posOfIndex + 2 * Integer.BYTES + tableTreeMetadata.primaryIndexSize(), node.values[i]);
+                System.arraycopy(node.keys[i].field().value(), 0, nodeBytes, posOfIndex + 2 * Integer.BYTES - pos, node.keys[i].field().value().length);
+                System.arraycopy(node.values[i], 0, nodeBytes, (posOfIndex + 2 * Integer.BYTES + primaryIndexSize) - pos, node.values[i].length);
 
                 if (i == node.q - 1) {
-                    diskWriter.write(posOfIndex + 2 * Integer.BYTES + tableTreeMetadata.primaryIndexSize() + tableTreeMetadata.dataSize(),
-                            BytesManipulator.intToBytes(node.nextPos));
+                    System.arraycopy(BytesManipulator.intToBytes(node.nextPos), 0, nodeBytes,
+                            (posOfIndex + 2 * Integer.BYTES + primaryIndexSize + dataSize) - pos, Integer.BYTES);
+
                 }
             }
         }
+        diskWriter.write(pos, nodeBytes);
     }
 
     @Override
