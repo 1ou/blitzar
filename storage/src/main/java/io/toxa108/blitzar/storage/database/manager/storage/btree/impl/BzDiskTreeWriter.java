@@ -5,7 +5,7 @@ import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeWriter;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
 import io.toxa108.blitzar.storage.io.DiskWriter;
 import io.toxa108.blitzar.storage.io.impl.BytesManipulator;
-import io.toxa108.blitzar.storage.io.impl.BzDiskWriterIo;
+import io.toxa108.blitzar.storage.io.impl.DiskNioWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class BzDiskTreeWriter implements DiskTreeWriter {
 
     public BzDiskTreeWriter(final File file,
                             final TableTreeMetadata tableTreeMetadata) throws IOException {
-        this.diskWriter = new BzDiskWriterIo(file);
+        this.diskWriter = new DiskNioWriter(file);
         this.tableTreeMetadata = tableTreeMetadata;
         this.arrayManipulator = new ArrayManipulator();
     }

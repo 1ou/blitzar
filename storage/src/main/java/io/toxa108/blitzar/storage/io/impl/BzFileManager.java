@@ -115,7 +115,7 @@ public class BzFileManager implements FileManager {
                                  final Scheme scheme) throws IOException {
         RandomAccessFile accessFile = new RandomAccessFile(file, "rw");
         accessFile.setLength(databaseConfiguration.diskPageSize() * 20);
-        DiskWriter diskWriter = new BzDiskWriterIo(file);
+        DiskWriter diskWriter = new DiskNioWriter(file);
 
         int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;
         int startOfIndexes = posOfIndexes;
@@ -147,7 +147,7 @@ public class BzFileManager implements FileManager {
     }
 
     private Scheme loadTableScheme(final File file) throws IOException {
-        DiskReader diskReader = new DiskReaderIo(file);
+        DiskReader diskReader = new DiskNioReader(file);
         Set<Index> indexes = new HashSet<>();
 
         int posOfIndexes = databaseConfiguration.diskPageSize() - m * 2;

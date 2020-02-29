@@ -12,10 +12,10 @@ import java.nio.channels.FileChannel;
  * Disk writer shouldn't know about all high level logic.
  * It works only with bytes and files.
  */
-public class BzDiskWriterIo implements DiskWriter {
+public class DiskNioWriter implements DiskWriter {
     private final FileChannel fileChannel;
 
-    public BzDiskWriterIo(final File file) throws IOException {
+    public DiskNioWriter(final File file) throws IOException {
         final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
         this.fileChannel = randomAccessFile.getChannel();
     }
