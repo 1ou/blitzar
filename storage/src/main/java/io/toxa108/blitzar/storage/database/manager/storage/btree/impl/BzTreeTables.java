@@ -148,7 +148,8 @@ public class BzTreeTables implements Tables {
                                     final TreeNode newNode,
                                     final Row row,
                                     final int properlyPosition) throws IOException {
-        int tmpPosition = n.pos;
+        final int tmpPosition = n.pos;
+
         TreeNode tmp = new TreeNode(pLeaf + 1, tableMetadata.dataSize());
         ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
         ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
@@ -159,7 +160,7 @@ public class BzTreeTables implements Tables {
         tmp.q = n.q + 1;
 
         newNode.nextPos = n.nextPos;
-        int j = (pLeaf + 1) >>> 1;
+        final int j = (pLeaf + 1) >>> 1;
 
         n.keys = new Key[pLeaf];
         n.p = new int[pLeaf + 1];
@@ -174,8 +175,8 @@ public class BzTreeTables implements Tables {
         newNode.q = tmp.q - j;
         Key key = tmp.keys[j - 1];
 
-        int newPosLeft = tableMetadata.freeSpacePos();
-        int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
+        final int newPosLeft = tableMetadata.freeSpacePos();
+        final int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
 
         n.nextPos = newPosRight;
         n.pos = newPosLeft;
@@ -250,9 +251,12 @@ public class BzTreeTables implements Tables {
                                 tmpPosition
                         );
                         tableLocks.unexclusive(pos);
+                        tableLocks.unshared(pos);
                         finished = true;
                     } else {
                         int k = positions.pop();
+                        tableLocks.exclusive(k);
+
                         n = diskTreeReader.read(k);
                         /*
                             If internal node n is not full
@@ -260,6 +264,8 @@ public class BzTreeTables implements Tables {
                         */
                         if (n.q < pNonLeaf - 1) {
                             insertInInternalNodeNoSplit(n.pos, newNode, key);
+                            tableLocks.unexclusive(n.pos);
+                            tableLocks.unshared(n.pos);
                             finished = true;
                         } else {
                             TreeNode tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
@@ -299,6 +305,9 @@ public class BzTreeTables implements Tables {
                             diskTreeWriter.updateMetadata(numberOfUsedBlocks);
 
                             key = tmp.keys[j - 1];
+
+                            tableLocks.unexclusive(n.pos);
+                            tableLocks.unshared(n.pos);
                         }
                     }
                 }

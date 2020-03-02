@@ -76,14 +76,14 @@ public class ThreadSafeDatabaseTest {
 
     @ParameterizedTest
 //    @ValueSource(ints = {1, 3, 5, 7, 10})
-    @ValueSource(ints = {10})
+    @ValueSource(ints = {2})
     public void fill_database_a_lot_rows_Ok(int threads) throws ExecutionException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
         final List<String> keys = new CopyOnWriteArrayList<>();
         final Collection<Runnable> futures = new ArrayList<>(threads);
 
-        for (int t = 0; t < threads; ++t) {
+        for (int t = 1; t <= threads; ++t) {
             final int finalT = t;
             futures.add((Runnable) service.submit(() -> {
                 for (int y = 1; y < 1000; y++) {
