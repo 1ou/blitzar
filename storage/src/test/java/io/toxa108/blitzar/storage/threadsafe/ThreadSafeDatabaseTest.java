@@ -38,8 +38,8 @@ public class ThreadSafeDatabaseTest {
 
     @ParameterizedTest
 //    @ValueSource(ints = {1, 3, 5, 7, 10})
-    @ValueSource(ints = {1})
-    public void fill_database_Ok(int threads) throws ExecutionException, InterruptedException {
+    @ValueSource(ints = {10})
+    public void fill_database_a_few_rows_Ok(int threads) throws ExecutionException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
         final List<String> keys = new CopyOnWriteArrayList<>();
@@ -72,5 +72,37 @@ public class ThreadSafeDatabaseTest {
                 "select * from example;".getBytes()
         ));
         assertEquals(threads, all.chars().filter(it -> it == '\n').count());
+    }
+
+    @ParameterizedTest
+//    @ValueSource(ints = {1, 3, 5, 7, 10})
+    @ValueSource(ints = {10})
+    public void fill_database_a_lot_rows_Ok(int threads) throws ExecutionException, InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(threads);
+        final ExecutorService service = Executors.newFixedThreadPool(threads);
+        final List<String> keys = new CopyOnWriteArrayList<>();
+        final Collection<Runnable> futures = new ArrayList<>(threads);
+
+        for (int t = 0; t < threads; ++t) {
+            final int finalT = t;
+            futures.add((Runnable) service.submit(() -> {
+                for (int y = 1; y < 1000; y++) {
+                    final String nanoTime = String.valueOf(System.nanoTime());
+                    keys.add(nanoTime);
+                    final String query = String.format(
+                            "insert into example (time, value) values (%s, %s);", y * finalT, nanoTime);
+                    log.info("Thread: " + Thread.currentThread().getName() + "Query: " + query);
+                }
+                countDownLatch.countDown();
+            }));
+        }
+
+        countDownLatch.await();
+
+        final String record = new String(bzDatabase.queryProcessor().process(
+                userContext,
+                "select * from example where time = 1001;".getBytes()
+        ));
+        assertEquals(threads, record.chars().filter(it -> it == '\n').count());
     }
 }

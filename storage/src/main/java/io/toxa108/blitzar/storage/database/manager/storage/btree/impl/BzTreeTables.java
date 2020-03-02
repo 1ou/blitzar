@@ -6,6 +6,8 @@ import io.toxa108.blitzar.storage.database.manager.storage.Tables;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeReader;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.DiskTreeWriter;
 import io.toxa108.blitzar.storage.database.manager.storage.btree.TableTreeMetadata;
+import io.toxa108.blitzar.storage.database.manager.storage.buffer.BufferPool;
+import io.toxa108.blitzar.storage.database.manager.storage.buffer.BzBufferPool;
 import io.toxa108.blitzar.storage.database.manager.transaction.BzTableTableLocks;
 import io.toxa108.blitzar.storage.database.manager.transaction.TableLocks;
 import io.toxa108.blitzar.storage.database.schema.Field;
@@ -16,6 +18,8 @@ import io.toxa108.blitzar.storage.database.schema.impl.BzField;
 import io.toxa108.blitzar.storage.database.schema.impl.BzKey;
 import io.toxa108.blitzar.storage.database.schema.impl.BzRow;
 import io.toxa108.blitzar.storage.database.schema.transform.impl.FieldValueAsString;
+import io.toxa108.blitzar.storage.io.impl.DiskNioReader;
+import io.toxa108.blitzar.storage.io.impl.DiskNioWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,41 +31,46 @@ import java.util.stream.Collectors;
  * Threadsafe b-plus-tree on disk realization
  */
 public class BzTreeTables implements Tables {
-    private final ArrayManipulator arrayManipulator;
     private int numberOfUsedBlocks = 0;
     private final SearchKeys searchKeys;
     private final TableLocks tableLocks;
     private final TableTreeMetadata tableMetadata;
     private final DiskTreeReader diskTreeReader;
     private final DiskTreeWriter diskTreeWriter;
+    private final BufferPool bufferPool;
 
     public BzTreeTables(final File file,
                         final DatabaseConfiguration databaseConfiguration,
                         final Scheme scheme) {
         try {
-            this.arrayManipulator = new ArrayManipulator();
             this.searchKeys = new SearchKeys();
             this.tableLocks = new BzTableTableLocks();
             this.tableMetadata = new BzTableTreeMetadata(file, databaseConfiguration, scheme);
             this.diskTreeReader = new BzDiskTreeReader(file, tableMetadata);
             this.diskTreeWriter = new BzDiskTreeWriter(file, tableMetadata);
+
+            this.bufferPool = new BzBufferPool(
+                    new DiskNioReader(file),
+                    new DiskNioWriter(file),
+                    databaseConfiguration
+            );
         } catch (IOException e) {
             throw new IllegalArgumentException("Runtime error. The blitzar is not configured.");
         }
     }
 
-    private void insertEntryInLeaf(final TreeNode n,
-                                   final Row row,
-                                   final int pos) throws IOException {
+    void insertEntryInRootLeaf(final TreeNode n,
+                               final Row row,
+                               final int pos) throws IOException {
         if (n.q == 0) {
             numberOfUsedBlocks = 1;
             diskTreeWriter.updateMetadata(numberOfUsedBlocks);
         }
 
-        arrayManipulator.insertInArray(n.keys, row.key(), pos);
-        arrayManipulator.insertInArray(n.p, -1, pos);
+        ArrayManipulator.insertInArray(n.keys, row.key(), pos);
+        ArrayManipulator.insertInArray(n.p, -1, pos);
         n.q++;
-        arrayManipulator.insertInArray(
+        ArrayManipulator.insertInArray(
                 n.values,
                 rowDataToBytes(row),
                 pos
@@ -70,31 +79,42 @@ public class BzTreeTables implements Tables {
         diskTreeWriter.write(n.pos, n);
     }
 
-    private TreeNode traverseDown(final Stack<TreeNode> stack,
-                                  final Key key) throws IOException {
+    /**
+     * Return position
+     *
+     * @param stack
+     * @param key
+     * @return
+     * @throws IOException
+     */
+    int traverseDown(final Stack<Integer> stack,
+                          final Key key) throws IOException {
         final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
 
         TreeNode n = diskTreeReader.read(beginPos);
 
         while (!n.leaf) {
-            stack.push(n);
+            stack.push(n.pos);
             final int q = n.q;
             if (key.compareTo(n.keys[0]) < 0) {
+                tableLocks.shared(n.p[0]);
                 n = diskTreeReader.read(n.p[0]);
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
+                tableLocks.shared(n.p[q]);
                 n = diskTreeReader.read(n.p[q]);
             } else {
                 final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
                 if (fn == -1) {
                     throw new IllegalArgumentException("Row is not inserted. Error.");
                 }
+                tableLocks.shared(n.p[q]);
                 n = diskTreeReader.read(n.p[fn]);
             }
         }
-        return n;
+        return n.pos;
     }
 
-    private static class SplitMetadata {
+    static class SplitMetadata {
         int pos;
         Key key;
 
@@ -104,20 +124,20 @@ public class BzTreeTables implements Tables {
         }
     }
 
-    private SplitMetadata splitBeforeInsert(final TreeNode n,
-                                            final TreeNode newNode,
-                                            final Row row,
-                                            final int properlyPosition) throws IOException {
+    SplitMetadata splitBeforeInsert(final TreeNode n,
+                                    final TreeNode newNode,
+                                    final Row row,
+                                    final int properlyPosition) throws IOException {
         final int pLeaf = tableMetadata.entriesInLeafNodeNumber();
 
         int tmpPosition = n.pos;
         TreeNode tmp = new TreeNode(pLeaf + 1, tableMetadata.dataSize());
-        arrayManipulator.copyArray(n.keys, tmp.keys, n.q);
-        arrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
-        arrayManipulator.copyArray(n.values, tmp.values, n.q);
-        arrayManipulator.insertInArray(tmp.keys, row.key(), properlyPosition);
-        arrayManipulator.insertInArray(tmp.p, numberOfUsedBlocks, properlyPosition);
-        arrayManipulator.insertInArray(tmp.values, rowDataToBytes(row), properlyPosition);
+        ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
+        ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
+        ArrayManipulator.copyArray(n.values, tmp.values, n.q);
+        ArrayManipulator.insertInArray(tmp.keys, row.key(), properlyPosition);
+        ArrayManipulator.insertInArray(tmp.p, numberOfUsedBlocks, properlyPosition);
+        ArrayManipulator.insertInArray(tmp.values, rowDataToBytes(row), properlyPosition);
         tmp.q = n.q + 1;
 
         newNode.nextPos = n.nextPos;
@@ -125,14 +145,14 @@ public class BzTreeTables implements Tables {
 
         n.keys = new Key[pLeaf];
         n.p = new int[pLeaf + 1];
-        arrayManipulator.copyArray(tmp.keys, n.keys, j);
-        arrayManipulator.copyArray(tmp.values, n.values, j);
-        arrayManipulator.copyArray(tmp.p, n.p, j);
+        ArrayManipulator.copyArray(tmp.keys, n.keys, j);
+        ArrayManipulator.copyArray(tmp.values, n.values, j);
+        ArrayManipulator.copyArray(tmp.p, n.p, j);
         n.q = j;
 
-        arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
-        arrayManipulator.copyArray(tmp.values, newNode.values, j, tmp.q - j);
-        arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
+        ArrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
+        ArrayManipulator.copyArray(tmp.values, newNode.values, j, tmp.q - j);
+        ArrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
         newNode.q = tmp.q - j;
         Key key = tmp.keys[j - 1];
 
@@ -154,11 +174,16 @@ public class BzTreeTables implements Tables {
     @Override
     public void addRow(final Row row) throws IOException {
         final Stack<TreeNode> stack = new Stack<>();
+        final Stack<Integer> positions = new Stack<>();
         final int pLeaf = tableMetadata.entriesInLeafNodeNumber();
         final int pNonLeaf = tableMetadata.entriesInNonLeafNodeNumber();
 
         Key key = row.key();
-        TreeNode n = traverseDown(stack, key);
+        int pos = traverseDown(positions, key);
+
+        tableLocks.exclusive(pos);
+        TreeNode n = diskTreeReader.read(pos);
+
         int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
         /*
             If record with such key already exists
@@ -174,7 +199,8 @@ public class BzTreeTables implements Tables {
                 If leaf is not full, insert new entry in leaf
              */
             if (n.q < pLeaf - 1) {
-                insertEntryInLeaf(n, row, properlyPosition);
+                insertEntryInRootLeaf(n, row, properlyPosition);
+                tableLocks.unexclusive(n.pos);
             }
             /*
                 Split leaf before insert
@@ -187,7 +213,7 @@ public class BzTreeTables implements Tables {
                 boolean finished = false;
                 while (!finished) {
                     if (stack.isEmpty()) {
-                        TreeNode topNode = new TreeNode(pLeaf, tableMetadata.dataSize());
+                        final TreeNode topNode = new TreeNode(pLeaf, tableMetadata.dataSize());
                         topNode.keys[0] = key;
                         topNode.p[0] = n.pos;
                         topNode.p[1] = newNode.pos;
@@ -207,8 +233,8 @@ public class BzTreeTables implements Tables {
                         */
                         if (n.q < pNonLeaf - 1) {
                             properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                            arrayManipulator.insertInArray(n.keys, key, properlyPosition);
-                            arrayManipulator.insertInArray(n.p, newNode.pos, properlyPosition + 1);
+                            ArrayManipulator.insertInArray(n.keys, key, properlyPosition);
+                            ArrayManipulator.insertInArray(n.p, newNode.pos, properlyPosition + 1);
                             n.q++;
 
                             diskTreeWriter.write(n.pos, n);
@@ -217,26 +243,26 @@ public class BzTreeTables implements Tables {
                             finished = true;
                         } else {
                             TreeNode tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
-                            arrayManipulator.copyArray(n.keys, tmp.keys, n.q);
-                            arrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
+                            ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
+                            ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
                             tmp.q = n.q + 1;
 
                             properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                            arrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
-                            arrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
+                            ArrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
+                            ArrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
 
                             newNode = new TreeNode(pNonLeaf, tableMetadata.dataSize());
                             int j = (pNonLeaf + 1) >>> 1;
 
                             n.keys = new Key[pNonLeaf];
                             n.p = new int[pNonLeaf + 1];
-                            arrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
-                            arrayManipulator.copyArray(tmp.p, n.p, 0, j);
+                            ArrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
+                            ArrayManipulator.copyArray(tmp.p, n.p, 0, j);
                             n.q = j;
                             n.leaf = false;
 
-                            arrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
-                            arrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
+                            ArrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
+                            ArrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
                             newNode.q = tmp.q - j;
                             newNode.leaf = false;
 
