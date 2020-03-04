@@ -112,15 +112,13 @@ public class BzTreeTables implements Tables {
                      final List<Integer> exclusive,
                      final List<Integer> shared) throws IOException {
         final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
-
         TreeNode n = diskTreeReader.read(beginPos);
 
         while (!n.leaf) {
             stack.push(n.pos);
             final int q = n.q;
-            System.out.println(n.q);
             if (key.compareTo(n.keys[0]) < 0) {
-                if (n.q == pNonLeaf) {
+                if (n.q == pNonLeaf / 2) {
                     tableLocks.exclusive(n.p[0]);
                     exclusive.add(n.p[0]);
                 } else {
@@ -129,7 +127,7 @@ public class BzTreeTables implements Tables {
                 }
                 n = diskTreeReader.read(n.p[0]);
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
-                if (n.q == pNonLeaf) {
+                if (n.q == pNonLeaf / 2) {
                     tableLocks.exclusive(n.p[q]);
                     exclusive.add(n.p[q]);
                 } else {
@@ -142,7 +140,7 @@ public class BzTreeTables implements Tables {
                 if (fn == -1) {
                     throw new IllegalArgumentException("Row is not inserted. Error.");
                 }
-                if (n.q == pNonLeaf) {
+                if (n.q == pNonLeaf / 2) {
                     tableLocks.exclusive(n.p[fn]);
                     exclusive.add(n.p[fn]);
                 } else {
@@ -264,47 +262,9 @@ public class BzTreeTables implements Tables {
                 Split leaf before insert
              */
             else {
-                int tmpPosition = n.pos;
-                TreeNode tmp = new TreeNode(pLeaf + 1, tableMetadata.dataSize());
-                ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
-                ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
-                ArrayManipulator.copyArray(n.values, tmp.values, n.q);
-                ArrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
-                ArrayManipulator.insertInArray(tmp.p, numberOfUsedBlocks, properlyPosition);
-                ArrayManipulator.insertInArray(tmp.values, rowDataToBytes(row), properlyPosition);
-                tmp.q = n.q + 1;
-
-                newNode.nextPos = n.nextPos;
-                int j = (pLeaf + 1) >>> 1;
-
-                n.keys = new Key[pLeaf];
-                n.p = new int[pLeaf + 1];
-                ArrayManipulator.copyArray(tmp.keys, n.keys, j);
-                ArrayManipulator.copyArray(tmp.values, n.values, j);
-                ArrayManipulator.copyArray(tmp.p, n.p, j);
-                n.q = j;
-
-                ArrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
-                ArrayManipulator.copyArray(tmp.values, newNode.values, j, tmp.q - j);
-                ArrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
-                newNode.q = tmp.q - j;
-                key = tmp.keys[j - 1];
-
-                int newPosLeft = tableMetadata.freeSpacePos();
-                int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
-
-                n.nextPos = newPosRight;
-                n.pos = newPosLeft;
-                newNode.pos = newPosRight;
-
-                diskTreeWriter.write(newPosLeft, n);
-                diskTreeWriter.write(newPosRight, newNode);
-
-                numberOfUsedBlocks += 2;
-                diskTreeWriter.updateMetadata(numberOfUsedBlocks);
-//                final SplitMetadata splitMetadata = splitBeforeInsert(n, newNode, row, properlyPosition);
-//                int tmpPosition = splitMetadata.pos;
-//                key = splitMetadata.key;
+                final SplitMetadata splitMetadata = splitBeforeInsert(n, newNode, row, properlyPosition);
+                int tmpPosition = splitMetadata.pos;
+                key = splitMetadata.key;
 
                 boolean finished = false;
                 while (!finished) {
@@ -330,7 +290,7 @@ public class BzTreeTables implements Tables {
                             insertInInternalNodeNoSplit(n.pos, newNode, key);
                             finished = true;
                         } else {
-                            tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
+                            TreeNode tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
                             ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
                             ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
                             tmp.q = n.q + 1;
@@ -340,7 +300,7 @@ public class BzTreeTables implements Tables {
                             ArrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
 
                             newNode = new TreeNode(pNonLeaf, tableMetadata.dataSize());
-                            j = (pNonLeaf + 1) >>> 1;
+                            int j = (pNonLeaf + 1) >>> 1;
 
                             n.keys = new Key[pNonLeaf];
                             n.p = new int[pNonLeaf + 1];
@@ -354,8 +314,8 @@ public class BzTreeTables implements Tables {
                             newNode.q = tmp.q - j;
                             newNode.leaf = false;
 
-                            newPosLeft = tableMetadata.freeSpacePos();
-                            newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
+                            int newPosLeft = tableMetadata.freeSpacePos();
+                            int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
 
                             tmpPosition = n.pos;
                             n.pos = newPosLeft;
