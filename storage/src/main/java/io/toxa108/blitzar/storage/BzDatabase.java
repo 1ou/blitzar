@@ -46,6 +46,30 @@ public class BzDatabase {
         this.queryProcessor = new BzQueryProcessor(databaseContext);
     }
 
+    public BzDatabase(@Nullable final String path,
+                      final DatabaseConfiguration databaseConfiguration) {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
+        try {
+            fileManager = new BzFileManager(path, databaseConfiguration);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException();
+        }
+
+        try {
+            databaseContext = new BzDatabaseContext(fileManager);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException();
+        }
+
+        this.users = new BzUsers();
+        this.queryProcessor = new BzQueryProcessor(databaseContext);
+    }
+
     public Users userManager() {
         return users;
     }

@@ -91,7 +91,7 @@ public class BzTreeTables implements Tables {
         final TreeNode topNode = new TreeNode(pLeaf, tableMetadata.dataSize());
         topNode.keys[0] = key;
         topNode.p[0] = n.pos;
-        topNode.p[1] = newNodePos;//newNode.pos;
+        topNode.p[1] = newNodePos;
         topNode.leaf = false;
         topNode.q = 1;
 
@@ -108,7 +108,9 @@ public class BzTreeTables implements Tables {
      * @throws IOException disk io issue
      */
     int traverseDown(final Stack<Integer> stack,
-                     final Key key) throws IOException {
+                     final Key key,
+                     final List<Integer> exclusive,
+                     final List<Integer> shared) throws IOException {
         final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
 
         TreeNode n = diskTreeReader.read(beginPos);
@@ -116,18 +118,37 @@ public class BzTreeTables implements Tables {
         while (!n.leaf) {
             stack.push(n.pos);
             final int q = n.q;
+            System.out.println(n.q);
             if (key.compareTo(n.keys[0]) < 0) {
-                tableLocks.shared(n.p[0]);
+                if (n.q == pNonLeaf) {
+                    tableLocks.exclusive(n.p[0]);
+                    exclusive.add(n.p[0]);
+                } else {
+                    tableLocks.shared(n.p[0]);
+                    shared.add(n.p[0]);
+                }
                 n = diskTreeReader.read(n.p[0]);
             } else if (key.compareTo(n.keys[q - 1]) > 0) {
-                tableLocks.shared(n.p[q]);
+                if (n.q == pNonLeaf) {
+                    tableLocks.exclusive(n.p[q]);
+                    exclusive.add(n.p[q]);
+                } else {
+                    tableLocks.shared(n.p[q]);
+                    shared.add(n.p[q]);
+                }
                 n = diskTreeReader.read(n.p[q]);
             } else {
                 final int fn = searchKeys.findProperlyPosition(n.keys, n.q, key);
                 if (fn == -1) {
                     throw new IllegalArgumentException("Row is not inserted. Error.");
                 }
-                tableLocks.shared(n.p[q]);
+                if (n.q == pNonLeaf) {
+                    tableLocks.exclusive(n.p[fn]);
+                    exclusive.add(n.p[fn]);
+                } else {
+                    tableLocks.shared(n.p[fn]);
+                    shared.add(n.p[fn]);
+                }
                 n = diskTreeReader.read(n.p[fn]);
             }
         }
@@ -206,15 +227,15 @@ public class BzTreeTables implements Tables {
     @Override
     public void addRow(final Row row) throws IOException {
         final Stack<Integer> positions = new Stack<>();
-        final List<Integer> exclusiveLocks = new ArrayList<>();
-        final int pLeaf = tableMetadata.entriesInLeafNodeNumber();
-        final int pNonLeaf = tableMetadata.entriesInNonLeafNodeNumber();
+
+        final List<Integer> exclusive = new ArrayList<>();
+        final List<Integer> shared = new ArrayList<>();
 
         Key key = row.key();
-        int pos = traverseDown(positions, key);
+        final int pos = traverseDown(positions, key, exclusive, shared);
 
         tableLocks.exclusive(pos);
-        exclusiveLocks.add(pos);
+        exclusive.add(pos);
         TreeNode n = diskTreeReader.read(pos);
 
         int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
@@ -222,11 +243,8 @@ public class BzTreeTables implements Tables {
             If record with such key already exists
          */
         if (properlyPosition == -1) {
-            Object[] posFor = positions.toArray();
-            for (Object o : posFor) {
-                tableLocks.unshared((Integer) o);
-            }
-            tableLocks.unexclusive(pos);
+            exclusive.forEach(tableLocks::unexclusive);
+            shared.forEach(tableLocks::unshared);
             throw new IllegalArgumentException(
                     "key: " + key.field().name() + " was inserted into node [" +
                             Arrays.stream(n.keys).map(it -> it.field().name())
@@ -238,20 +256,14 @@ public class BzTreeTables implements Tables {
              */
             if (n.q < pLeaf - 1) {
                 insertEntryInRootLeafNoSplit(n, row, properlyPosition);
-                tableLocks.unexclusive(n.pos);
-                positions.forEach(tableLocks::unshared);
+                exclusive.forEach(tableLocks::unexclusive);
+                shared.forEach(tableLocks::unshared);
                 return;
             }
             /*
                 Split leaf before insert
              */
             else {
-                Object[] posFor = positions.toArray();
-                for (Object o : posFor) {
-                    tableLocks.exclusive((Integer) o);
-                    exclusiveLocks.add((Integer) o);
-                }
-
                 int tmpPosition = n.pos;
                 TreeNode tmp = new TreeNode(pLeaf + 1, tableMetadata.dataSize());
                 ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
@@ -359,15 +371,8 @@ public class BzTreeTables implements Tables {
                     }
                 }
             }
-
-            for (Integer it : exclusiveLocks) {
-                tableLocks.unexclusive(it);
-            }
-
-            Object[] posFor = positions.toArray();
-            for (Object o : posFor) {
-                tableLocks.unshared((Integer) o);
-            }
+            exclusive.forEach(tableLocks::unexclusive);
+            shared.forEach(tableLocks::unshared);
         }
     }
 
