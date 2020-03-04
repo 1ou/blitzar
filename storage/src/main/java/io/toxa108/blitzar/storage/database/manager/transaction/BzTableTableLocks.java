@@ -85,7 +85,7 @@ public class BzTableTableLocks implements TableLocks {
     @Override
     public void unexclusive(final int x) {
         log.info("unexclusive " + x);
-        SemaphoreReentrantReadWriteLock lock = map.get(String.valueOf(x));
+        final SemaphoreReentrantReadWriteLock lock = map.get(String.valueOf(x));
         if (lock != null) {
             lock.writeLock.unlock();
         }

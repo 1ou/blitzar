@@ -75,9 +75,8 @@ public class ThreadSafeDatabaseTest {
     }
 
     @ParameterizedTest
-//    @ValueSource(ints = {1, 3, 5, 7, 10})
-    @ValueSource(ints = {2})
-    public void fill_database_a_lot_rows_Ok(int threads) throws ExecutionException, InterruptedException {
+    @ValueSource(ints = {1, 2, 5, 7, 10})
+    public void fill_database_a_lot_rows_Ok(int threads) throws InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
         final List<String> keys = new CopyOnWriteArrayList<>();
@@ -91,6 +90,7 @@ public class ThreadSafeDatabaseTest {
                     keys.add(nanoTime);
                     final String query = String.format(
                             "insert into example (time, value) values (%s, %s);", y * finalT, nanoTime);
+                    bzDatabase.queryProcessor().process(userContext, query.getBytes());
                     log.info("Thread: " + Thread.currentThread().getName() + "Query: " + query);
                 }
                 countDownLatch.countDown();
@@ -101,7 +101,7 @@ public class ThreadSafeDatabaseTest {
 
         final String record = new String(bzDatabase.queryProcessor().process(
                 userContext,
-                "select * from example where time = 1001;".getBytes()
+                "select * from example where time = 5;".getBytes()
         ));
         assertEquals(threads, record.chars().filter(it -> it == '\n').count());
     }
