@@ -59,38 +59,38 @@ Benchmarks
 The efficiency of the library wasn't the goal of blitzar that's why there are no high expectations.
 ``` 
 
-## Road Map
+### Road Map
 
-### Interim release: 0.1.0 (1 march 2020)
+#### Interim release: 0.1.0 (1 march 2020)
 - [x]  Storing databases
 - [x]  Storing tables
 - [x]  Server
 - [x]  Service discovery
 - [x]  Process sql queries
 
-### Interim release: 0.2.0 (15 march 2020)
+#### Interim release: 0.2.0 (15 march 2020)
 - [x]  Thread safe version of database
 - [ ]  Bloom filter
 - [ ]  Buffer pool
 - [x]  Code coverage > 70% 
 
-### Interim release: 0.3.0 (1 april 2020)
+#### Interim release: 0.3.0 (1 april 2020)
 - [ ]  User managment
 - [ ]  Batch insert
 - [ ]  Benchmarks
 - [ ]  Code coverage > 80% 
 
-### Interim release: 0.4.0 (15 april 2020)
+#### Interim release: 0.4.0 (15 april 2020)
 - [ ]  Query specification (byte protocol)
 - [ ]  Code coverage > 85% 
 
-### Release: 1.0.0  (1 june 2020)
+#### Release: 1.0.0  (1 june 2020)
 - [ ]  Multicolumn indexes
 - [ ]  Integration tests
 - [ ]  Add and remove columns
 - [ ]  Code coverage > 90%
 
-### future plans
+#### future plans
 - Database transactions
 - Distributed version
 
