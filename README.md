@@ -5,7 +5,7 @@
 The Blitzar is a timeseries database with sql syntax. 
 The data storing in the b+tree data structure on the disk. 
 
-Capabilities
+Capabilities (according to release 1.0.0)
 ======
 
 User
@@ -42,7 +42,7 @@ Queries
 ```
 User can insert, select data with conditions like (>, <, =, <>, >=, <=). 
 The join syntax is not available because there are no relations between tables. 
-For now there is ability only to insert data, the update and delete operations are not supported yet.
+For now there is ability only to insert data, the update and delete operations are not supported on the data yet.
 
 create database database_name;
 use database_name;
@@ -59,31 +59,36 @@ Benchmarks
 The efficiency of the library wasn't the goal of blitzar that's why there are no high expectations.
 ``` 
 
-## RoadMap
+## Road Map
 
-### Release: 0.1.0
+### Interim release: 0.1.0 (1 march 2020)
 - [x]  Storing databases
 - [x]  Storing tables
 - [x]  Server
 - [x]  Service discovery
 - [x]  Process sql queries
 
-### Release: 0.2.0
+### Interim release: 0.2.0 (15 march 2020)
 - [x]  Thread safe version of database
 - [ ]  Bloom filter
 - [ ]  Buffer pool
 - [x]  Code coverage > 70% 
 
-### Release: 0.3.0
+### Interim release: 0.3.0 (1 april 2020)
+- [ ]  User managment
 - [ ]  Batch insert
 - [ ]  Benchmarks
 - [ ]  Code coverage > 80% 
 
-### Release: 1.0.0
+### Interim release: 0.4.0 (15 april 2020)
+- [ ]  Query specification (byte protocol)
+- [ ]  Code coverage > 85% 
+
+### Release: 1.0.0  (1 june 2020)
 - [ ]  Multicolumn indexes
-- [ ]  Code coverage > 90%
 - [ ]  Integration tests
 - [ ]  Add and remove columns
+- [ ]  Code coverage > 90%
 
 ### future plans
 - Database transactions
