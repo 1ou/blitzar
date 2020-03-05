@@ -1,6 +1,7 @@
 package io.toxa108.blitzar.storage.threadsafe;
 
 import io.toxa108.blitzar.storage.BzDatabase;
+import io.toxa108.blitzar.storage.ThreadDumpProvider;
 import io.toxa108.blitzar.storage.database.manager.user.BzUser;
 import io.toxa108.blitzar.storage.query.UserContext;
 import io.toxa108.blitzar.storage.query.impl.BzUserContext;
@@ -37,8 +38,7 @@ public class ThreadSafeDatabaseTest {
     }
 
     @ParameterizedTest
-//    @ValueSource(ints = {1, 3, 5, 7, 10})
-    @ValueSource(ints = {10})
+    @ValueSource(ints = {1, 3, 5, 7, 10})
     public void fill_database_a_few_rows_Ok(int threads) throws ExecutionException, InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
@@ -76,27 +76,59 @@ public class ThreadSafeDatabaseTest {
 
     @ParameterizedTest
 //    @ValueSource(ints = {1, 2, 5, 7, 10})
-    @ValueSource(ints = {1})
+    @ValueSource(ints = {2})
     public void fill_database_a_lot_rows_Ok(int threads) throws InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
-        final List<String> keys = new CopyOnWriteArrayList<>();
-        final Collection<Runnable> futures = new ArrayList<>(threads);
+        final List<Thread> threadsList = new ArrayList<>();
+
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(ThreadDumpProvider.get());
+            }
+        }).start();
+
 
         for (int t = 1; t <= threads; ++t) {
             final int finalT = t;
-            futures.add((Runnable) service.submit(() -> {
+            final Thread thread = new Thread(() -> {
                 for (int y = 1; y < 1000; y++) {
                     final String nanoTime = String.valueOf(System.nanoTime());
-                    keys.add(nanoTime);
                     final String query = String.format(
                             "insert into example (time, value) values (%s, %s);", y * finalT, nanoTime);
                     bzDatabase.queryProcessor().process(userContext, query.getBytes());
                     log.info("Thread: " + Thread.currentThread().getName() + "Query: " + query);
                 }
                 countDownLatch.countDown();
-            }));
+            });
+            thread.start();
+            threadsList.add(thread);
         }
+
+//        new Thread(() -> {
+//            while (true) {
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                final StringBuilder threadInfoStr = new StringBuilder();
+//                for (Thread it : threadsList) {
+//                    final StackTraceElement[] stackTraceElements = it.getStackTrace();
+//                    for (final StackTraceElement stackTraceElement : stackTraceElements) {
+//                        threadInfoStr.append("\n        at ");
+//                        threadInfoStr.append(stackTraceElement);
+//                    };
+//                    threadInfoStr.append("\n \n _______\n\n \n \n \n \n ");
+//                }
+//                System.out.println(threadInfoStr.toString());
+//            }
+//        }).start();
 
         countDownLatch.await();
 

@@ -9,13 +9,6 @@ public interface TableLocks {
     void shared(int x);
 
     /**
-     * If exclusive lock
-     *
-     * @param x position
-     */
-    boolean isExclusive(int x);
-
-    /**
      * Exclusive lock file position
      *
      * @param x position
@@ -35,4 +28,12 @@ public interface TableLocks {
      * @param x position
      */
     void unexclusive(int x);
+
+    /**
+     * Amount of shared threads
+     *
+     * @param x position
+     * @return number
+     */
+    int sharedCount(final int x);
 }

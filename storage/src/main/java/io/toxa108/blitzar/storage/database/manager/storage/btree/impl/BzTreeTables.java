@@ -112,6 +112,8 @@ public class BzTreeTables implements Tables {
                      final List<Integer> exclusive,
                      final List<Integer> shared) throws IOException {
         final int beginPos = tableMetadata.databaseConfiguration().metadataSize() + 1;
+        tableLocks.exclusive(beginPos);
+        exclusive.add(beginPos);
         TreeNode n = diskTreeReader.read(beginPos);
 
         while (!n.leaf) {
@@ -225,114 +227,113 @@ public class BzTreeTables implements Tables {
     @Override
     public void addRow(final Row row) throws IOException {
         final Stack<Integer> positions = new Stack<>();
-
         final List<Integer> exclusive = new ArrayList<>();
         final List<Integer> shared = new ArrayList<>();
 
-        Key key = row.key();
-        final int pos = traverseDown(positions, key, exclusive, shared);
+        try {
+            Key key = row.key();
+            final int pos = traverseDown(positions, key, exclusive, shared);
 
-        tableLocks.exclusive(pos);
-        exclusive.add(pos);
-        TreeNode n = diskTreeReader.read(pos);
+            tableLocks.exclusive(pos);
+            exclusive.add(pos);
+            TreeNode n = diskTreeReader.read(pos);
 
-        int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
+            int properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
         /*
             If record with such key already exists
          */
-        if (properlyPosition == -1) {
-            exclusive.forEach(tableLocks::unexclusive);
-            shared.forEach(tableLocks::unshared);
-            throw new IllegalArgumentException(
-                    "key: " + key.field().name() + " was inserted into node [" +
-                            Arrays.stream(n.keys).map(it -> it.field().name())
-                                    .collect(Collectors.joining(", ")) + "]");
-        } else {
-            TreeNode newNode = new TreeNode(pLeaf, tableMetadata.dataSize());
+            if (properlyPosition == -1) {
+                throw new IllegalArgumentException(
+                        "key: " + key.field().name() + " was inserted into node [" +
+                                Arrays.stream(n.keys).map(it -> it.field().name())
+                                        .collect(Collectors.joining(", ")) + "]");
+            } else {
+                TreeNode newNode = new TreeNode(pLeaf, tableMetadata.dataSize());
             /*
                 If leaf is not full, insert new entry in leaf
              */
-            if (n.q < pLeaf - 1) {
-                insertEntryInRootLeafNoSplit(n, row, properlyPosition);
-                exclusive.forEach(tableLocks::unexclusive);
-                shared.forEach(tableLocks::unshared);
-                return;
-            }
+                if (n.q < pLeaf - 1) {
+                    insertEntryInRootLeafNoSplit(n, row, properlyPosition);
+                }
             /*
                 Split leaf before insert
              */
-            else {
-                final SplitMetadata splitMetadata = splitBeforeInsert(n, newNode, row, properlyPosition);
-                int tmpPosition = splitMetadata.pos;
-                key = splitMetadata.key;
+                else {
+                    final SplitMetadata splitMetadata = splitBeforeInsert(n, newNode, row, properlyPosition);
+                    int tmpPosition = splitMetadata.pos;
+                    key = splitMetadata.key;
 
-                boolean finished = false;
-                while (!finished) {
-                    if (positions.isEmpty()) {
-                        insertEntryInRootLeafWithSplit(
-                                n,
-                                newNode.pos,
-                                key,
-                                tmpPosition
-                        );
-                        finished = true;
-                    } else {
-                        /*
-                         * We have to lock all stack positions exclusive
-                         */
-                        int k = positions.pop();
-                        n = diskTreeReader.read(k);
+                    boolean finished = false;
+                    while (!finished) {
+                        if (positions.isEmpty()) {
+                            insertEntryInRootLeafWithSplit(
+                                    n,
+                                    newNode.pos,
+                                    key,
+                                    tmpPosition
+                            );
+                            finished = true;
+                        } else {
+                            /*
+                             * We have to lock all stack positions exclusive
+                             */
+                            final int k = positions.pop();
+                            n = diskTreeReader.read(k);
                         /*
                             If internal node n is not full
                             parent node is not full - no split
                         */
-                        if (n.q < pNonLeaf - 1) {
-                            insertInInternalNodeNoSplit(n.pos, newNode, key);
-                            finished = true;
-                        } else {
-                            TreeNode tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
-                            ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
-                            ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
-                            tmp.q = n.q + 1;
+                            if (n.q < pNonLeaf - 1) {
+                                insertInInternalNodeNoSplit(n.pos, newNode, key);
+                                finished = true;
+                            } else {
+                                TreeNode tmp = new TreeNode(pNonLeaf + 1, tableMetadata.dataSize());
+                                ArrayManipulator.copyArray(n.keys, tmp.keys, n.q);
+                                ArrayManipulator.copyArray(n.p, tmp.p, n.q + 1);
+                                tmp.q = n.q + 1;
 
-                            properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
-                            ArrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
-                            ArrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
+                                properlyPosition = searchKeys.findProperlyPosition(n.keys, n.q, key);
+                                ArrayManipulator.insertInArray(tmp.keys, key, properlyPosition);
+                                ArrayManipulator.insertInArray(tmp.p, newNode.pos, properlyPosition + 1);
 
-                            newNode = new TreeNode(pNonLeaf, tableMetadata.dataSize());
-                            int j = (pNonLeaf + 1) >>> 1;
+                                newNode = new TreeNode(pNonLeaf, tableMetadata.dataSize());
+                                final int j = (pNonLeaf + 1) >>> 1;
 
-                            n.keys = new Key[pNonLeaf];
-                            n.p = new int[pNonLeaf + 1];
-                            ArrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
-                            ArrayManipulator.copyArray(tmp.p, n.p, 0, j);
-                            n.q = j;
-                            n.leaf = false;
+                                n.keys = new Key[pNonLeaf];
+                                n.p = new int[pNonLeaf + 1];
+                                ArrayManipulator.copyArray(tmp.keys, n.keys, 0, j);
+                                ArrayManipulator.copyArray(tmp.p, n.p, 0, j);
+                                n.q = j;
+                                n.leaf = false;
 
-                            ArrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
-                            ArrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
-                            newNode.q = tmp.q - j;
-                            newNode.leaf = false;
+                                ArrayManipulator.copyArray(tmp.keys, newNode.keys, j, tmp.q - j);
+                                ArrayManipulator.copyArray(tmp.p, newNode.p, j, tmp.q - j + 1);
+                                newNode.q = tmp.q - j;
+                                newNode.leaf = false;
 
-                            int newPosLeft = tableMetadata.freeSpacePos();
-                            int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
+                                final int newPosLeft = tableMetadata.freeSpacePos();
+                                final int newPosRight = tableMetadata.freeSpacePos() + tableMetadata.databaseConfiguration().diskPageSize();
 
-                            tmpPosition = n.pos;
-                            n.pos = newPosLeft;
-                            newNode.pos = newPosRight;
+                                tmpPosition = n.pos;
+                                n.pos = newPosLeft;
+                                newNode.pos = newPosRight;
 
-                            diskTreeWriter.write(newPosLeft, n);
-                            diskTreeWriter.write(newPosRight, newNode);
-                            numberOfUsedBlocks += 2;
-                            diskTreeWriter.updateMetadata(numberOfUsedBlocks);
+                                diskTreeWriter.write(newPosLeft, n);
+                                diskTreeWriter.write(newPosRight, newNode);
+                                numberOfUsedBlocks += 2;
+                                diskTreeWriter.updateMetadata(numberOfUsedBlocks);
 
-                            key = tmp.keys[j - 1];
+                                key = tmp.keys[j - 1];
+                            }
                         }
                     }
                 }
             }
-            exclusive.forEach(tableLocks::unexclusive);
+        } finally {
             shared.forEach(tableLocks::unshared);
+            exclusive.forEach(tableLocks::unexclusive);
+            exclusive.clear();
+            shared.clear();
         }
     }
 

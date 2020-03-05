@@ -35,28 +35,20 @@ public class BzTableTableLocks implements TableLocks {
                 String.valueOf(x),
                 k -> new SemaphoreReentrantReadWriteLock()
         );
+        lock.readLock.lock();
+        lock.numberReadLocks.incrementAndGet();
         if (lock.writeLock.isLocked()) {
             lock.writeLock.lock();
         }
-        lock.readLock.lock();
-        lock.numberReadLocks.incrementAndGet();
-    }
-
-    @Override
-    public boolean isExclusive(final int x) {
-        final SemaphoreReentrantReadWriteLock lock = map.computeIfAbsent(
-                String.valueOf(x),
-                k -> new SemaphoreReentrantReadWriteLock()
-        );
-        return lock.writeLock.isLocked();
     }
 
     /**
      * https://stackoverflow.com/questions/464784/java-reentrantreadwritelocks-how-to-safely-acquire-write-lock
      * https://github.com/npgall/concurrent-locks
-     *
+     * <p>
      * there is no possibility to upgrade ReentrantReadWriteLock from read lock to write! you got deadlock.
-     * @param x  position
+     *
+     * @param x position
      */
     @Override
     public void exclusive(final int x) {
@@ -71,23 +63,33 @@ public class BzTableTableLocks implements TableLocks {
     @Override
     public void unshared(final int x) {
         log.info("unshared " + x);
-        final SemaphoreReentrantReadWriteLock lock = map.get(String.valueOf(x));
-        if (lock != null) {
-            /*
-                If no one has monitor of position {@param x} then remove read lock
-             */
-            if (lock.numberReadLocks.decrementAndGet() == 0) {
-                lock.readLock.unlock();
-            }
-        }
+        map.computeIfPresent(
+                String.valueOf(x),
+                (k, v) -> {
+                    /*
+                        If no one has monitor of position {@param x} then remove read lock
+                    */
+                    if (v.numberReadLocks.decrementAndGet() == 0) {
+                        v.readLock.unlock();
+                    }
+                    return v;
+                });
     }
 
     @Override
     public void unexclusive(final int x) {
         log.info("unexclusive " + x);
-        final SemaphoreReentrantReadWriteLock lock = map.get(String.valueOf(x));
-        if (lock != null) {
-            lock.writeLock.unlock();
-        }
+        map.computeIfPresent(
+                String.valueOf(x),
+                (k, v) -> {
+                    v.writeLock.unlock();
+                    return v;
+                }
+        );
+    }
+
+    @Override
+    public int sharedCount(final int x) {
+        return map.get(String.valueOf(x)).readLock.getHoldCount();
     }
 }
