@@ -61,27 +61,31 @@ The efficiency of the library wasn't the goal of blitzar that's why there are no
 
 ## RoadMap
 
-### Release: 0.0.1
+### Release: 0.1.0
 - [x]  Storing databases
 - [x]  Storing tables
 - [x]  Server
 - [x]  Service discovery
 - [x]  Process sql queries
 
-### Release: 0.0.2
-
+### Release: 0.2.0
 - [x]  Thread safe version of database
 - [ ]  Bloom filter
 - [ ]  Buffer pool
-- [ ]  Code coverage > 90% 
+- [x]  Code coverage > 70% 
 
-### Release: 0.0.3
-
-- [ ]  Database transactions
+### Release: 0.3.0
 - [ ]  Batch insert
 - [ ]  Benchmarks
+- [ ]  Code coverage > 80% 
 
 ### Release: 1.0.0
+- [ ]  Multicolumn indexes
+- [ ]  Code coverage > 90%
+- [ ]  Integration tests
+- [ ]  Add and remove columns
 
-- [ ]  Distributed version
+### future plans
+- Database transactions
+- Distributed version
 
