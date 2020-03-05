@@ -76,7 +76,7 @@ public class ThreadSafeDatabaseTest {
 
     @ParameterizedTest
 //    @ValueSource(ints = {1, 2, 5, 7, 10})
-    @ValueSource(ints = {2})
+    @ValueSource(ints = {1})
     public void fill_database_a_lot_rows_Ok(int threads) throws InterruptedException {
         final CountDownLatch countDownLatch = new CountDownLatch(threads);
         final ExecutorService service = Executors.newFixedThreadPool(threads);
