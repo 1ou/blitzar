@@ -20,7 +20,7 @@ class BzTableTableLocksTest {
 
     @BeforeEach
     public void init() {
-        tableLocks = new BzTableTableLocks();
+        tableLocks = new BzTableTableLocks("test");
     }
 
     @RepeatedTest(value = 10)
@@ -100,8 +100,9 @@ class BzTableTableLocksTest {
         assertTrue(diff > 200);
     }
 
-    @RepeatedTest(value = 10)
+    @RepeatedTest(value = 1)
     public void sharedAndExclusive_Ok() throws InterruptedException {
+        int t = 2;
         final Runnable r1 = () -> {
             try {
                 tableLocks.shared(1);
@@ -116,17 +117,20 @@ class BzTableTableLocksTest {
         final Runnable r2 = () -> {
             try {
                 tableLocks.exclusive(1);
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             } finally {
                 tableLocks.unexclusive(1);
             }
         };
 
         final long start = System.currentTimeMillis();
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < t; ++i) {
             new Thread(r1).start();
         }
-        Thread.sleep(100);
-        for (int i = 0; i < 100; ++i) {
+        Thread.sleep(50);
+        for (int i = 0; i < t; ++i) {
             final Thread t2 = new Thread(r2);
             t2.start();
             t2.join();

@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 public class BzTableTableLocksTest {
     private final Logger log = LoggerFactory.getLogger(BzTableTableLocksTest.class);
 
-    private final TableLocks tableLocks = new BzTableTableLocks();
+    private final TableLocks tableLocks = new BzTableTableLocks("test");
 
     @Test
     public void test_exclusive_lock() {

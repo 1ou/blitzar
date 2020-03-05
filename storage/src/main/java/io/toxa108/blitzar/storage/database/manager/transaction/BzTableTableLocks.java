@@ -13,6 +13,16 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class BzTableTableLocks implements TableLocks {
     private final Logger log = LoggerFactory.getLogger(BzTableTableLocks.class);
+    private final String tableName;
+
+    /**
+     * Ctor.
+     *
+     * @param tableName table name
+     */
+    public BzTableTableLocks(final String tableName) {
+        this.tableName = tableName;
+    }
 
     private static class SemaphoreReentrantReadWriteLock {
         private ReentrantLock readLock;
@@ -30,7 +40,7 @@ public class BzTableTableLocks implements TableLocks {
 
     @Override
     public void shared(final int x) {
-        log.info("shared " + x);
+        log.info("table" + tableName + " shared " + x);
         final SemaphoreReentrantReadWriteLock lock = map.computeIfAbsent(
                 String.valueOf(x),
                 k -> new SemaphoreReentrantReadWriteLock()
@@ -52,7 +62,7 @@ public class BzTableTableLocks implements TableLocks {
      */
     @Override
     public void exclusive(final int x) {
-        log.info("exclusive " + x);
+        log.info("table" + tableName + " exclusive " + x);
         final SemaphoreReentrantReadWriteLock lock = map.computeIfAbsent(
                 String.valueOf(x),
                 k -> new SemaphoreReentrantReadWriteLock()
@@ -62,7 +72,7 @@ public class BzTableTableLocks implements TableLocks {
 
     @Override
     public void unshared(final int x) {
-        log.info("unshared " + x);
+        log.info("table" + tableName + " unshared " + x);
         map.computeIfPresent(
                 String.valueOf(x),
                 (k, v) -> {
@@ -78,7 +88,7 @@ public class BzTableTableLocks implements TableLocks {
 
     @Override
     public void unexclusive(final int x) {
-        log.info("unexclusive " + x);
+        log.info("table" + tableName + " unexclusive " + x);
         map.computeIfPresent(
                 String.valueOf(x),
                 (k, v) -> {

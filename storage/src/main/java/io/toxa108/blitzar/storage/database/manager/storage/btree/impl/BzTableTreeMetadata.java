@@ -18,6 +18,7 @@ public class BzTableTreeMetadata implements TableTreeMetadata {
     private final DiskReader diskReader;
     private final int pLeaf;
     private final int pNonLeaf;
+    private final String name;
 
     public BzTableTreeMetadata(final File file,
                                final DatabaseConfiguration databaseConfiguration,
@@ -27,6 +28,7 @@ public class BzTableTreeMetadata implements TableTreeMetadata {
         this.diskReader = new DiskNioReader(file);
         this.pLeaf = pLeafCalculate();
         this.pNonLeaf = pNonLeafCalculate();
+        this.name = file.getName().split("\\.")[0];
     }
 
     /**
@@ -149,6 +151,11 @@ public class BzTableTreeMetadata implements TableTreeMetadata {
     @Override
     public boolean containIndex(String indexName) {
         return scheme.containIndex(indexName);
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override

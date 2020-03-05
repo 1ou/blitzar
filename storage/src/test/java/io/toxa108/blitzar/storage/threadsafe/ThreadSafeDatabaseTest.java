@@ -83,14 +83,12 @@ public class ThreadSafeDatabaseTest {
         final List<Thread> threadsList = new ArrayList<>();
 
         new Thread(() -> {
-            while (true) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 System.out.println(ThreadDumpProvider.get());
-            }
         }).start();
 
 
@@ -109,26 +107,6 @@ public class ThreadSafeDatabaseTest {
             thread.start();
             threadsList.add(thread);
         }
-
-//        new Thread(() -> {
-//            while (true) {
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                final StringBuilder threadInfoStr = new StringBuilder();
-//                for (Thread it : threadsList) {
-//                    final StackTraceElement[] stackTraceElements = it.getStackTrace();
-//                    for (final StackTraceElement stackTraceElement : stackTraceElements) {
-//                        threadInfoStr.append("\n        at ");
-//                        threadInfoStr.append(stackTraceElement);
-//                    };
-//                    threadInfoStr.append("\n \n _______\n\n \n \n \n \n ");
-//                }
-//                System.out.println(threadInfoStr.toString());
-//            }
-//        }).start();
 
         countDownLatch.await();
 

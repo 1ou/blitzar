@@ -107,4 +107,11 @@ public interface TableTreeMetadata {
      * @return true or false
      */
     boolean containIndex(String indexName);
+
+    /**
+     * Table name
+     *
+     * @return name
+     */
+    String name();
 }
