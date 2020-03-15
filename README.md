@@ -59,38 +59,21 @@ Benchmarks
 The efficiency of the library wasn't the goal of blitzar that's why there are no high expectations.
 ``` 
 
-### Road Map
+### Todo 
 
-#### Interim release: 0.1.0
 - [x]  Storing databases
 - [x]  Storing tables
 - [x]  Server
 - [x]  Service discovery
 - [x]  Process sql queries
-
-#### Interim release: 0.2.0
 - [x]  Thread safe version of database
 - [ ]  Bloom filter
 - [ ]  Buffer pool
-- [x]  Code coverage > 70% 
-
-#### Interim release: 0.3.0
 - [ ]  User managment
 - [ ]  Batch insert
 - [ ]  Benchmarks
-- [ ]  Code coverage > 80% 
-
-#### Interim release: 0.4.0
 - [ ]  Query specification (byte protocol)
-- [ ]  Code coverage > 85% 
-
-#### Release: 1.0.0 
 - [ ]  Multicolumn indexes
 - [ ]  Integration tests
 - [ ]  Add and remove columns
-- [ ]  Code coverage > 90%
-
-#### future plans
-- Database transactions
-- Distributed version
 
